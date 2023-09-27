@@ -1,33 +1,29 @@
+import os
+import subprocess
+import sys
 import json
+import logging
 
-# import requests. This is what the requirements.txt file is for.
+from osgeo import gdal
+import rasterio
+import pyproj
+import shapely
+# import requests
 
+# set up logger
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
-    """Sample pure Lambda function
+    length = event['length']
+    width = event['width']
+    area = calculate_area(length,width)
+    print(f"area: {area}")
 
-    Parameters
-    ----------
-    event: dict, required
-        API Gateway Lambda Proxy Input Format
+    logger.info(f"Cloudwatch logs: {context.log_group_name}")
 
-        Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
+    data = {"area": area}
+    return json.dumps(data)
 
-    context: object, required
-        Lambda Context runtime methods and attributes
-
-        Context doc: https://docs.aws.amazon.com/lambda/latest/dg/python-context-object.html
-
-    Returns
-    ------
-    API Gateway Lambda Proxy Output Format: dict
-
-        Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
-    """
-
-    return {
-        "statusCode": 200,
-        "body": json.dumps({
-            "message": "hello world",
-        }),
-    }
+def calculate_area(length, width):
+    return length*width
