@@ -63,6 +63,36 @@ def ndvi_to_colored_image(ndvi, cmap=plt.cm.RdYlGn):
     colored_ndvi = (cmap(ndvi_norm)[:, :, :3] * 255).astype(np.uint8)  # Apply colormap and convert to [0, 255] range
     return colored_ndvi
 
+def cog_to_xyz_tiles(cog_dir, s3_dir, bucket):
+        """
+        Take a cog saved in /tmp and create map tiles from it.
+
+        parameters:
+        - cog_dir - the local /tmp directory for the cog
+        - s3_dir - the name of the parent directory for the tiles to be stored in the S3 bucket
+        -zoom - the zoom levels to generate the tiles for
+
+        Returns:
+        - XYZ map tiles for the input COG, uploaded to an S3 bucket
+        """
+    # Create a directory to store the tiles
+        temp_dir= '/tmp/stac-tiles'
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+        
+        generate_tiles(cog_dir, temp_dir, zoom='14-16')
+        # Upload the tiles to the S3 bucket directly within the lambda_handler function
+        for root, dirs, files in os.walk(temp_dir):
+            for filename in files:
+                local_path = os.path.join(root, filename)
+                relative_path = os.path.relpath(local_path, temp_dir)
+                s3_path = os.path.join(s3_dir, relative_path)  # Modify the s3_path to include the parent directory
+                s3_client.upload_file(local_path, bucket, s3_path)
+                print(f"File {s3_path} uploaded to s3://{bucket}/{s3_path}")
+
+        print(f"XYZ tiles uploaded to s3://{bucket}/{s3_dir}")
+        shutil.rmtree(temp_dir)
+
 def lambda_handler(event, context):
     """
     AWS Lambda handler function to process Sentinel-2 data, calculate NDVI,
@@ -182,23 +212,12 @@ def lambda_handler(event, context):
             print(f"Colored NDVI GeoTIFF uploaded to s3://{bucket}/{ndvi_rgb_s3key}")
 
         # Generate and upload XYZ tiles to S3
-        # Create a directory to store the tiles
-        tiles_directory = '/tmp/stac-tiles'
-        xyz_parent_s3key = 'stac-tiles'
-        if not os.path.exists(tiles_directory):
-            os.makedirs(tiles_directory)
+        cog_to_xyz_tiles('/tmp/colored_ndvi.tif', 'stac-tiles-ndvi', bucket)     
+        cog_to_xyz_tiles('/tmp/stac-vis.tif', 'stac-tiles-rgb', bucket)   
 
-        generate_tiles('/tmp/colored_ndvi.tif', tiles_directory, zoom='12-18')
-        # Upload the tiles to the S3 bucket directly within the lambda_handler function
-        for root, dirs, files in os.walk(tiles_directory):
-            for filename in files:
-                local_path = os.path.join(root, filename)
-                relative_path = os.path.relpath(local_path, tiles_directory)
-                s3_path = os.path.join(xyz_parent_s3key, relative_path)  # Modify the s3_path to include the parent directory
-                s3_client.upload_file(local_path, bucket, s3_path)
-                print(f"File {s3_path} uploaded to s3://{bucket}/{s3_path}")
-
-        print(f"XYZ tiles uploaded to s3://{bucket}/{xyz_parent_s3key}")
+    os.remove(vis_path)
+    os.remove(ndvi_path)
+    os.remove(ndvi_rgb_path)
 
     return {
         'statusCode': 200,
