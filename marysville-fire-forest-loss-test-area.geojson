@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "marysville-fire-forest-loss-test-area",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "fid": 1 }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 146.017616049757294, -37.337915555961779 ], [ 145.68789820995147, -37.342981076318708 ], [ 145.704623027912646, -37.557318293298408 ], [ 146.015226790048587, -37.556055568491722 ], [ 146.017616049757294, -37.337915555961779 ] ] ] } }
+]
+}
