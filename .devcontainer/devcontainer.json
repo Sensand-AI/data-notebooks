@@ -8,7 +8,6 @@
 	},
 	"features": {
 	},
-	"overrideCommand": false,
 	// Forward Jupyter port locally, mark required.
 	"forwardPorts": [8888],
 	"portsAttributes": {
@@ -18,6 +17,7 @@
 			"onAutoForward": "ignore"
 		}
 	},
+	"overrideCommand": true,
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
@@ -29,9 +29,9 @@
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": ["ms-python.python", "ms-toolsai.jupyter"]
 		}
-	}
+	},
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "pip3 install --user -r requirements.txt",
+	"postCreateCommand": "jupyter notebook --NotebookApp.token='' --NotebookApp.password=''",
 
 	// Configure tool-specific properties.
 	// "customizations": {},
