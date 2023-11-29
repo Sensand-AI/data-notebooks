@@ -30,16 +30,11 @@
 			"extensions": [
 				"ms-python.python",
 				"ms-toolsai.jupyter",
-				"GitHub.copilot"
+				"GitHub.copilot",
+				"ms-azuretools.vscode-docker"
 			]
 		}
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "jupyter notebook --NotebookApp.token='' --NotebookApp.password=''",
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+	"postCreateCommand": "jupyter notebook --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=${containerWorkspaceFolder}/notebooks"
 }

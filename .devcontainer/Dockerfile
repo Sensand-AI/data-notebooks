@@ -13,4 +13,6 @@ ENV GDAL_CONFIG=/usr/bin/gdal-config
 USER jovyan
 
 # Install relevant python packages
-RUN pip install numpy pandas matplotlib geopandas rasterio geemap
+RUN pip install numpy pandas matplotlib geopandas rasterio geemap folium leafmap
+
+# Experimental packages
