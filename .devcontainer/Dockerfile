@@ -12,7 +12,13 @@ ENV GDAL_CONFIG=/usr/bin/gdal-config
 # Switch back to the jovyan user
 USER jovyan
 
-# Install relevant python packages
-RUN pip install numpy pandas matplotlib geopandas rasterio geemap folium leafmap
+# Install core python packages
+RUN pip install numpy pandas boto3 tornado
 
-# Experimental packages
+# data visualization
+RUN pip install seaborn plotly matplotlib
+
+# geospatial packages
+RUN pip install fiona shapely geopandas rasterio geemap folium leafmap earthengine-api
+
+# experimental packages
