@@ -27,7 +27,11 @@
 				"python.defaultInterpreterPath": "/opt/conda/bin/python"
 			},
 			// Add the IDs of extensions you want installed when the container is created.
-			"extensions": ["ms-python.python", "ms-toolsai.jupyter"]
+			"extensions": [
+				"ms-python.python",
+				"ms-toolsai.jupyter",
+				"GitHub.copilot"
+			]
 		}
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
