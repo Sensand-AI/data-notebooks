@@ -175,7 +175,7 @@ def lambda_handler(event, context):
                 nir.mask += mask
                 red.mask += mask
 
-                # Calculate NDVI
+                # Calculate NDVI 
                 ndvi = (nir - red) / (nir + red)
 
                 # Save the masked NDVI to one tif per polygon

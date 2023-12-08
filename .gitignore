@@ -6,3 +6,4 @@ dash-tutorial.ipynb
 .venv/
 .vscode/
 requirements.txt
+.env
