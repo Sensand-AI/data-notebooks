@@ -1,6 +1,6 @@
 import boto3
 
-class AwsS3Functions:
+class S3Utils:
     def __init__(self, aws_access_key_id, aws_secret_access_key):
         self.s3_client = boto3.client(
             's3',
