@@ -1,6 +1,8 @@
 .ipynb_checkpoints
 notebooks/datatest-files
-test-files/
+test-files
+__pycache__
+*.egg-info/
 data/
 dash-tutorial.ipynb
 .venv/
