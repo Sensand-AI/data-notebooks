@@ -7,3 +7,4 @@ dash-tutorial.ipynb
 .vscode/
 requirements.txt
 .env
+duckdb-data/data-duck/
