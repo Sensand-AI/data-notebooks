@@ -8,3 +8,5 @@ dash-tutorial.ipynb
 .venv/
 .vscode/
 requirements.txt
+.env
+duckdb-data/data-duck/
