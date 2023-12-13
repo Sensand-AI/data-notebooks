@@ -36,5 +36,5 @@
 		}
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "jupyter notebook --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=${containerWorkspaceFolder}/notebooks"
+	"postCreateCommand": ".devcontainer/startup.sh",
 }
