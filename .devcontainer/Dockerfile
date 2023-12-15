@@ -22,5 +22,5 @@ RUN pip install seaborn plotly matplotlib plotly_express
 RUN pip install fiona shapely geopandas rasterio geemap folium leafmap earthengine-api sentinelhub
 
 # experimental
-RUN pip install pystac mapboxgl
+RUN pip install pystac pystac_client stackstac mapboxgl
 

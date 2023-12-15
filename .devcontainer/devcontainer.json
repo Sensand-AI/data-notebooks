@@ -35,6 +35,9 @@
 			]
 		}
 	},
+	"runArgs": [
+		"--env-file", "${localWorkspaceFolder}/.devcontainer/.env"
+	], 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": ".devcontainer/startup.sh",
 }
