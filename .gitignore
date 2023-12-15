@@ -10,3 +10,4 @@ dash-tutorial.ipynb
 requirements.txt
 .env
 duckdb-data/data-duck/
+.DS_Store
