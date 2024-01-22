@@ -15,12 +15,12 @@ USER jovyan
 # Install core python packages
 RUN pip install numpy pandas boto3 tornado
 
-# data visualization
+# data visualizationPP
 RUN pip install seaborn plotly matplotlib plotly_express
 
 # geospatial packages
-RUN pip install fiona shapely geopandas rasterio geemap folium leafmap earthengine-api sentinelhub gdal2tiles
+RUN pip install fiona shapely geopandas rasterio  gdal2tiles geemap folium leafmap earthengine-api sentinelhub
 
 # experimental
-RUN pip install pystac pystac_client stackstac mapboxgl dask-geopandas
+# RUN pip install pystac pystac_client stackstac mapboxgl dask-geopandas 
 
