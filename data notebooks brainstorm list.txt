@@ -21,3 +21,7 @@ Misc
  - aggregation/ heatmap of historical tasks - show which paddocks require more attention?
  - linear regression to see links between vegetation health and farm practices (Jefferson mentioned wanting this)
  - get Global Forest Watch data fetching withoutbgoing via GEE as middleman
+
+
+ this is a silly line of text becuase Jenna is checking if her work acc still works.
+ 
