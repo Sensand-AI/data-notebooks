@@ -4,6 +4,7 @@ test-files
 __pycache__
 *.egg-info/
 data/
+evergreen-resources/data/
 dash-tutorial.ipynb
 .venv/
 .vscode/
