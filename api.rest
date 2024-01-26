@@ -1,0 +1,8 @@
+### Get the Jupyter Server version
+GET http://jupyter-api:8888/test HTTP/1.1
+content-type: application/json
+
+###
+
+GET http://jupyter-api:8888/hello/world HTTP/1.1
+content-type: application/json

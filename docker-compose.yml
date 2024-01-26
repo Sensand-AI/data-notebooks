@@ -13,12 +13,24 @@ services:
     env_file:
       - .env
 
+  jupyter-api:
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    volumes:
+      - .:/workspaces/data-notebooks
+    ports:
+      - "9999:8888"
+    command: /bin/bash -c "/workspaces/data-notebooks/startup-api.sh"
+    env_file:
+      - .env
+
   ngrok:
     image: ngrok/ngrok:latest
     command: http --log stdout --authtoken=$NGROK_AUTHTOKEN host.docker.internal:8888
     ports:
       - "4040:4040"
     environment:
-      - NGROK_AUTHTOKEN=${$NGROK_AUTHTOKEN}
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     depends_on:
       - jupyter
