@@ -4,10 +4,18 @@
 	"name": "Jupyter Data Science Notebooks",
 	"dockerComposeFile": ["../docker-compose.yml"],
 	"service": "jupyter",
-	"workspaceFolder": "/workspaces",
+	"workspaceFolder": "/workspaces/data-notebooks",
 	"shutdownAction": "stopCompose",
+	"remoteUser": "root",
+	"remoteEnv": { "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}" },
 	"features": {
-	},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"moby": "true",
+			"version": "latest",
+			"installDockerBuildx": true,
+			"dockerDashComposeVersion": "v2"
+		}
+	},	
 	// Forward Jupyter port locally, mark required.
 	"forwardPorts": [8888],
 	"portsAttributes": {

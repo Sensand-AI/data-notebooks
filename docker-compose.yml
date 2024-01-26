@@ -14,11 +14,11 @@ services:
       - .env
 
   ngrok:
-    image: wernight/ngrok
-    command: ngrok http jupyter:8888
+    image: ngrok/ngrok:latest
+    command: http --log stdout --authtoken=$NGROK_AUTHTOKEN host.docker.internal:8888
     ports:
       - "4040:4040"
     environment:
-      - NGROK_AUTH=2YYFQ1cRBJWidCJ5Mkd7zgB6JfU_aAKJ7ximWq8vL5sc3gyi
+      - NGROK_AUTHTOKEN=${$NGROK_AUTHTOKEN}
     depends_on:
       - jupyter
