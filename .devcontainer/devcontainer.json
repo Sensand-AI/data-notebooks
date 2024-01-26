@@ -2,10 +2,10 @@
 // README at: https://github.com/devcontainers-community/templates/tree/main/src/jupyter-datascience-notebooks
 {
 	"name": "Jupyter Data Science Notebooks",
-	"build": {
-		"context": ".",
-		"dockerfile": "Dockerfile"
-	},
+	"dockerComposeFile": ["../docker-compose.yml"],
+	"service": "jupyter",
+	"workspaceFolder": "/workspaces",
+	"shutdownAction": "stopCompose",
 	"features": {
 	},
 	// Forward Jupyter port locally, mark required.
@@ -17,7 +17,7 @@
 			"onAutoForward": "ignore"
 		}
 	},
-	"overrideCommand": true,
+	"overrideCommand": false,
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
@@ -34,10 +34,5 @@
 				"ms-azuretools.vscode-docker"
 			]
 		}
-	},
-	"runArgs": [
-		"--env-file", "${localWorkspaceFolder}/.devcontainer/.env"
-	], 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": ".devcontainer/startup.sh",
+	}
 }
