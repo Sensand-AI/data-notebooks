@@ -22,6 +22,8 @@ services:
     ports:
       - "9999:8888"
     command: /bin/bash -c "/workspaces/data-notebooks/startup-api.sh"
+    environment:
+      - SEED_URI=/workspaces/data-notebooks/notebooks/api/test.ipynb
     env_file:
       - .env
 

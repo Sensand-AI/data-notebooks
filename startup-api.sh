@@ -5,9 +5,4 @@ cd /workspaces/data-notebooks/aws_utils
 pip install -e .
 
 # Start Jupyter Kernel Gateway
-jupyter kernelgateway \
-    --KernelGatewayApp.ip=0.0.0.0 \
-    --KernelGatewayApp.port=8888 \
-    --KernelGatewayApp.allow_origin='*' \ 
-    --KernelGatewayApp.api='kernel_gateway.notebook_http' \
-    --KernelGatewayApp.seed_uri='/workspaces/data-notebooks/notebooks/api/test.ipynb'
+jupyter kernelgateway --ip=0.0.0.0 --port=8888 --KernelGatewayApp.allow_origin='*' --KernelGatewayApp.api='kernel_gateway.notebook_http' --KernelGatewayApp.seed_uri=${SEED_URI}
