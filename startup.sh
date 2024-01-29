@@ -5,4 +5,4 @@ cd /workspaces/data-notebooks/aws_utils
 pip install -e .
 
 # Start Jupyter Notebook server
-jupyter notebook --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/workspaces/data-notebooks/notebooks
+jupyter notebook --NotebookApp.token='' --NotebookApp.password='' --notebook-dir=/workspaces/data-notebooks/notebooks --port=8888

@@ -23,3 +23,6 @@ RUN pip install fiona shapely geopandas rasterio geemap folium leafmap earthengi
 
 # experimental
 RUN pip install pystac pystac_client stackstac mapboxgl dask-geopandas
+
+# jupyter extensions
+RUN pip install jupyter_kernel_gateway jupyter_contrib_nbextensions

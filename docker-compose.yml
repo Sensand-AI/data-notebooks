@@ -16,7 +16,7 @@ services:
   jupyter-api:
     build:
       context: .
-      dockerfile: jupyter.Dockerfile
+      dockerfile: jupyter-api.Dockerfile
     volumes:
       - .:/workspaces/data-notebooks
     ports:
