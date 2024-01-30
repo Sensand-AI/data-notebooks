@@ -19,8 +19,13 @@ RUN pip install numpy pandas boto3 tornado
 RUN pip install seaborn plotly matplotlib plotly_express
 
 # geospatial packages
-RUN pip install fiona shapely geopandas rasterio  gdal2tiles geemap folium leafmap earthengine-api sentinelhub
+RUN pip install fiona shapely geopandas rasterio gdal2tiles earthengine-api sentinelhub
+
+# mapping packages
+RUN  geemap folium leafmap xarray_leaflet
 
 # experimental
-RUN pip install pystac pystac_client stackstac[viz] mapboxgl dask-geopandas rioxarray odc-stac odc-algo jupyter-server-proxy localtileserver
+RUN pip install pystac pystac_client stackstac[viz] dask-geopandas rioxarray 
 
+# temporarily removed packages:
+# jupyter-server-proxy localtileserver mapboxgl
