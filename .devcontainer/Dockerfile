@@ -16,7 +16,7 @@ USER jovyan
 RUN pip install numpy pandas boto3 tornado
 
 # data visualizationPP
-RUN pip install seaborn plotly matplotlib plotly_express
+RUN pip install seaborn plotly matplotlib plotly_express hvplot
 
 # geospatial packages
 RUN pip install fiona shapely geopandas rasterio gdal2tiles earthengine-api sentinelhub
@@ -29,7 +29,7 @@ RUN pip install folium leafmap xarray_leaflet jupyter-server-proxy localtileserv
 RUN pip install pystac pystac_client odc-stac stackstac[viz]
 
 # experimental
-RUN pip install dask-geopandas rioxarray sidecar mapclassify
+RUN pip install dask-geopandas rioxarray sidecar mapclassify panel
 
 # temporarily removed packages:
 # 
