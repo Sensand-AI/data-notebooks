@@ -22,10 +22,14 @@ RUN pip install seaborn plotly matplotlib plotly_express
 RUN pip install fiona shapely geopandas rasterio gdal2tiles earthengine-api sentinelhub
 
 # mapping packages
-RUN  geemap folium leafmap xarray_leaflet
+# simplify to remove extra packages later on e.g. leafmap
+RUN pip install folium leafmap xarray_leaflet jupyter-server-proxy localtileserver mapboxgl ipyleaflet
+
+# stac packages
+RUN pip install pystac pystac_client odc-stac stackstac[viz]
 
 # experimental
-RUN pip install pystac pystac_client stackstac[viz] dask-geopandas rioxarray 
+RUN pip install dask-geopandas rioxarray sidecar mapclassify
 
 # temporarily removed packages:
-# jupyter-server-proxy localtileserver mapboxgl
+# 
