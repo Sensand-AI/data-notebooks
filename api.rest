@@ -1,8 +1,8 @@
-### Get the Jupyter Server version
+### Health check
 GET http://jupyter:5000/healthcheck HTTP/1.1
 content-type: application/json
 
-###
+### Run a notebook
 
 POST http://jupyter:5000/run-notebook HTTP/1.1
 content-type: application/json
