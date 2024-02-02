@@ -23,3 +23,5 @@ RUN pip install fiona shapely geopandas rasterio geemap folium leafmap earthengi
 
 # experimental
 RUN pip install pystac pystac_client stackstac mapboxgl dask-geopandas
+
+RUN pip install flask papermill requests

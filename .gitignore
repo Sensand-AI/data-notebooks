@@ -11,3 +11,4 @@ requirements.txt
 .env
 duckdb-data/data-duck/
 .DS_Store
+.s3mock-data/
