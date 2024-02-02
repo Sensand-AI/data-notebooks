@@ -40,7 +40,8 @@
 				"ms-toolsai.jupyter",
 				"GitHub.copilot",
 				"ms-azuretools.vscode-docker",
-				"humao.rest-client"
+				"humao.rest-client",
+				"RandomFractalsInc.geo-data-viewer"
 			]
 		}
 	}
