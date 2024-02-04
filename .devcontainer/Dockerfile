@@ -19,7 +19,7 @@ RUN pip install numpy pandas boto3 tornado
 RUN pip install seaborn plotly matplotlib plotly_express hvplot
 
 # geospatial packages
-RUN pip install fiona shapely geopandas rasterio gdal2tiles earthengine-api sentinelhub
+RUN pip install fiona shapely geopandas rasterio[s3] gdal2tiles earthengine-api sentinelhub
 
 # mapping packages
 # simplify to remove extra packages later on e.g. leafmap
