@@ -1,0 +1,14 @@
+awslambdaric
+boto3
+numpy
+matplotlib
+GDAL==3.6
+gdal2tiles
+rasterio
+geopandas
+shapely
+geojson
+pyproj
+pystac
+pystac-client
+

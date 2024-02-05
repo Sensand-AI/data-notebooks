@@ -8,7 +8,6 @@ evergreen-resources/data/
 dash-tutorial.ipynb
 .venv/
 .vscode/
-requirements.txt
 .env
 duckdb-data/data-duck/
 .DS_Store
