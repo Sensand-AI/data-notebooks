@@ -23,33 +23,6 @@ services:
     volumes:
       - ./.s3mock-data:/s3mockroot
 
-  # flask-api:
-  #   build:
-  #     context: .
-  #     dockerfile: api.Dockerfile
-  #   volumes:
-  #     - .:/workspaces/data-notebooks
-  #   command: /bin/bash -c "flask run --host=0.0.0.0"
-  #   ports:
-  #     - "5001:5000"
-  #   environment:
-  #     - FLASK_APP=/workspaces/data-notebooks/api/app.py
-  #     - FLASK_ENV=development
-
-  # jupyter-api:
-  #   build:
-  #     context: .
-  #     dockerfile: jupyter-api.Dockerfile
-  #   volumes:
-  #     - .:/workspaces/data-notebooks
-  #   ports:
-  #     - "9999:8888"
-  #   command: /bin/bash -c "/workspaces/data-notebooks/startup-api.sh"
-  #   environment:
-  #     - SEED_URI=/workspaces/data-notebooks/notebooks/api/elevation.ipynb
-  #   env_file:
-  #     - .env
-
   ngrok:
     image: ngrok/ngrok:latest
     command: http --log stdout --authtoken=$NGROK_AUTHTOKEN host.docker.internal:8888

@@ -48,3 +48,6 @@ If you'd like to explore Jupyter and create your own notebook:
 4. Push to the original branch: `git push origin [project_name]/[location]`
 5. Create the pull request.
 
+### Installing new python packages
+
+Add your python package to `requirements.txt`. You must include a comment on what that package is and what it does.
