@@ -13,6 +13,8 @@ services:
       - "5001:5000"
     env_file:
       - .env
+    depends_on:
+      - s3mock
 
   s3mock:
     image: adobe/s3mock
@@ -22,13 +24,3 @@ services:
       - "9090:9090"
     volumes:
       - ./.s3mock-data:/s3mockroot
-
-  ngrok:
-    image: ngrok/ngrok:latest
-    command: http --log stdout --authtoken=$NGROK_AUTHTOKEN host.docker.internal:8888
-    ports:
-      - "4040:4040"
-    environment:
-      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
-    depends_on:
-      - jupyter

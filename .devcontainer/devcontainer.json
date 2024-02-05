@@ -16,12 +16,19 @@
 			"dockerDashComposeVersion": "v2"
 		}
 	},	
-	// Forward Jupyter port locally, mark required.
-	"forwardPorts": [8888],
+	"forwardPorts": [8888, 5001, 9090],
 	"portsAttributes": {
 		"8888": {
 			"label": "Jupyter",
 			"requireLocalPort": true,
+			"onAutoForward": "ignore"
+		},
+		"5001":{
+			"label": "Flask",
+			"onAutoForward": "ignore"
+		},
+		"9090": {
+			"label": "S3 Mock",
 			"onAutoForward": "ignore"
 		}
 	},
