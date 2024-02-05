@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <TileMap version="1.0.0" tilemapservice="http://tms.osgeo.org/1.0.0">
+      <Title>test-dem-scaled.tif</Title>
+      <Abstract></Abstract>
+      <SRS>EPSG:3857</SRS>
+      <BoundingBox minx="116.26012130269048" miny="-29.30715724543035" maxx="116.38743265087921" maxy="-29.22023778827910"/>
+      <Origin x="116.26012130269048" y="-29.30715724543035"/>
+      <TileFormat width="256" height="256" mime-type="image/png" extension="png"/>
+      <TileSets profile="mercator">
+        <TileSet href="11" units-per-pixel="76.43702827148438" order="11"/>
+        <TileSet href="12" units-per-pixel="38.21851413574219" order="12"/>
+      </TileSets>
+    </TileMap>
+    
