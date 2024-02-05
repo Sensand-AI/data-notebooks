@@ -56,3 +56,7 @@ Add your python package to `requirements.txt`. You must include a comment on wha
 Create a `.env` file in the root project directory based off `.env.example` containing the actual secret values.
 
 You can find the values in `(env) data-notebooks` in the 1Password Engineering Vault. If adding a new secret value, add it here as well.
+
+## Remote Sensing Datasets
+
+[A list of Remote Sensing Datasets in Notion](https://www.notion.so/sensandworkspace/Remote-Sensing-Datasets-18aebbc192104af8a5062ce843a4faf4).
