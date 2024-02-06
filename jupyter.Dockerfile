@@ -4,7 +4,8 @@ FROM jupyter/datascience-notebook
 USER root
 RUN apt-get update && apt-get install -y \
     libgdal-dev \
-    gdal-bin
+    gdal-bin \ 
+    && apt-get clean
 
 # Set environment variable for GDAL
 ENV GDAL_CONFIG=/usr/bin/gdal-config
@@ -12,17 +13,8 @@ ENV GDAL_CONFIG=/usr/bin/gdal-config
 # Switch back to the jovyan user
 USER jovyan
 
-# Install core python packages
-RUN pip install numpy pandas boto3 tornado
-
-# data visualization
-RUN pip install seaborn plotly matplotlib plotly_express
-
-# geospatial packages
-
-RUN pip install fiona shapely geopandas rasterio geemap folium leafmap earthengine-api sentinelhub gdal2tiles
-
-# experimental
-RUN pip install pystac pystac_client stackstac mapboxgl dask-geopandas rioxarray xarray-leaflet tqdm odc-stac localtileserver jupyter-server-proxy rio-tiler
-
-RUN pip install flask papermill requests
+# Upgrade pip and Install Python packages
+# Use --no-cache-dir to avoid storing cache, and --prefer-binary to prefer older binary packages over newer source distributions
+COPY requirements.txt /tmp/
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir --prefer-binary -r /tmp/requirements.txt

@@ -41,10 +41,22 @@ Once the devcontainer is up and running:
 
 If you'd like to explore Jupyter and create your own notebook:
 
-
 1. Fork this repository.
 2. Create a branch: `git checkout -b [branch_name]`.
 3. Make your changes and commit them: `git commit -m '[commit_message]'`
 4. Push to the original branch: `git push origin [project_name]/[location]`
 5. Create the pull request.
 
+### Installing new python packages
+
+Add your python package to `requirements.txt`. You must include a comment on what that package is and what it does.
+
+### Missing `.env` and adding secrets
+
+Create a `.env` file in the root project directory based off `.env.example` containing the actual secret values.
+
+You can find the values in `(env) data-notebooks` in the 1Password Engineering Vault. If adding a new secret value, add it here as well.
+
+## Remote Sensing Datasets
+
+[A list of Remote Sensing Datasets in Notion](https://www.notion.so/sensandworkspace/Remote-Sensing-Datasets-18aebbc192104af8a5062ce843a4faf4).

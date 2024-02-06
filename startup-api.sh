@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install the aws_utils package in editable mode
-cd /workspaces/data-notebooks/aws_utils
+cd /workspaces/data-notebooks/packages/aws_utils
 pip install -e .
 
 # Start Jupyter Kernel Gateway
