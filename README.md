@@ -11,7 +11,7 @@ Before you begin, ensure you have met the following requirements:
 - [Docker](https://www.docker.com/products/docker-desktop) installed
 - [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) for VS Code
 
-## Setting Up the Devcontainer
+## Option 1: Setting Up the Devcontainer
 
 1. **Clone the Repository**:
    ```bash
@@ -25,6 +25,18 @@ Before you begin, ensure you have met the following requirements:
 
 3. **Wait for the Container to Build**:
    - The first time you open the project, VS Code will build the devcontainer. This process can take a few minutes.
+
+## Option 2: Run with docker-compose
+1. **Clone the Repository**:
+   ```bash
+   git clone git@github.com:sensand/data-notebooks.git
+   cd data-notebooks
+   ```
+
+2. **Open in VS Code**:
+   - Open the project folder in Visual Studio Code.
+   - VS Code might prompt you to reopen the project in a container. **DON'T**
+   - Open a terminal in VS Code and run `docker compose up jupyter`
 
 ## Using the Jupyter Notebook
 
