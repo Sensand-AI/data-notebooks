@@ -43,3 +43,4 @@ nbdev # Git friendly notebook development
 flask  # Micro web framework for building web applications. Currently being used alongside Papermill
 papermill  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks
 polars # A blazingly fast DataFrame library implemented in Rust
+sagemaker	# Open source library for training and deploying machine-learned models on Amazon SageMaker
