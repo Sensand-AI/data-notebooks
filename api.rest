@@ -37,3 +37,13 @@ content-type: application/json
 	"notebook_name": "exploration and testing/digital elevation model papermill with parameters test.ipynb",
   "parameters": {}
 }
+
+### Run a sagemaker notebook with parameters
+
+POST http://jupyter:5000/run-sagemaker-notebook HTTP/1.1
+content-type: application/json
+
+{
+	"notebook_name": "exploration and testing/digital elevation model papermill with parameters test.ipynb",
+  "parameters": {}
+}
