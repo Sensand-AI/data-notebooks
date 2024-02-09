@@ -26,5 +26,5 @@ time_intervals : 2
 # see https://github.com/Sydney-Informatics-Hub/geodata-harvester#-data-sources
 target_sources:
   SLGA:
-    Bulk_Density: [0-5cm]
-    Clay: [0-5cm]
+    Bulk_Density: [0-5cm, 5-15cm]
+    Clay: [0-5cm, 5-15cm]
