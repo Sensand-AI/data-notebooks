@@ -16,3 +16,4 @@ notebooks/terrawise/output-data
 notebooks/terrawise/input-data
 sandbox/input-data
 sandbox/output-data
+postgis-data/
