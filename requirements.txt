@@ -20,6 +20,7 @@ plotly_express  # High-level interface for Plotly
 geopandas  # Extends pandas for geospatial data operations
 fiona  # For reading and writing spatial data files
 shapely  # Manipulation and analysis of geometric objects
+pyproj #reprojection and coordinate reference system package
 rasterio[s3]	# Rasterio with S3 support
 rioxarray # read  in raster data as xarrays. Needed for some processing packages
 earthengine-api  # Google Earth Engine API
