@@ -35,9 +35,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
     # first is the local drive, second is in the container
-      - ./postgis-data:/var/lib/postgresql/data
+      - ./postgis-data-v2:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    env_file:
+      .env
 
 
   # postgis:
