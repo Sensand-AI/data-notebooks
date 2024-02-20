@@ -18,7 +18,7 @@ plotly_express  # High-level interface for Plotly
 
 # Geospatial data analysis libraries
 geopandas  # Extends pandas for geospatial data operations
-fiona  # For reading and writing spatial data files
+fiona>=1.8.21  # For reading and writing spatial data files
 shapely  # Manipulation and analysis of geometric objects
 pyproj #reprojection and coordinate reference system package
 rasterio[s3]	# Rasterio with S3 support
@@ -53,4 +53,20 @@ flask  # Micro web framework for building web applications. Currently being used
 papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks. Added version to resolve docker build issue.
 polars # A blazingly fast DataFrame library implemented in Rust
 sagemaker	# Open source library for training and deploying machine-learned models on Amazon SageMaker
+
+#experimental for geodata-harvester package Jenna is working on
 geodata-harvester
+owslib # client programming with Open Geospatial Consortium (OGC) web service (OWS) and their related content models.
+# yaml
+# shutil
+# argparse
+# glob
+# pathlib
+# json
+# numba
+# termcolor
+# warnings
+# logging
+# alive_progress
+# datetime
+# netCDF4

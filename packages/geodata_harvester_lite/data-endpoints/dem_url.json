@@ -1,0 +1,15 @@
+{
+    "title": "DEM 1 Second Grid",
+    "description": "Digital Elevation Model (DEM) of Australia derived from STRM with 1 Second Grid - Hydrologically Enforced.",
+    "crs": "EPSG:4326",
+    "bbox": [
+        112.99986111100009,
+        -44.0001388895483,
+        153.9998611116614,
+        -10.000138888999906
+    ],
+    "resolution_arcsec": 1,
+    "layers_url": {
+        "DEM": "https://services.ga.gov.au/site_9/services/DEM_SRTM_1Second_Hydro_Enforced/MapServer/WCSServer?request=GetCapabilities&service=WCS"
+    }
+}
