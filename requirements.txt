@@ -53,3 +53,4 @@ papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter No
 polars # A blazingly fast DataFrame library implemented in Rust
 sagemaker	# Open source library for training and deploying machine-learned models on Amazon SageMaker
 geodata-harvester
+
