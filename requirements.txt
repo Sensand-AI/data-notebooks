@@ -49,7 +49,7 @@ nbdev # Git friendly notebook development
 
 # Experimental
 flask  # Micro web framework for building web applications. Currently being used alongside Papermill
-papermill  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks
+papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks. Added version to resolve docker build issue.
 polars # A blazingly fast DataFrame library implemented in Rust
 sagemaker	# Open source library for training and deploying machine-learned models on Amazon SageMaker
 geodata-harvester
