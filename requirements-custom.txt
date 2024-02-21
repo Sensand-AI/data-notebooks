@@ -1,0 +1,3 @@
+# Local packages in editable mode
+-e /workspaces/data-notebooks/packages/aws_utils
+-e /workspaces/data-notebooks/packages/gis_utils
