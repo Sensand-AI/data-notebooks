@@ -3,7 +3,7 @@ import time
 import subprocess
 
 # Convert the notebook to a Python script
-jupytext.write(jupytext.read('input.ipynb'), 'input_as_script.py')
+jupytext.write(jupytext.read('../input.ipynb'), 'input_as_script.py')
 
 # Measure execution time of the Python script
 start_time = time.time()
