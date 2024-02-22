@@ -1,0 +1,5 @@
+awslambdaric
+GDAL==3.6
+rio-tiler
+rasterio[s3]
+pyjwt[crypto]
