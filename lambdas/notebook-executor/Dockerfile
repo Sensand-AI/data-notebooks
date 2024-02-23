@@ -23,6 +23,12 @@ RUN pip install jupyter nbconvert ipykernel
 COPY requirements.txt ${LAMBDA_TASK_ROOT}/requirements.txt
 RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt -t ${LAMBDA_TASK_ROOT}
 
+# Copy local Python packages
+COPY packages/ ${LAMBDA_TASK_ROOT}/packages
+
+# Install local Python packages
+RUN pip install ${LAMBDA_TASK_ROOT}/packages/gis_utils/ ${LAMBDA_TASK_ROOT}/packages/aws_utils/
+
 # # Copy your Lambda function code and notebooks into the container
 COPY app/ ${LAMBDA_TASK_ROOT}/app
 COPY notebooks/ ${LAMBDA_TASK_ROOT}/notebooks
