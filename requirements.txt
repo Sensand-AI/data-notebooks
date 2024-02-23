@@ -58,16 +58,3 @@ wheel # for package development
 #experimental for geodata-harvester package Jenna is working on
 geodata-harvester
 owslib # client programming with Open Geospatial Consortium (OGC) web service (OWS) and their related content models.
-# yaml
-# shutil
-# argparse
-# glob
-# pathlib
-# json
-# numba
-# termcolor
-# warnings
-# logging
-# alive_progress
-# datetime
-# netCDF4
