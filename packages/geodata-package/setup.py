@@ -1,13 +1,13 @@
-#copied from Nav's aws_utils package
-
 from setuptools import find_packages, setup
 
 VERSION = '0.0.1'
 
+# by defining requirements here, no requirements.txt file is needed.
 setup(
-    name="geodata_harvester_lite",
+    name="geodata_fetch",
     version=VERSION,
-    packages=find_packages(),
+    package_dir={"": "geodata"},
+    packages=find_packages(where="geodata"),
     install_requires=[
         'rasterio',
         'rioxarray',
@@ -21,6 +21,5 @@ setup(
         'fiona>=1.8.21',
         'owslib==0.27.2',
         'requests==2.28.1'
-    ],
-	keywords=['geodata', 'harvester'],
+    ]
 )

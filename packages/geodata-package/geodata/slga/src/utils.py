@@ -119,7 +119,9 @@ def msg_success(message, log=False):
 
 
 ## ------------------------------------------------------------------------- ##
-
+"""
+Was orignally in a separate module (wwwwidgets module), moved it to here as I've cut down the package to just the essentials. JAG.
+"""
 def load_settings(fname_settings):
     """
     Load settings from yaml file
