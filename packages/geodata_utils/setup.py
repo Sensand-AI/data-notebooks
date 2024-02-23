@@ -4,10 +4,8 @@ VERSION = '0.0.1'
 
 # by defining requirements here, no requirements.txt file is needed.
 setup(
-    name="geodata_fetch",
+    name="geodata-fetch",
     version=VERSION,
-    package_dir={"": "geodata"},
-    packages=find_packages(where="geodata"),
     install_requires=[
         'rasterio',
         'rioxarray',
@@ -21,5 +19,8 @@ setup(
         'fiona>=1.8.21',
         'owslib==0.27.2',
         'requests==2.28.1'
-    ]
+    ],
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
+    include_package_data=True,
 )
