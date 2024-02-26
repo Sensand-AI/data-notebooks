@@ -28,8 +28,6 @@ from glob import glob
 import os
 import json
 
-from types import SimpleNamespace
-
 import rasterio
 from rasterio.mask import mask
 from rasterio.warp import calculate_default_transform, reproject, Resampling
@@ -79,45 +77,45 @@ def spin(message=None, colour="magenta", events=1, log=False):
     """Spin animation as a progress inidicator"""
     if log:
         logging.info(message)
-    return alive_bar(events, title=colored(message))
+    return alive_bar(events, title=colored("\u2299 " + message, color=colour))
 
 
-def msg_info(message, icon=False, log=False):
+def msg_info(message, icon=True, log=False):
     """Prints an info message"""
     if log:
         logging.info(message)
     if icon:
-        print(message)
+        cprint("\u2139 " + message, color="magenta")
     else:
-        print(message)
+        cprint("  " + message, color="magenta")
 
 
 def msg_dl(message, log=False):
     """Prints a downloading message"""
     if log:
         logging.info(message)
-    print(message)
+    cprint("\u29e9 " + message, color="magenta")
 
 
 def msg_warn(message, log=False):
     """Prints a warning message"""
     if log:
         logging.warning(message)
-    print(message)
+    cprint("\u2691 " + message, color="yellow")
 
 
 def msg_err(message, log=False):
     """Prints an error message"""
     if log:
         logging.error(message)
-    print(message)
+    cprint("\u2716 " + message, color="red", attrs=["bold"])
 
 
 def msg_success(message, log=False):
     """Prints a success message"""
     if log:
         logging.info(message)
-    print(message)
+    cprint("\u2714 " + message, color="magenta")
 
 
 ## ------------------------------------------------------------------------- ##
@@ -125,16 +123,23 @@ def msg_success(message, log=False):
 Was orignally in a separate module (wwwwidgets module), moved it to here as I've cut down the package to just the essentials. JAG.
 """
 def load_settings(fname_settings):
+    """
+    Load settings from yaml file
+
+    Input:
+        fname_settings: path and filename to settings file
+
+    Output:
+        settings: settings as namespace
+    """
     # Load settings from yaml file
     with open(fname_settings, "r") as f:
-        settings = json.load(f)
-        
+        settings = yaml.load(f, Loader=yaml.FullLoader)
     # Parse settings dictinary as namespace (settings are available as
     # settings.variable_name rather than settings['variable_name'])
     settings = SimpleNamespace(**settings)
-    
-    settings.date_min = str(settings.date_start)
-    settings.date_max = str(settings.date_end)
+    settings.date_min = str(settings.date_min)
+    settings.date_max = str(settings.date_max)
     return settings
 
 ## ------------------------------------------------------------------------- ##

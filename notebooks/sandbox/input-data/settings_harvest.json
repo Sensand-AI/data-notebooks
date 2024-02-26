@@ -1,0 +1,21 @@
+{
+    "outfile":"",
+    "target_centroid_lat":"",
+    "target_centroid_long":"",
+    "target_bbox":[
+        112.9995833334,
+        -44.0004166670144,
+        153.999583334061,
+        -10.0004166664663
+    ],
+    "target_res":"3",
+    "date_start":"",
+    "date_end":"",
+    "time_intervals":"",
+    "target_sources":{
+        "SLGA":{
+            "Bulk_Density":"[0-5cm]",
+            "Clay":"[0-5cm]"
+        }
+    }
+}

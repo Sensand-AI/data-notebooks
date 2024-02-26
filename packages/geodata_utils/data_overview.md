@@ -81,6 +81,25 @@ Attribution: Commonwealth of Australia (Geoscience Australia)
 
 Layernames:
 
-- 'DEM_1s'
+- 'DEM'
    - Title: DEM SRTM 1 Second Hydro Enforced
    - Description: The 1 second SRTM derived hydrologically enforced DEM (DEM-H Version 1.0) is a 1 arc second (~30 m) gridded digital elevation model (DEM) that has been hydrologically conditioned and drainage enforced. The DEM-H captures flow paths based on SRTM elevations and mapped stream lines, and supports delineation of catchments and related hydrological attributes.
+
+
+## New and experimental SLGA
+
+### These are datasets that are very new, have not been tested, or are in the process of being tested. 
+
+
+Layernames:
+
+- 'Soil Bacteria and Fungi Beta Diversity (3" resolution) - Release 1':
+   - Title: Fungi_Beta_Diversity
+   - Description: These products provide estimates of the Beta Diversity of soil fungi and bacteria. The digital soil attribute maps are in raster format at a resolution of 3 arc sec (~90 x 90 m pixels).
+   - Unit: unknown?
+   - only available as COG, not WCS
+- 'Soil Bacteria and Fungi Beta Diversity (3" resolution) - Release 1':
+   - Title: Bacteria_Beta_Diversity
+   - Description: These products provide estimates of the Beta Diversity of soil fungi and bacteria. The digital soil attribute maps are in raster format at a resolution of 3 arc sec (~90 x 90 m pixels).
+   - Unit: unknown?
+   - only available as COG, not WCS

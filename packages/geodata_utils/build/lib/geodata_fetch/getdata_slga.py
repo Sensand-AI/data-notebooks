@@ -27,26 +27,24 @@ import os
 from owslib.wcs import WebCoverageService
 import rasterio
 from rasterio.plot import show
-from geodata_fetch import utils
-from geodata_fetch.utils import spin
+from geodata_harvester import utils
+from geodata_harvester.utils import spin
 
 # logger setup
-from geodata_fetch import write_logs
+from geodata_harvester import write_logs
 import logging
 
 import json
-import importlib.resources #to read in slga.json during runtime
 
 
-def get_slgadict():
+def get_slgadict_json(slga_json):
     """
     This is the modified version of get_slgadict(), but where the data endpoints (WCS, in this case), are read in from a json file instead of being hardcoded in.
     This will prevent the need to update the code when the endpoints change.
     TODO: change all hardcoded values including title, description etc to be read from the json file.
     """
-    with importlib.resources.open_text('config','slga_soil_urls.json') as f:
+    with open('geodata_harvester_lite/slga/slga_soil_urls.json', 'r') as f:
         slga_json = json.load(f)
-
     
     slgadict = {}
     slgadict["title"] = slga_json["title"]
@@ -60,6 +58,74 @@ def get_slgadict():
 
 
     return slgadict
+
+# def get_slgadict():
+#     """
+#     Get dictionary of SLGA data.
+
+#     The Soil Facility produced a range of digital soil attribute products.
+#     Each product contains six digital soil attribute maps, and their upper and lower confidence limits,
+#     representing the soil attribute at six depths: 0-5cm, 5-15cm, 15-30cm, 30-60cm, 60-100cm and 100-200cm.
+#     These depths are consistent with the specifications of the GlobalSoilMap.net project (http://www.globalsoilmap.net/).
+#     The digital soil attribute maps are in raster format at a resolution of 3 arc sec (~90 x 90 m pixels).
+
+#     Period (temporal coverage; approximately): 1950-2013;
+#     Spatial resolution: 3 arc seconds (approx 90m);
+#     Data license : Creative Commons Attribution 3.0 (CC By);
+#     Target data standard: GlobalSoilMap specifications;
+#     Format: GeoTIFF.
+
+#     Run function get_capabilities(url) to update dictionary
+
+#     Returns
+#     -------
+#     slgadict : dictionary of National Soil Map data
+#     """
+#     slgadict = {}
+#     slgadict["title"] = "SLGA"
+#     slgadict["description"] = "National Soil and Landscape Grid of Australia"
+#     slgadict["crs"] = "EPSG:4326"
+#     slgadict["bbox"] = [
+#         112.9995833334,
+#         -44.0004166670144,
+#         153.999583334061,
+#         -10.0004166664663,
+#     ]
+#     slgadict["resolution_arcsec"] = 3
+#     slgadict["depth_min"] = 0
+#     slgadict["depth_max"] = 200
+#     slgadict["layers_url"] = {
+#         "Bulk_Density": "https://www.asris.csiro.au/ArcGIS/services/TERN/BDW_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "Organic_Carbon": "https://www.asris.csiro.au/ArcGIS/services/TERN/SOC_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "Clay": "https://www.asris.csiro.au/ArcGIS/services/TERN/CLY_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "Silt": "https://www.asris.csiro.au/ArcGIS/services/TERN/SLT_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "Sand": "https://www.asris.csiro.au/ArcGIS/services/TERN/SND_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "pH_CaCl2": "https://www.asris.csiro.au/ArcGIS/services/TERN/PHC_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "Available_Water_Capacity": "https://www.asris.csiro.au/ArcGIS/services/TERN/AWC_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "Total_Nitrogen": "https://www.asris.csiro.au/ArcGIS/services/TERN/NTO_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "Total_Phosphorus": "https://www.asris.csiro.au/ArcGIS/services/TERN/PTO_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "Effective_Cation_Exchange_Capacity": "https://www.asris.csiro.au/ArcGIS/services/TERN/ECE_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "Depth_of_Regolith": "https://www.asris.csiro.au/ArcGIS/services/TERN/DER_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#         "Depth_of_Soil": "https://www.asris.csiro.au/ArcGIS/services/TERN/DES_ACLEP_AU_NAT_C/MapServer/WCSServer",
+#     }
+#     return slgadict
+
+
+def getdict_license():
+    """
+    Retrieves the SLGA license and attribution information as dict
+    """
+    dict = {
+        "name": "Soil and Landscape Grid of Australia (SLGA)",
+        "source_url": "https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails.html",
+        "license": "CC BY 4.0",
+        "license_title": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "copyright": "(c) 2010-2022 CSIRO Australia, © 2020 TERN (University of Queensland)",
+        "attribution": "CSIRO Australia, TERN (University of Queensland), and Geoscience Australia",
+    }
+    return dict
+
 
 def plot_raster(infname):
     """
@@ -281,11 +347,11 @@ def get_slga_layers(
     TBD: check that Request image size does not exceeds allowed limit. Set Timeout?
     """
 
-    # # Logger setup
-    # if verbose:
-    #     write_logs.setup(level="info")
-    # else:
-    #     write_logs.setup()
+    # Logger setup
+    if verbose:
+        write_logs.setup(level="info")
+    else:
+        write_logs.setup()
 
     # Check if layernames is a list
     if not isinstance(layernames, list):
