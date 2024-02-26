@@ -7,6 +7,7 @@
 	"workspaceFolder": "/workspaces/data-notebooks",
 	"shutdownAction": "stopCompose",
 	"remoteUser": "root",
+	"containerUser": "jovyan",
 	"remoteEnv": { "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}" },
 	"features": {
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
