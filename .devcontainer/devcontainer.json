@@ -6,8 +6,8 @@
 	"service": "jupyter",
 	"workspaceFolder": "/workspaces/data-notebooks",
 	"shutdownAction": "stopCompose",
-	"remoteUser": "root",
-	"containerUser": "jovyan",
+	"remoteUser": "jovyan",
+	"updateRemoteUserUID": true,
 	"remoteEnv": { "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}" },
 	"features": {
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
