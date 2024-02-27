@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Install the aws_utils package in editable mode
-cd /workspaces/data-notebooks/packages/aws_utils
-pip install -e .
+pip install -r /workspaces/data-notebooks/requirements-custom.txt
+
 
 # Start the Flask app in the background
 # Assuming your Flask app is located at /workspaces/data-notebooks/api/app.py
