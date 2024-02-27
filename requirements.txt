@@ -1,6 +1,7 @@
 # Core numerical and data manipulation libraries
 numpy  # Fundamental package for scientific computing with Python
 pandas  # Data analysis and manipulation tool
+xarray # multidimensional data arrays, needed for raster data handling
 
 # AWS SDK for Python
 boto3  # Amazon Web Services (AWS) SDK for Python
@@ -16,19 +17,16 @@ plotly  # Interactive graphing library for making interactive, publication-quali
 plotly_express  # High-level interface for Plotly
 
 # Geospatial data analysis libraries
+geopandas  # Extends pandas for geospatial data operations
 fiona  # For reading and writing spatial data files
 shapely  # Manipulation and analysis of geometric objects
-geopandas  # Extends pandas for geospatial data operations
 rasterio[s3]	# Rasterio with S3 support
-geemap  # Google Earth Engine (GEE) Python API for geospatial data analysis
-folium  # Makes it easy to visualize data that’s been manipulated in Python on an interactive leaflet map
-leafmap  # A Python package for interactive mapping and geospatial analysis with minimal coding
+rioxarray # read  in raster data as xarrays. Needed for some processing packages
 earthengine-api  # Google Earth Engine API
 sentinelhub  # Python library for downloading and processing satellite imagery
 
 # Geospatial data processing tools
 gdal2tiles  # For converting raster datasets to directory structures of tiles
-rioxarray  # Geospatial xarray extension powered by rasterio for working with geospatial rasters
 pystac  # Python library for working with SpatioTemporal Asset Catalog (STAC)
 pystac_client  # Python client for working with STAC APIs
 stackstac[viz]  # Turn STAC Items into dask-based xarrays
@@ -36,11 +34,23 @@ mapboxgl  # Python interface for Mapbox GL JS, a JavaScript library for interact
 dask-geopandas  # Parallelized GeoPandas with Dask
 mapclassify  # Classification schemes for choropleth maps
 
+# geospatial data visualisation tools
+folium  # Makes it easy to visualize data that’s been manipulated in Python on an interactive leaflet map
+ipyleaflet
+leafmap  # A Python package for interactive mapping and geospatial analysis with minimal coding
+ipywidgets # adding interactive functionality to notebooks
+hvplot # collection of tools for mapping and tabular data viz
+geoviews
+holoviews
+datashader #required for hvplot to render raster data
+
 # Development and Workflow tools
 nbdev # Git friendly notebook development
 
 # Experimental
 flask  # Micro web framework for building web applications. Currently being used alongside Papermill
-papermill  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks
+papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks. Added version to resolve docker build issue.
 polars # A blazingly fast DataFrame library implemented in Rust
 sagemaker	# Open source library for training and deploying machine-learned models on Amazon SageMaker
+geodata-harvester
+

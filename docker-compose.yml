@@ -15,6 +15,7 @@ services:
       - .env
     depends_on:
       - s3mock
+      - postgis
 
   s3mock:
     image: adobe/s3mock
@@ -24,3 +25,33 @@ services:
       - "9090:9090"
     volumes:
       - ./.s3mock-data:/s3mockroot
+
+
+  postgis:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+    # first is the local drive, second is in the container
+      - ./postgis-data-v2:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    env_file:
+      .env
+
+
+  # postgis:
+  #   build:
+  #     context: .
+  #     dockerfile: postgis.Dockerfile
+  #   environment:
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #   volumes:
+  #   # first is the local drive, second is in the container
+  #     - ./postgis-data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"

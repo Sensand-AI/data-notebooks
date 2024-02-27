@@ -1,0 +1,5 @@
+layername,agfunction,dataset,layertitle,filename_out,loginfo
+SLGA_Bulk_Density_0-5cm,0-5cm,SLGA,SLGA_Bulk_Density_0-5cm_0-5cm,output-data/SLGA_Bulk_Density_0-5cm.tif,downloaded
+SLGA_Bulk_Density_5-15cm,5-15cm,SLGA,SLGA_Bulk_Density_5-15cm_5-15cm,output-data/SLGA_Bulk_Density_5-15cm.tif,downloaded
+SLGA_Clay_0-5cm,0-5cm,SLGA,SLGA_Clay_0-5cm_0-5cm,output-data/SLGA_Clay_0-5cm.tif,downloaded
+SLGA_Clay_5-15cm,5-15cm,SLGA,SLGA_Clay_5-15cm_5-15cm,output-data/SLGA_Clay_5-15cm.tif,downloaded
