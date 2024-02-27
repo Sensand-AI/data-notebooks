@@ -54,7 +54,6 @@ papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter No
 polars # A blazingly fast DataFrame library implemented in Rust
 sagemaker	# Open source library for training and deploying machine-learned models on Amazon SageMaker
 wheel # for package development
-
 #experimental for geodata-harvester package Jenna is working on
 geodata-harvester
 owslib # client programming with Open Geospatial Consortium (OGC) web service (OWS) and their related content models.
