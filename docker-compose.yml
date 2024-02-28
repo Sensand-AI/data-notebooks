@@ -7,6 +7,9 @@ services:
       dockerfile: jupyter.Dockerfile
     volumes:
       - .:/workspaces/data-notebooks
+      - $SSH_AUTH_SOCK:/ssh-agent
+    environment:
+    - SSH_AUTH_SOCK=/ssh-agent
     command: /bin/bash -c "/workspaces/data-notebooks/startup.sh"
     ports:
       - "8888:8888"

@@ -12,8 +12,7 @@ dash-tutorial.ipynb
 duckdb-data/data-duck/
 .DS_Store
 .s3mock-data/
-notebooks/terrawise/output-data
-notebooks/terrawise/input-data
-sandbox/input-data
-sandbox/output-data
-postgis-data/
+notebooks/terrawise/output-data/
+notebooks/terrawise/input-data/
+notebooks/sandbox/input-data/
+notebooks/sandbox/output-data/
