@@ -199,8 +199,8 @@ def plot_rasters(rasters, longs=None, lats=None, titles=None):
 
         j += 1
 
-    fig.tight_layout()
-    plt.show()
+    #fig.tight_layout()
+    #plt.show()
 
 
 def _getFeatures(gdf):
