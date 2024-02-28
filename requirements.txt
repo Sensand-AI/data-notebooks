@@ -46,6 +46,8 @@ datashader #required for hvplot to render raster data
 
 # Development and Workflow tools
 nbdev # Git friendly notebook development
+ddtrace # Datadog tracing library
+datadog # Datadog monitoring library
 
 # Experimental
 flask  # Micro web framework for building web applications. Currently being used alongside Papermill
@@ -53,4 +55,5 @@ papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter No
 polars # A blazingly fast DataFrame library implemented in Rust
 sagemaker	# Open source library for training and deploying machine-learned models on Amazon SageMaker
 geodata-harvester
+
 

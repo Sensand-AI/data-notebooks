@@ -50,7 +50,7 @@ content-type: application/json
 
 ### Run a lambda notebook executor
 
-POST http://localhost:9000/2015-03-31/functions/function/invocations HTTP/1.1
+POST http://notebook-executor:9000/2015-03-31/functions/function/invocations HTTP/1.1
 content-type: application/json
 
 {
