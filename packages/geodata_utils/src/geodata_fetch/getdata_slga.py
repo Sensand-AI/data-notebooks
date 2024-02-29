@@ -5,22 +5,11 @@ Core functionality:
 - Retrieval of WCS capability  with function get_capabilities()
 - automatic download SLGA data for given depth range and layer(s) via Web Coverage Service (WCS)
 - clip data to custom bounding box
-- save data as multi-band geotiff
-- plot data as map
+- save data as geotiff
 
 The SLGA layers and metadata are described as dictionary in the module function get_slgadict()
 and the respective licensing and attribution are availabe with the module function getdict_license()
 
-More details about the SLGA data and attributions can be found here:
-https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails-SoilAttributes.html
-
-This package is part of the Data Harvester project developed for the Agricultural Research Federation (AgReFed).
-
-Copyright 2022 Sydney Informatics Hub (SIH), The University of Sydney
-
-This open-source software is released under the LGPL-3.0 License.
-
-Author: Sebastian Haan
 """
 
 import os
