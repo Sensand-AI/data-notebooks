@@ -95,14 +95,15 @@ def run(path_to_config, log_name="download_summary", preview=False, return_df=Fa
     fn = Path(settings.infile).resolve().name
     print(f"\nExtracting data points for {fn}  -----")
     # Extract datatable from rasters given input coordinates
-    # gdf = utils.raster_query(longs, lats, rasters, titles) # old slower version
     #gdf = utils.extract_values_from_rasters(coords, rasters)
     
 
     if preview is True:
-        utils.plot_rasters(rasters, longs, lats, titles)
+        return None
+        #utils.plot_rasters(rasters, longs, lats, titles)
     elif preview is False:
-        utils.plot_rasters(rasters, titles=titles)
+        return None
+        #utils.plot_rasters(rasters, titles=titles)
 
     print("\nHarvest complete")
 

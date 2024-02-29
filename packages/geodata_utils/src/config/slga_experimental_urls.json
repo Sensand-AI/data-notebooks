@@ -1,5 +1,5 @@
 {
-    "title": "SLGA",
+    "title": "SLGA-experimental",
     "description": "National Soil and Landscape Grid of Australia",
     "crs": "EPSG:4326",
     "bbox": [
@@ -18,3 +18,8 @@
 
     }
 }
+
+
+
+
+
