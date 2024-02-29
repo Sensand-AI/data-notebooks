@@ -50,22 +50,16 @@ def get_slgadict():
 
     return slgadict
 
-def plot_raster(infname):
-    """
-    Read in raster tif with rasterio and visualise as map
+# def plot_raster(infname):
+#     """
+#     Read in raster tif with rasterio and visualise as map
 
-    Parameters
-    ----------
-    infname : str
-    """
-    data = rasterio.open(infname)
-    # show image
-    show(data)
-
-    # show image with matplotlib
-    # img = data.read(1)
-    # plt.imshow(img, cmap='viridis')
-    # plt.colorbar()
+#     Parameters
+#     ----------
+#     infname : str
+#     """
+#     data = rasterio.open(infname)
+#     show(data)
 
 
 def get_capabilities(url):
@@ -248,11 +242,11 @@ def get_slga_layers(
     resolution=3,
     depth_min=0,
     depth_max=200,
-    get_ci=True,
+    get_ci=True, #ammend to set this in the json/API call instead of being hard-coded here
     verbose=False,
 ):
     """
-    Download layers from SLGA data server and saves as geotif.
+    Download layers from SLGA and saves as geotif.
 
     Parameters
     ----------
@@ -266,8 +260,6 @@ def get_slga_layers(
     Returns
     -------
     fnames_out : list of output file names
-
-    TBD: check that Request image size does not exceeds allowed limit. Set Timeout?
     """
 
     # # Logger setup
