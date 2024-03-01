@@ -2,7 +2,7 @@ FROM ghcr.io/lambgeo/lambda-gdal:3.6 as gdal
 
 ARG PYTHON_VERSION=3.10  # Default to Python 3.10 if not specified
 
-FROM public.ecr.aws/lambda/python:${PYTHON_VERSION}
+FROM public.ecr.aws/lambda/python:3.10
 
 # Bring C libs from lambgeo/lambda-gdal image
 COPY --from=gdal /opt/lib/ /opt/lib/
@@ -19,7 +19,7 @@ ENV \
 RUN yum install -y gcc gcc-c++ && yum clean all && rm -rf /var/cache/yum /var/lib/yum/history
 
 # Install Jupyter dependencies
-RUN pip install jupyterlab notebook jupyterhub nbclassic
+RUN pip install jupyterlab notebook jupyterhub nbclassic ipykernel
 
 COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/requirements.txt
 
