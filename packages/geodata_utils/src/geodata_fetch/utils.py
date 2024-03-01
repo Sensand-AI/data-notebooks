@@ -2,26 +2,33 @@
 """
 Utility functions for use in the Agrefed data harvesting pipeline.
 
---Function List, in order of appearence--
+--Function List--
 
-plot_rasters: Plots a list of rasters.
 _getFeatures (internal): Extracts rasterio compatible test from geodataframe.
+
 reproj_mask: Masks a raster to the area of a shape, and reprojects.
+
 reproj_rastermatch: Reproject a file to match the shape and projection of
     existing raster.
+    
 reproj_raster: Reproject and clip for a given output resolution, crs and bbox.
+
 _read_file (internal): Reads raster with rasterio returns numpy array
+
 aggregate_rasters: Averages (or similar) over multiple files and multiple
     channels.
+    
 aggregate_multiband: Averages (or similar) over multiple files but keeps
     multi-channels independent.
+    
 _get_coords_at_point (internal): Finds closest index of a point-location in an
     array (raster).
+    
 raster_query: Given a longitude,latitude value, return the value at that point
     of a raster/tif.
+    
 extract_values_from_rasters: Given a list of rasters, extract the values at coords.
-init_logtable: Stores metdata for each step of raster download and processing.
-update_logtable: Updates each the logtable with new information.
+
 """
 
 from glob import glob
@@ -44,15 +51,15 @@ import rioxarray as rxr
 from pyproj import CRS
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-from matplotlib.ticker import FormatStrFormatter
+#import matplotlib.pyplot as plt
+#from matplotlib.ticker import FormatStrFormatter
 
 from numba import jit
 
 import warnings
 import logging
 
-from termcolor import colored, cprint
+
 from alive_progress import alive_bar, config_handler
 
 
@@ -75,12 +82,11 @@ logging.basicConfig(
 
 ## ------ Functions to show progress and provide feedback to the user ------ ##
 
-
-def spin(message=None, colour="magenta", events=1, log=False):
+def spin(message=None, events=1, log=False):
     """Spin animation as a progress inidicator"""
     if log:
         logging.info(message)
-    return alive_bar(events, title=colored(message))
+    return alive_bar(events, title=message)
 
 
 def msg_info(message, icon=False, log=False):
@@ -187,70 +193,6 @@ def get_wcs_capabilities(url):
 
     return keys, title_list, description_list, bbox_list
 ## ------------------------------------------------------------------------- ##
-
-def plot_rasters(rasters, longs=None, lats=None, titles=None):
-    """
-    Plots multiple raster files (.tif) on a grid of nicely arranged figures.
-
-    Parameters:
-        raster: list of filenames (.tif).
-            Will only read the first band/channel if multiband.
-        longs: optional x values in list like object for plotting as points 
-            over raster images.
-        lats: optional x values in list like object for plotting as points
-            over raster images.
-        titles: title of plot default is raster file name.
-
-    Returns:  
-        None
-    """
-    # Set the value for reasonable shaped plot based on the number of datasets
-    figlen = int(np.ceil(len(rasters) / 3))
-    # Make a blank canvas if there is no data
-    figlen = 2 if figlen < 2 else figlen
-
-    # Create the figure
-    fig, axes = plt.subplots(figlen, 3, figsize=(12, figlen * 3))
-
-    if titles == None:
-        titles = rasters
-    # Loop through each subplot/axis on the figure.
-    # Use counters to know what axes we are up to.
-    i, j = 0, 0
-    for a, rast in enumerate(rasters):
-        if j == 3:
-            j = 0
-            i += 1
-
-        # print(a,i,j,figlen,rast)
-        src = rasterio.open(rast)
-        # Only read first Band for flexibility without complexity
-        data = src.read(1)
-        # Grab the percentiles for pretty plotting of color ranges
-        n95 = np.percentile(data, 5)
-        n5 = np.percentile(data, 95)
-
-        # Make the plot and clean it up
-        show(
-            data,
-            ax=axes[i, j],
-            title=titles[a],
-            transform=src.transform,
-            cmap="Greys",
-            vmin=n95,
-            vmax=n5,
-        )
-        axes[i, j].scatter(longs, lats, s=1, c="r")
-        axes[i, j].xaxis.set_major_formatter(FormatStrFormatter("%.2f"))
-        axes[i, j].yaxis.set_major_formatter(FormatStrFormatter("%.2f"))
-        axes[i, j].locator_params(axis="y", nbins=4)
-        axes[i, j].locator_params(axis="x", nbins=4)
-
-        j += 1
-
-    #fig.tight_layout()
-    #plt.show()
-
 
 def _getFeatures(gdf):
     """
@@ -805,124 +747,6 @@ def extract_values_from_rasters(coords, raster_files, method = "nearest"):
     gdf.insert(1, 'Latitude', coords[:,1])
 
     return gdf
-
-
-def init_logtable():
-    """
-    Create a log table to store information from the raster download or processing.
-
-    RETURNS:
-        df_log: dataframe to update
-    """
-    return pd.DataFrame(
-        columns=[
-            "layername",
-            "agfunction",
-            "dataset",
-            "layertitle",
-            "filename_out",
-            "loginfo",
-        ]
-    )
-
-
-def update_logtable(
-    df_log,
-    filenames,
-    layernames,
-    datasource,
-    settings,
-    layertitles=[],
-    agfunctions=[],
-    loginfos=[],
-    force=False
-):
-    """
-    Update the dataframe table with the information from the raster download or processing.
-    The dataframe is simultaneoulsy saved to a csv file in default output directory.
-
-    INPUTS
-    df_log: dataframe to update
-    filenames: list of filenames to add to the dataframe (captured in output of getdata_* functions)
-    layernames: list of layernames to add to the dataframe (must be same length as filenames)
-    datasource: datasource of the rasters (e.g. 'SLGA', 'SILO', 'DEA', see settings)
-    settings: settings Namespace object
-    layertitles: list of layer titles to add to the dataframe; if empty or none provided, it will be inferred from settings
-    agfunctions: list of aggregation functions to add to the dataframe; if empty or none provided, it will be inferred from settings
-    loginfos: string or list of log information strings to add to the dataframe;
-
-    RETURNS
-    df_log: updated dataframe
-    """
-    # First automatically check consistency of inputs and set defaults if necessary
-    if len(filenames) != len(layernames):
-        print(
-            "Error: Number of filenames does not match number of layernames. Dataframe not updated."
-        )
-        return df_log
-    if type(agfunctions) == str:
-        agfunctions = [agfunctions] * len(layernames)
-    if agfunctions == []:
-        try:
-            if "agfunctions" in settings.target_sources["SLGA"]:
-                agfunctions = settings.target_sources[datasource]["agfunctions"]
-            else:
-                agfunctions = list(settings.target_sources[datasource].values())
-                # flatten possible list of lists
-                # check if list of lists
-                if type(agfunctions[0]) == list:
-                    agfunctions = [item for sublist in agfunctions for item in sublist]
-            if agfunctions == None:
-                agfunctions = ["None"] * len(layernames)
-        except:
-            agfunctions = ["None"] * len(layernames)
-
-    if len(agfunctions) != len(layernames):
-        print(
-            "Error: Number of agfunctions does not match number of layernames. Dataframe not updated."
-        )
-        return df_log
-    if layertitles == []:
-        layertitles = [
-            layernames[i] + "_" + agfunctions[i] for i in range(len(layernames))
-        ]
-
-    # check if you are adding a duplicate entry to the log
-    for f in filenames:
-        warnings.simplefilter(action="ignore", category=FutureWarning)
-        if f in df_log.filename_out.values:
-            if force == False:
-                print("Error: " + str(f) + " exists in df_log! Dataframe not updated.\nCheck your inputs or overwrite with force=True")
-                return df_log
-            elif force==True:
-                print("Warning: " + str(f) + " exists in df_log and has been overitten by force=True")
-                df_log.drop(df_log[df_log.filename_out != f].index, inplace=True)
-
-    # check if loginfos is a list or a string
-    if type(loginfos) == str:
-        loginfos = [loginfos] * len(layernames)
-    else:
-        if loginfos == []:
-            loginfos = ["processed"] * len(layernames)
-        elif len(loginfos) != len(layernames):
-            print(
-                "Error: Number of loginfos does not match number of layernames. Dataframe not updated."
-            )
-            return df_log
-    datasets = [datasource] * len(layernames)
-    data_add = {
-        "layername": layernames,
-        "agfunction": agfunctions,
-        "dataset": datasets,
-        "layertitle": layertitles,
-        "filename_out": filenames,
-        "loginfo": loginfos,
-    }
-    # Add to log dataframe
-    df_log = pd.concat([df_log, pd.DataFrame(data_add)], ignore_index=True)
-    # Save to csv in settings.outpath
-    df_log.to_csv(os.path.join(settings.outpath, "df_log.csv"), index=False)
-    return df_log
 
 
 @jit(nopython=True)

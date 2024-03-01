@@ -1,5 +1,5 @@
 {
-    "title": "DEM 1 Second Grid",
+    "title": "DEM",
     "description": "Digital Elevation Model (DEM) of Australia derived from STRM with 1 Second Grid - Hydrologically Enforced.",
     "source_url": "https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails.html",
     "license": "CC BY 4.0",
