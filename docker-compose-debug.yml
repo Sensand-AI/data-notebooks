@@ -1,0 +1,20 @@
+version: '3.8'
+
+datadog-agent:
+  cgroup: host
+  image: datadog/agent:7
+  environment:
+    DD_API_KEY: ${DD_API_KEY}
+    DD_APM_ENABLED: ${DD_APM_ENABLED}
+    DD_SITE: ${DD_SITE}
+    DD_APM_NON_LOCAL_TRAFFIC: true
+    DD_DOGSTATSD_NON_LOCAL_TRAFFIC: true
+    DD_LOGS_ENABLED: true
+    DD_LOGS_CONFIG_DOCKER_CONTAINER_USE_FILE: true
+  ports:
+    - "8126:8126"
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - /proc/:/host/proc/:ro
+    - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    - /opt/datadog-agent/run:/opt/datadog-agent/run:rw

@@ -1,22 +1,29 @@
 version: '3.8'
 
 services:
+
+  devcontainer:
+    image: mcr.microsoft.com/vscode/devcontainers/python:${PYTHON_VERSION}-bullseye
+    command: /bin/sh -c "sleep infinity"
+    volumes:
+      - .:/workspace
+
   jupyter:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: jupyter.Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION} 
     volumes:
       - .:/workspaces/data-notebooks
-    command: /bin/bash -c "/workspaces/data-notebooks/startup.sh"
-    ports:
-      - "8888:8888"
-      - "5001:5000"
+    entrypoint: /bin/bash -c "/workspaces/data-notebooks/startup.sh"
     env_file:
       - .env
+    ports:
+      - "8888:8888"
     depends_on:
-      # - postgis
       - s3mock
-
 
   s3mock:
     image: adobe/s3mock
@@ -26,6 +33,27 @@ services:
       - "9090:9090"
     volumes:
       - ./.s3mock-data:/s3mockroot
+
+  notebook-executor:
+    platform: linux/amd64
+    build:
+      context: lambdas/notebook-executor
+      dockerfile: Dockerfile
+    ports:
+      - "9000:8080"
+    volumes:
+      - ./lambdas/notebook-executor/notebooks:/var/task/notebooks
+      - ./lambdas/notebook-executor/app:/var/task/app
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 1024
+      DATADOG_HOST: datadog-agent
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "docker-compose", "service": "notebook-executor"}]'
+      com.datadoghq.tags.env: development
+      com.datadoghq.tags.service: notebook-executor
 
 
   # postgis:
