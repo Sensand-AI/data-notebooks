@@ -15,8 +15,9 @@ matplotlib  # Comprehensive library for creating static, animated, and interacti
 
 # Geospatial data analysis libraries
 geopandas  # Extends pandas for geospatial data operations
-fiona  # For reading and writing spatial data files
+fiona>=1.8.21  # For reading and writing spatial data files
 shapely  # Manipulation and analysis of geometric objects
+pyproj #reprojection and coordinate reference system package
 rasterio[s3]	# Rasterio with S3 support
 rioxarray # read  in raster data as xarrays. Needed for some processing packages
 earthengine-api  # Google Earth Engine API
@@ -45,6 +46,6 @@ datadog # Datadog monitoring library
 papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks. Added version to resolve docker build issue.
 polars # A blazingly fast DataFrame library implemented in Rust
 sagemaker	# Open source library for training and deploying machine-learned models on Amazon SageMaker
-geodata-harvester
-
-
+wheel # for package development
+#owslib # client programming with Open Geospatial Consortium (OGC) web service (OWS) and their related content models.
+geodata-harvester # A Python library for harvesting geospatial data from the web
