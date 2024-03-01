@@ -1,18 +1,27 @@
 version: '3.8'
 
 services:
+
+  devcontainer:
+    image: mcr.microsoft.com/vscode/devcontainers/python:${PYTHON_VERSION}-bullseye
+    command: /bin/sh -c "sleep infinity"
+    volumes:
+      - .:/workspace
+
   jupyter:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: jupyter.Dockerfile
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION} 
     volumes:
       - .:/workspaces/data-notebooks
-    command: /bin/bash -c "/workspaces/data-notebooks/startup.sh"
-    ports:
-      - "8888:8888"
-      - "5001:5000"
+    entrypoint: /bin/bash -c "/workspaces/data-notebooks/startup.sh"
     env_file:
       - .env
+    ports:
+      - "8888:8888"
     depends_on:
       - s3mock
 
@@ -45,38 +54,6 @@ services:
       com.datadoghq.ad.logs: '[{"source": "docker-compose", "service": "notebook-executor"}]'
       com.datadoghq.tags.env: development
       com.datadoghq.tags.service: notebook-executor
-
-  datadog-agent:
-    cgroup: host
-    image: datadog/agent:7
-    environment:
-      DD_API_KEY: ${DD_API_KEY}
-      DD_APM_ENABLED: ${DD_APM_ENABLED}
-      DD_SITE: ${DD_SITE}
-      DD_APM_NON_LOCAL_TRAFFIC: true
-      DD_DOGSTATSD_NON_LOCAL_TRAFFIC: true
-      DD_LOGS_ENABLED: true
-      DD_LOGS_CONFIG_DOCKER_CONTAINER_USE_FILE: true
-    env_file:
-      - .env
-    ports:
-      - "8126:8126"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /proc/:/host/proc/:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /opt/datadog-agent/run:/opt/datadog-agent/run:rw
-
-  # postgis:
-  #   image: postgis/postgis:16-3.4
-  #   environment:
-  #     POSTGRES_DB: ${POSTGRES_DB}
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #   ports:
-  #     - "5432:5432"
-  #   env_file:
-  #     .env
 
 
   # postgis:
