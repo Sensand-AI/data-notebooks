@@ -40,6 +40,10 @@ def get_slgadict():
     slgadict = {}
     slgadict["title"] = slga_json["title"]
     slgadict["description"] = slga_json["description"]
+    slgadict["license"] = slga_json["license"]
+    slgadict["source_url"] = slga_json["source_url"]
+    slgadict["copyright"] = slga_json["copyright"]
+    slgadict["attribution"] = slga_json["attribution"]
     slgadict["crs"] = slga_json["crs"]
     slgadict["bbox"] = slga_json["bbox"]
     slgadict["resolution_arcsec"] = slga_json["resolution_arcsec"]
@@ -50,67 +54,53 @@ def get_slgadict():
 
     return slgadict
 
-# def plot_raster(infname):
+
+
+# def get_capabilities(url):
 #     """
-#     Read in raster tif with rasterio and visualise as map
+#     Get capabilities from WCS layer
 
 #     Parameters
 #     ----------
-#     infname : str
+#     url : str
+#         layer url
+
+#     Returns
+#     -------
+#     keys    : list
+#         layer identifiers
+#     titles  : list  of str
+#         layer titles
+#     descriptions : list of str
+#         layer descriptions
+#     bboxs   : list of floats
+#         layer bounding boxes
 #     """
-#     data = rasterio.open(infname)
-#     show(data)
 
+#     # Create WCS object
+#     wcs = WebCoverageService(url, version="1.0.0",)
 
-def get_capabilities(url):
-    """
-    Get capabilities from WCS layer
+#     # Get coverages and content dict keys
+#     content = wcs.contents
+#     keys = content.keys()
 
-    Parameters
-    ----------
-    url : str
-        layer url
+#     #print("Operations possible: ", [op.name for op in wcs.operations])
 
-    Returns
-    -------
-    keys    : list
-        layer identifiers
-    titles  : list  of str
-        layer titles
-    descriptions : list of str
-        layer descriptions
-    bboxs   : list of floats
-        layer bounding boxes
-    """
+#     # Get bounding boxes and crs for each coverage
+#     bbox_list = []
+#     title_list = []
+#     description_list = []
+#     for key in keys:
+#         print(f"key: {key}")
+#         print(f"title: {wcs[key].title}")
+#         title_list.append(wcs[key].title)
+#         print(f"{wcs[key].abstract}")
+#         description_list.append(wcs[key].abstract)
+#         print(f"bounding box: {wcs[key].boundingboxes}")
+#         bbox_list.append(wcs[key].boundingboxes)
+#         print("")
 
-    # Create WCS object
-    wcs = WebCoverageService(url, version="1.0.0")
-
-    # URL address for national bulk density layer
-    # url_bd = "https://www.asris.csiro.au/ArcGIS/services/TERN/BDW_ACLEP_AU_NAT_C/MapServer/WCSServer?SERVICE=WCS&REQUEST=GetCapabilities"
-    # url_bd = "https://www.asris.csiro.au/ArcGIS/services/TERN/BDW_ACLEP_AU_NAT_C/MapServer/WCSServer"
-
-    # Get coverages and content dict keys
-    content = wcs.contents
-    keys = content.keys()
-
-    print("Operations possible: ", [op.name for op in wcs.operations])
-
-    # Get bounding boxes and crs for each coverage
-    bbox_list = []
-    title_list = []
-    description_list = []
-    for key in keys:
-        print(f"key: {key}")
-        print(f"title: {wcs[key].title}")
-        title_list.append(wcs[key].title)
-        print(f"{wcs[key].abstract}")
-        description_list.append(wcs[key].abstract)
-        print(f"bounding box: {wcs[key].boundingboxes}")
-        bbox_list.append(wcs[key].boundingboxes)
-        print("")
-
-    return keys, title_list, description_list, bbox_list
+#     return keys, title_list, description_list, bbox_list
 
 
 def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
@@ -132,6 +122,9 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         output file name
 
     """
+    if resolution is None:
+        resolution = get_slgadict()["resolution_arcsec"]
+        
     # Create WCS object
     filename = outfname.split(os.sep)[-1]
     if os.path.exists(outfname):
@@ -142,7 +135,7 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         return False
     else:
         with spin(f"Downloading {filename}") as s:
-            wcs = WebCoverageService(url, version="1.0.0")
+            wcs = WebCoverageService(url, version="1.0.0", timeout=300)
             # Get data
             data = wcs.getCoverage(
                 identifier,
@@ -152,7 +145,6 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
                 resx=resolution,
                 resy=resolution,
             )
-            # timeout=30)
             s(1)
 
         # Save data
@@ -239,9 +231,9 @@ def get_slga_layers(
     layernames,
     bbox,
     outpath,
-    resolution=3,
-    depth_min=0,
-    depth_max=200,
+    resolution=3, #remove hard coding, pull from settings json. remember this is a default and should be able to be overridden
+    depth_min=0, #remove hard coding, pull from settings json
+    depth_max=200, #remove hard coding, pull from settings json
     get_ci=True, #ammend to set this in the json/API call instead of being hard-coded here
     verbose=False,
 ):
@@ -261,12 +253,6 @@ def get_slga_layers(
     -------
     fnames_out : list of output file names
     """
-
-    # # Logger setup
-    # if verbose:
-    #     write_logs.setup(level="info")
-    # else:
-    #     write_logs.setup()
 
     # Check if layernames is a list
     if not isinstance(layernames, list):
@@ -363,41 +349,3 @@ def get_slga_layers(
     # logging.print("SLGA download(s) complete")
     return fnames_out
 
-
-### test functions ###
-
-
-def test_wcs():
-
-    layername = "Bulk_Density"
-    # Get SLGA dictionary
-    slgadict = get_slgadict()
-    # get layer url
-    layers_url = slgadict["layers_url"]
-    url = layers_url[layername]
-    # url = "https://www.asris.csiro.au/ArcGIS/services/TERN/BDW_ACLEP_AU_NAT_C/MapServer/WCSServer"
-
-    # Get capabilities
-    keys, titles, descriptions, bboxs = get_capabilities(url)
-
-    # define bounding box for retrieval (simple test here for ~ half of Australia)
-    bbox = (130, -44, 153.9, -11)
-    # define resolution (in arcsec per pixel since crs is in WGS84).
-    # Note that there is a request size limit for the WCS service.
-    resolution = 50
-    # define output file name
-    outpath = "result_slga_testfunction"
-
-    # Get data for first layer depth
-    fnames_out = get_slga_layers(
-        "Bulk_Density", bbox, outpath, resolution, depth_min=0, depth_max=5
-    )
-
-    # crs = 'EPSG:4326' # WGS84
-    # Get data (here only for first layer)
-    # identifier = '1'
-    # fname_out = 'result_slga_testfunction.tif'
-    # get_wcsmap(url, identifier, crs, bbox, resolution / 3600., fname_out)
-
-    # Show data
-    plot_raster(fnames_out)

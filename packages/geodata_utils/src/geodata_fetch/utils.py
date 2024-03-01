@@ -34,6 +34,7 @@ import rasterio
 from rasterio.mask import mask
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.plot import show
+from owslib.wcs import WebCoverageService
 
 import numpy as np
 import pandas as pd
@@ -137,6 +138,54 @@ def load_settings(fname_settings):
     settings.date_max = str(settings.date_end)
     return settings
 
+"""
+get_capabilities() is duplicated in dem and slga - it should be extraced here if its being re-used.
+"""
+def get_wcs_capabilities(url):
+    """
+    Get capabilities from WCS layer
+
+    Parameters
+    ----------
+    url : str
+        layer url
+
+    Returns
+    -------
+    keys    : list
+        layer identifiers
+    titles  : list  of str
+        layer titles
+    descriptions : list of str
+        layer descriptions
+    bboxs   : list of floats
+        layer bounding boxes
+    """
+
+    # Create WCS object
+    wcs = WebCoverageService(url, version="1.0.0",)
+
+    # Get coverages and content dict keys
+    content = wcs.contents
+    keys = content.keys()
+
+    #print("Operations possible: ", [op.name for op in wcs.operations])
+
+    # Get bounding boxes and crs for each coverage
+    bbox_list = []
+    title_list = []
+    description_list = []
+    for key in keys:
+        print(f"key: {key}")
+        print(f"title: {wcs[key].title}")
+        title_list.append(wcs[key].title)
+        print(f"{wcs[key].abstract}")
+        description_list.append(wcs[key].abstract)
+        print(f"bounding box: {wcs[key].boundingboxes}")
+        bbox_list.append(wcs[key].boundingboxes)
+        print("")
+
+    return keys, title_list, description_list, bbox_list
 ## ------------------------------------------------------------------------- ##
 
 def plot_rasters(rasters, longs=None, lats=None, titles=None):

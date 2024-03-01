@@ -1,6 +1,10 @@
 {
     "title": "SLGA",
     "description": "National Soil and Landscape Grid of Australia",
+    "source_url": "https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails.html",
+    "license": "CC BY 4.0",
+    "copyright": "(c) 2010-2022 CSIRO Australia, © 2020 TERN (University of Queensland)",
+    "attribution": "CSIRO Australia, TERN (University of Queensland), and Geoscience Australia",
     "crs": "EPSG:4326",
     "bbox": [
         112.9995833334,

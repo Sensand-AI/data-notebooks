@@ -56,7 +56,7 @@ def run(path_to_config, log_name="download_summary", preview=False, return_df=Fa
 #-----add getdata functions here---------------------------------------------------------#
 
     if "SLGA" in list_sources:
-        print("\n⌛ Downloading SLGA data...")
+        print("Downloading SLGA data...")
         slga_layernames = list(settings.target_sources["SLGA"].keys())
         # get min and max depth for each layername
         depth_min = []
@@ -73,7 +73,7 @@ def run(path_to_config, log_name="download_summary", preview=False, return_df=Fa
                 settings.outpath,
                 depth_min=depth_min,
                 depth_max=depth_max,
-                get_ci=True,
+                get_ci=True, #can this be added to the settings.json instead of being hard-coded here?
             )
         except Exception as e:
             print(e)
@@ -84,6 +84,31 @@ def run(path_to_config, log_name="download_summary", preview=False, return_df=Fa
                 slga_layernames = [Path(f).stem for f in files_slga]
         else:
             pass
+    
+    if "DEM" in list_sources:
+        print("Downloading DEM data...")
+        dem_layernames = settings.target_sources["DEM"]
+        try:
+            files_dem = getdata_dem.get_dem_layers(
+                dem_layernames,
+                settings.target_bbox,
+                settings.outpath,
+            )
+        except Exception as e:
+            print(e)
+        # Check if output if False (no data available) and skip if so
+        if (files_dem == [False]) or files_dem is None:
+            pass
+        else:
+            # Add extracted data to log dataframe
+            download_log = update_logtable(
+                download_log,
+                files_dem,
+                dem_layernames,
+                'DEM',
+                settings,
+                layertitles=dem_layernames,
+                loginfos='downloaded')
 
 #--------------------------------------------------------------------------------------#
 
