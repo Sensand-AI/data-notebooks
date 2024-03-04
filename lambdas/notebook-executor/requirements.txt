@@ -34,7 +34,5 @@ mapclassify  # Classification schemes for choropleth maps
 
 papermill  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks
 
-awslambdaric	# AWS Lambda Python runtime interface client (RIC) for Python
-
 ddtrace # Datadog tracing library
 datadog # Datadog Python APM client

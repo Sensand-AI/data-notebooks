@@ -21,18 +21,25 @@ RUN yum install -y gcc gcc-c++ && yum clean all && rm -rf /var/cache/yum /var/li
 # Install Jupyter dependencies
 RUN pip install jupyterlab notebook jupyterhub nbclassic ipykernel
 
-COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/requirements.txt
-
-# Upgrade pip and Install Python packages
-# Use --no-cache-dir to avoid storing cache, and --prefer-binary to prefer older binary packages over newer source distributions
+# Upgrade pip
 RUN pip install --upgrade pip
+
+# Install Python packages
+COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/requirements.txt
 RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt
+
+# Install local packages
+COPY packages/ ${LAMBDA_TASK_ROOT}/packages
+COPY requirements-custom.txt ${LAMBDA_TASK_ROOT}/requirements-custom.txt
+RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt
 
 COPY notebooks/ ${LAMBDA_TASK_ROOT}/notebooks
 
 # Default port for Jupyter
 EXPOSE 8888
 
-# Set ENTRYPOINT to sleep indefinitely
-# This is to keep the container running and bypasses the default Lambda behavior
-ENTRYPOINT ["sh", "-c", "sleep infinity"]
+# Copy script to start Jupyter
+COPY start-jupyter.sh ${LAMBDA_TASK_ROOT}/start-jupyter.sh
+
+# Run the Jupyter server using the start-jupyter.sh script
+ENTRYPOINT ["sh", "start-jupyter.sh"]

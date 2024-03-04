@@ -35,5 +35,9 @@ datashader #required for hvplot to render raster data
 
 # Experimental
 papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks. Added version to resolve docker build issue.
-polars # A blazingly fast DataFrame library implemented in Rust
 geodata-harvester
+
+# Development and Workflow tools
+nbdev # Git friendly notebook development
+ddtrace # Datadog tracing library
+datadog # Datadog monitoring library

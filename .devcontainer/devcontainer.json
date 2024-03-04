@@ -45,12 +45,14 @@
 			// Set *default* container specific settings.json values on container create.
 			"settings": {
 				"python.defaultInterpreterPath": "/usr/local/bin/python",
-				"python.dataScience.jupyterServerURI": "http://jupyter:8888/?token=mewmew",
+				"python.dataScience.jupyterServerURI": "http://jupyter:8888/?token=vscode",
 				"python.pythonPath": "/usr/local/bin/python",
 				"python.jupyter.alwaysTrustNotebooks": true,
 				"python.dataScience.useDefaultConfigForJupyter": false,
 				"python.dataScience.searchForJupyter": false,
 				"python.dataScience.allowUnauthorizedRemoteConnection": true,
+				"python.linting.enabled": true,
+				"python.linting.pylintEnabled": true
 			},
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
@@ -59,7 +61,8 @@
 				"GitHub.copilot",
 				"ms-azuretools.vscode-docker",
 				"humao.rest-client",
-				"RandomFractalsInc.geo-data-viewer"
+				"RandomFractalsInc.geo-data-viewer",
+				"ms-python.vscode-pylance"
 			]
 		}
 	}
