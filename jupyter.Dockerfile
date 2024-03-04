@@ -1,7 +1,5 @@
 FROM ghcr.io/lambgeo/lambda-gdal:3.6 as gdal
 
-ARG PYTHON_VERSION=3.10  # Default to Python 3.10 if not specified
-
 FROM public.ecr.aws/lambda/python:3.10
 
 # Bring C libs from lambgeo/lambda-gdal image
