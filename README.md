@@ -82,3 +82,17 @@ You can find the values in `(env) data-notebooks` in the 1Password Engineering V
 ## Remote Sensing Datasets
 
 [A list of Remote Sensing Datasets in Notion](https://www.notion.so/sensandworkspace/Remote-Sensing-Datasets-18aebbc192104af8a5062ce843a4faf4).
+
+## Using the Devcontainer with Jupyter
+
+### 1. Connecting to the jupyter kernel (Yes, VSCode's process is a bit convoluted - I can't store the kernel in settings.json for some reason)
+
+`./start-juptyer.sh` will start the jupyter notebook server. A token is applied `vscode` and the server is started on port `8888`.
+
+In order for VSCode to connect to the jupyter kernel, you must have the `jupyter` extension installed. Once installed, you can connect to the kernel by clicking on the `Jupyter` icon in the left sidebar and selecting the notebook you want to open.
+
+Click on the Kernel dropdown on the top right of the notebook and select the kernel you want to use. Click `Select another kernel` and then `Select Jupyter Server`. 
+
+Enter the URL of the jupyter server (http://jupyter:8888/?token=vscode) and click `Connect`.
+
+You will get another prompt to select the kernel. Select the kernel listed with `ipykernel`.
