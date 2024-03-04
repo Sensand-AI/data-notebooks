@@ -5,6 +5,7 @@
 	"dockerComposeFile": ["../docker-compose.yml"],
 	"service": "devcontainer",
 	"workspaceFolder": "/workspace",
+	"runServices": ["jupyter"],
 	"shutdownAction": "stopCompose",
 	"remoteEnv": { 
 		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
@@ -12,7 +13,6 @@
 	"containerEnv": {
 		"PYTHON_VERSION": "3.10"
 	},
-	"postCreateCommand": "sh ./.devcontainer/setup.sh",
 	"features": {
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
 			"moby": "true",
