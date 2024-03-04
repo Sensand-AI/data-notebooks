@@ -5,6 +5,7 @@
 	"dockerComposeFile": ["../docker-compose.yml"],
 	"service": "devcontainer",
 	"workspaceFolder": "/workspace",
+	"runServices": ["jupyter"],
 	"shutdownAction": "stopCompose",
 	"remoteEnv": { 
 		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
@@ -12,7 +13,6 @@
 	"containerEnv": {
 		"PYTHON_VERSION": "3.10"
 	},
-	"postCreateCommand": "sh ./.devcontainer/setup.sh",
 	"features": {
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
 			"moby": "true",
@@ -50,9 +50,7 @@
 				"python.jupyter.alwaysTrustNotebooks": true,
 				"python.dataScience.useDefaultConfigForJupyter": false,
 				"python.dataScience.searchForJupyter": false,
-				"python.dataScience.allowUnauthorizedRemoteConnection": true,
-				"python.linting.enabled": true,
-				"python.linting.pylintEnabled": true
+				"python.dataScience.allowUnauthorizedRemoteConnection": true
 			},
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
@@ -62,7 +60,8 @@
 				"ms-azuretools.vscode-docker",
 				"humao.rest-client",
 				"RandomFractalsInc.geo-data-viewer",
-				"ms-python.vscode-pylance"
+				"ms-python.vscode-pylance",
+				"ms-python.pylint"
 			]
 		}
 	}

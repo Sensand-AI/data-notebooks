@@ -3,7 +3,9 @@ version: '3.8'
 services:
 
   devcontainer:
-    image: mcr.microsoft.com/vscode/devcontainers/python:${PYTHON_VERSION}-bullseye
+    build:
+      context: .
+      dockerfile: devcontainer.Dockerfile
     command: /bin/sh -c "sleep infinity"
     volumes:
       - .:/workspace
@@ -13,8 +15,6 @@ services:
     build:
       context: .
       dockerfile: jupyter.Dockerfile
-      args:
-        PYTHON_VERSION: ${PYTHON_VERSION} 
     volumes:
       - ./notebooks:/var/task/notebooks
       - ./packages:/var/task/packages
