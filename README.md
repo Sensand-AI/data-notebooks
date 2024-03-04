@@ -61,7 +61,17 @@ If you'd like to explore Jupyter and create your own notebook:
 
 ### Installing new python packages
 
-Add your python package to `requirements.txt`. You must include a comment on what that package is and what it does.
+There are multiple `requirements-*.txt` files in the project. Each file is used for a different purpose.
+
+- `requirements-jupyter.txt` is used to install packages for the Jupyter notebook and for the `notebook-executor` lambda function.
+- `requirements-custom.txt` contains custom packages that are not available in the public PyPi repository.
+- `requirements-dev.txt` contains packages used for development purposes.
+
+Add your python package to `requirements-jupyter.txt`. You must include a comment on what that package is and what it does.
+
+After adding the package, you must rebuild the devcontainer. You can do this by running the `Remote-Containers: Rebuild Container` command from the command palette.
+
+Note: The `notebook-executor` lambda function is used to run Jupyter notebooks as AWS Lambda functions. It is imperative that your package is compatible with AWS Lambda.
 
 ### Missing `.env` and adding secrets
 

@@ -16,8 +16,9 @@ services:
       args:
         PYTHON_VERSION: ${PYTHON_VERSION} 
     volumes:
-      - .:/workspaces/data-notebooks
-    entrypoint: /bin/bash -c "/workspaces/data-notebooks/startup.sh"
+      - ./notebooks:/var/task/notebooks
+      - ./packages:/var/task/packages
+      - ./start-juptyer.sh:/var/task/start-juptyer.sh
     env_file:
       - .env
     ports:
@@ -37,12 +38,13 @@ services:
   notebook-executor:
     platform: linux/amd64
     build:
-      context: lambdas/notebook-executor
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: lambdas/notebook-executor/notebook-executor.Dockerfile
     ports:
       - "9000:8080"
     volumes:
-      - ./lambdas/notebook-executor/notebooks:/var/task/notebooks
+      - ./notebooks:/var/task/notebooks
+      - ./packages:/var/task/packages
       - ./lambdas/notebook-executor/app:/var/task/app
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
@@ -55,18 +57,3 @@ services:
       com.datadoghq.tags.env: development
       com.datadoghq.tags.service: notebook-executor
 
-
-  # postgis:
-  #   image: postgis/postgis:16-3.4
-  #   environment:
-  #     POSTGRES_DB: ${POSTGRES_DB}
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #   volumes:
-  #     - ./postgis-data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-  #   env_file:
-  #     .env
-  #   command: 
-  #     -c 'listen_addresses=*'

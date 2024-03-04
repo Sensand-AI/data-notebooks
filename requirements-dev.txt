@@ -1,0 +1,1 @@
+awslambdaric	# AWS Lambda Python runtime interface client (RIC) for Python

@@ -19,18 +19,17 @@ RUN yum install -y gcc gcc-c++ && yum clean all && rm -rf /var/cache/yum /var/li
 # Install Jupyter dependencies
 RUN pip install jupyter nbconvert ipykernel
 
-# Copy requirements.txt and install Python dependencies
-COPY requirements.txt ${LAMBDA_TASK_ROOT}/requirements.txt
+# Copy requirements and install Python dependencies
+COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/requirements.txt
 RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt -t ${LAMBDA_TASK_ROOT}
 
-# Copy local Python packages
-COPY packages/ ${LAMBDA_TASK_ROOT}/packages
-
 # Install local Python packages
-RUN pip install ${LAMBDA_TASK_ROOT}/packages/gis_utils/ ${LAMBDA_TASK_ROOT}/packages/aws_utils/
+COPY packages/ ${LAMBDA_TASK_ROOT}/packages
+COPY requirements-custom.txt ${LAMBDA_TASK_ROOT}/requirements-custom.txt
+RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt -t ${LAMBDA_TASK_ROOT}
 
-# # Copy your Lambda function code and notebooks into the container
-COPY app/ ${LAMBDA_TASK_ROOT}/app
+# Copy your Lambda function code and notebooks into the container
+COPY lambdas/notebook-executor/app/ ${LAMBDA_TASK_ROOT}/app
 COPY notebooks/ ${LAMBDA_TASK_ROOT}/notebooks
 
 CMD ["app.lambda_function.lambda_handler"]
