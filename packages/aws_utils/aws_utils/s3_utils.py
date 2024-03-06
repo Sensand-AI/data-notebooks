@@ -1,7 +1,8 @@
-"""Module for interacting with AWS S3."""
 import os
+
 import boto3
 from botocore.exceptions import ClientError
+
 
 class S3Utils:
     """Class to interact with AWS S3."""
@@ -55,7 +56,7 @@ class S3Utils:
         except ClientError as e:
             return f"An error occurred: {e}"
 
-    def generate_presigned_url(self, bucket_name, object_key, expiration=3600):
+    def generate_presigned_url(self, bucket_name, object_key, expiration=60):
         """
         Generate a presigned URL to share an S3 object.
         """

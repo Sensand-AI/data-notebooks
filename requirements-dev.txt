@@ -1,2 +1,3 @@
 awslambdaric	# AWS Lambda Python runtime interface client (RIC) for Python
 pylint	# Python code static checker
+nbdev # Git friendly notebook development

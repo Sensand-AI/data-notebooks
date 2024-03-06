@@ -1,22 +1,22 @@
 """Module to execute a Jupyter notebook with parameters as a Lambda function."""
 
 import datetime
-import os
 import json
+import os
 from typing import Any, Dict
-import boto3
+
 import papermill as pm
+from aws_utils import S3Utils
+from botocore.exceptions import BotoCoreError
 from datadog import initialize, statsd
 from ddtrace import tracer
-
-from jsonschema import validate, ValidationError
-
+from jsonschema import ValidationError, validate
 from papermill.exceptions import PapermillExecutionError
-from botocore.exceptions import BotoCoreError
 
 initialize(statsd_host=os.environ.get('DATADOG_HOST'))
 aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+aws_s3_notebook_output = os.getenv('AWS_S3_BUCKET_NOTEBOOK_OUTPUT')
 REGION_NAME = 'us-east-1'
 
 @tracer.wrap(name='validate_event', service='notebook-executor')
@@ -83,12 +83,13 @@ def lambda_handler(event, _):
             'headers': {
                 'Content-Type': 'application/json'
             },
-            'body': json.dumps({'error': str(e)})
+            'body': json.dumps({'error': e.message})
         }
 
     parameters = event.get('parameters', {})
     save_output = event.get('save_output', True)
-    s3_bucket = 'jenna-remote-sensing-sandbox' # S3 bucket to save the output notebook
+    output_type = event.get('output_type', 'unknown')
+    s3_bucket = aws_s3_notebook_output
 
     # Generate a datetime stamp
     datetime_stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -96,8 +97,7 @@ def lambda_handler(event, _):
     notebook_basename = os.path.splitext(notebook_name)[0]  # Get the base name without extension
     s3_output_key = f'executed_{notebook_basename}_{datetime_stamp}.ipynb'
     # Initialize the S3. Don't need to pass credentials if the Lambda has the right IAM role
-    s3 = boto3.client(
-        's3',
+    s3_utils = S3Utils(
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         region_name=REGION_NAME
@@ -124,7 +124,12 @@ def lambda_handler(event, _):
 
             # If enabled, save the executed notebook to S3
             if save_output:
-                s3.upload_file(output_path, s3_bucket, s3_output_key)
+                s3_utils.upload_file(
+                    file_path=output_path,
+                    bucket=s3_bucket,
+                    file_name=s3_output_key
+                )
+                presigned_url = s3_utils.generate_presigned_url(s3_bucket, s3_output_key)
 
             statsd.increment('notebook.execution.success')
             return {
@@ -132,7 +137,11 @@ def lambda_handler(event, _):
                 'headers': {
                     'Content-Type': 'application/json'
                 },
-                'body': f'Notebook "{notebook_name}" executed successfully!'
+                'body': {
+                    "message": f"Notebook '{notebook_name}' executed successfully!",
+                    "output_type": output_type,
+                    "output_url": presigned_url
+                }
             }
         except (PapermillExecutionError, BotoCoreError) as e:
             statsd.increment('notebook.execution.error')

@@ -8,6 +8,9 @@
     "save_output": {
       "type": "boolean"
     },
+    "output_type": {
+      "type": "string"
+    },
     "parameters": {
       "type": "object",
       "properties": {
@@ -29,5 +32,5 @@
       "required": ["geojson", "propertyName", "start_date", "end_date"]
     }
   },
-  "required": ["notebook_name", "parameters"]
+  "required": ["notebook_name", "parameters", "output_type"]
 }
