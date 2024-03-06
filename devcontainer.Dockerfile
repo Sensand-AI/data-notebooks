@@ -18,4 +18,10 @@ RUN cat /workspace/requirements-jupyter.txt /workspace/requirements-dev.txt > /w
 
 RUN pip install -r /workspace/requirements.txt
 
+# Copy startup script and install custom extensions in editable mode
+COPY start-devcontainer.sh /workspace/start-devcontainer.sh
+COPY requirements-custom.txt /workspace/requirements-custom.txt
+COPY packages /workspace/packages
+RUN /workspace/start-devcontainer.sh
+
 CMD ["sleep", "infinity"]

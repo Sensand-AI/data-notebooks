@@ -38,6 +38,5 @@ papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter No
 geodata-harvester
 
 # Development and Workflow tools
-nbdev # Git friendly notebook development
 ddtrace # Datadog tracing library
 datadog # Datadog monitoring library

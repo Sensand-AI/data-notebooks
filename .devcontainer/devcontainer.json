@@ -28,10 +28,6 @@
 			"requireLocalPort": true,
 			"onAutoForward": "ignore"
 		},
-		"5001":{
-			"label": "Flask",
-			"onAutoForward": "ignore"
-		},
 		"9090": {
 			"label": "S3 Mock",
 			"onAutoForward": "ignore"
