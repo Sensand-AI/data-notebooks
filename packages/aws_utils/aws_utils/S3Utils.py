@@ -1,11 +1,16 @@
+"""Module for interacting with AWS S3."""
 import boto3
+from botocore.exceptions import ClientError
 
 class S3Utils:
-    def __init__(self, aws_access_key_id, aws_secret_access_key):
+    """Class to interact with AWS S3."""
+
+    def __init__(self, aws_access_key_id, aws_secret_access_key, region_name):
         self.s3_client = boto3.client(
             's3',
             aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key
+            aws_secret_access_key=aws_secret_access_key,
+            region_name=region_name
         )
 
     def list_files(self, bucket, prefix):
@@ -15,7 +20,7 @@ class S3Utils:
         try:
             response = self.s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
             return [item['Key'] for item in response.get('Contents', [])]
-        except Exception as e:
+        except ClientError as e:
             return f"An error occurred: {e}"
 
     def upload_file(self, file_name, data, bucket, prefix):
@@ -26,7 +31,7 @@ class S3Utils:
             object_key = f"{prefix}{file_name}"
             self.s3_client.put_object(Bucket=bucket, Key=object_key, Body=data)
             return f"File '{file_name}' uploaded successfully to '{prefix}' in bucket '{bucket}'"
-        except Exception as e:
+        except ClientError as e:
             return f"An error occurred: {e}"
 
     def get_file(self, file_name, bucket, prefix):
@@ -37,5 +42,23 @@ class S3Utils:
             object_key = f"{prefix}{file_name}"
             response = self.s3_client.get_object(Bucket=bucket, Key=object_key)
             return response['Body'].read()
-        except Exception as e:
+        except ClientError as e:
             return f"An error occurred: {e}"
+
+    def generate_presigned_url(self, bucket_name, object_key, expiration=3600):
+        """
+        Generate a presigned URL to share an S3 object.
+        """
+        try:
+            response = self.s3_client.generate_presigned_url(
+                'get_object',
+                Params={
+                    'Bucket': bucket_name,
+                    'Key': object_key
+                },
+                ExpiresIn=expiration
+            )
+            return response
+        except ClientError as e:
+            return f"An error occurred: {e}"
+        
