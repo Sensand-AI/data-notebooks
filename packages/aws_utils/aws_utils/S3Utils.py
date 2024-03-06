@@ -1,4 +1,5 @@
 """Module for interacting with AWS S3."""
+import os
 import boto3
 from botocore.exceptions import ClientError
 
@@ -23,14 +24,23 @@ class S3Utils:
         except ClientError as e:
             return f"An error occurred: {e}"
 
-    def upload_file(self, file_name, data, bucket, prefix):
+    def upload_file(self, file_path, bucket, file_name=None, prefix=None):
         """
         Upload a file to a specific prefix in an S3 bucket.
         """
         try:
-            object_key = f"{prefix}{file_name}"
-            self.s3_client.put_object(Bucket=bucket, Key=object_key, Body=data)
-            return f"File '{file_name}' uploaded successfully to '{prefix}' in bucket '{bucket}'"
+            # Use the provided file_name or fallback to the name from the file_path
+            if not file_name:
+                file_name = os.path.basename(file_path)
+
+            full_key = f"{prefix}/{file_name}" if prefix else file_name
+
+            # Open and read the file in binary mode
+            with open(file_path, 'rb') as file_data:
+                self.s3_client.put_object(Bucket=bucket, Key=full_key, Body=file_data)
+            
+            return f"File '{file_name}' uploaded successfully to '{full_key}' in bucket '{bucket}'."
+        
         except ClientError as e:
             return f"An error occurred: {e}"
 
