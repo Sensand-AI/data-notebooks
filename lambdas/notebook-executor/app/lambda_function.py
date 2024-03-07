@@ -34,8 +34,15 @@ def generate_deterministic_uuid(notebook_name: str, parameters: dict):
         f"{aws_lambda_function_name}-{aws_default_region}"
     )
 
+    # Remove parameters that are not deterministic
+    parameters_to_unset = ['geojson']
+    settable_parameters = []
+    for param in parameters_to_unset:
+        if param not in parameters:
+            settable_parameters.append(param)
+
     # Generate a UUID based on the notebook name and a stringified, sorted version of parameters
-    sorted_parameters = json.dumps(parameters, sort_keys=True)
+    sorted_parameters = json.dumps(settable_parameters, sort_keys=True)
     name_string = f"{notebook_name}-{sorted_parameters}"
     deterministic_uuid = uuid.uuid5(namespace_uuid, name_string)
 
@@ -118,7 +125,6 @@ def lambda_handler(event, _):
     parameters['notebook_key'] = notebook_key
     save_output = event.get('save_output', True)
     output_type = event.get('output_type', 'unknown')
-    s3_bucket = aws_s3_notebook_output
 
     # Generate a datetime stamp
     datetime_stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -156,8 +162,8 @@ def lambda_handler(event, _):
             if save_output:
                 s3_utils.upload_file(
                     file_path=output_path,
-                    bucket=s3_bucket,
-                    file_name=s3_output_key
+                    file_name=s3_output_key,
+                    prefix=notebook_key
                 )
 
             statsd.increment('notebook.execution.success')
@@ -169,7 +175,7 @@ def lambda_handler(event, _):
                 'body': {
                     "message": f"Notebook '{notebook_name}' executed successfully!",
                     "output_type": output_type,
-                    "output_files": s3_utils.generate_presigned_urls(prefix=notebook_key)
+                    "output_files": [s3_utils.generate_presigned_urls(prefix=notebook_key)]
                 }
             }
         except (PapermillExecutionError, BotoCoreError) as e:
