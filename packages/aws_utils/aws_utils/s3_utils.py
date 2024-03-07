@@ -3,27 +3,49 @@ import os
 import boto3
 from botocore.exceptions import ClientError
 
-
 class S3Utils:
     """Class to interact with AWS S3."""
 
-    def __init__(self, aws_access_key_id, aws_secret_access_key, region_name):
+    def __init__(
+        self,
+        aws_access_key_id,
+        aws_secret_access_key,
+        region_name, s3_bucket,
+        endpoint_url=None
+    ):
+        """
+        Initialize the S3 client.
+
+        :param aws_access_key_id: AWS access key ID.
+        :param aws_secret_access_key: AWS secret access key.
+        :param region_name: AWS region name.
+        :param s3_bucket: Default S3 bucket name to use.
+        :param endpoint_url: Custom endpoint URL, if any (e.g., for local development using s3mock).
+        """
         self.s3_client = boto3.client(
             's3',
             aws_access_key_id=aws_access_key_id,
             aws_secret_access_key=aws_secret_access_key,
-            region_name=region_name
+            region_name=region_name,
+            endpoint_url=endpoint_url
         )
+        self.default_bucket = s3_bucket
 
     def list_files(self, bucket, prefix):
         """
         List files in an S3 bucket.
         """
+        file_keys = []
         try:
-            response = self.s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
-            return [item['Key'] for item in response.get('Contents', [])]
+            # Use the paginator because the list could be very large
+            paginator = self.s3_client.get_paginator('list_objects_v2')
+            for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+                for item in page.get('Contents', []):
+                    file_keys.append(item['Key'])
         except ClientError as e:
-            return f"An error occurred: {e}"
+            print(f"An error occurred: {e}")
+            raise e
+        return file_keys
 
     def upload_file(self, file_path, bucket, file_name=None, prefix=None):
         """
@@ -39,9 +61,9 @@ class S3Utils:
             # Open and read the file in binary mode
             with open(file_path, 'rb') as file_data:
                 self.s3_client.put_object(Bucket=bucket, Key=full_key, Body=file_data)
-            
-            return f"File '{file_name}' uploaded successfully to '{full_key}' in bucket '{bucket}'."
         
+            return f"File '{file_name}' uploaded successfully to '{full_key}' in bucket '{bucket}'."
+
         except ClientError as e:
             return f"An error occurred: {e}"
 

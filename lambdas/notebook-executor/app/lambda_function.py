@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import uuid
 import os
 from typing import Any, Dict
 
@@ -14,17 +15,38 @@ from jsonschema import ValidationError, validate
 from papermill.exceptions import PapermillExecutionError
 
 initialize(statsd_host=os.environ.get('DATADOG_HOST'))
+# Retrieve environment variables
 aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
 aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
 aws_s3_notebook_output = os.getenv('AWS_S3_BUCKET_NOTEBOOK_OUTPUT')
-REGION_NAME = 'us-east-1'
+aws_default_region = os.getenv('AWS_DEFAULT_REGION')
+aws_lambda_function_name = os.getenv('AWS_LAMBDA_FUNCTION_NAME', 'notebook-executor')
 
-@tracer.wrap(name='validate_event', service='notebook-executor')
+@tracer.wrap(name='generate_deterministic_uuid', service=aws_lambda_function_name)
+def generate_deterministic_uuid(notebook_name: str, parameters: dict):
+    """
+    Generates a deterministic UUID using the Lambda function name and AWS 
+    region as part of the namespace, and the notebook name and parameters as the name.
+    """
+    # Use AWS Lambda function name and AWS region as part of the namespace
+    namespace_uuid = uuid.uuid5(
+        uuid.NAMESPACE_DNS,
+        f"{aws_lambda_function_name}-{aws_default_region}"
+    )
+
+    # Generate a UUID based on the notebook name and a stringified, sorted version of parameters
+    sorted_parameters = json.dumps(parameters, sort_keys=True)
+    name_string = f"{notebook_name}-{sorted_parameters}"
+    deterministic_uuid = uuid.uuid5(namespace_uuid, name_string)
+
+    return str(deterministic_uuid)
+
+@tracer.wrap(name='validate_event', service=aws_lambda_function_name)
 def validate_event(event: Dict[str, Any], schema: Dict[str, Any]) -> None:
     """Validates the incoming event against the provided schema."""
     validate(instance=event, schema=schema)
 
-@tracer.wrap(name='load_schema', service='notebook-executor')
+@tracer.wrap(name='load_schema', service=aws_lambda_function_name)
 def load_schema(notebook_name: str):
     """Load the JSON Schema for validating the notebook parameters."""
     schema_path = os.path.join('/var/task/notebooks', notebook_name, 'schema.json')
@@ -34,7 +56,7 @@ def load_schema(notebook_name: str):
     else:
         raise FileNotFoundError(f"Schema file for notebook {notebook_name} not found.")
 
-@tracer.wrap(name='lambda_handler', service='notebook-executor')
+@tracer.wrap(name='lambda_handler', service=aws_lambda_function_name)
 def lambda_handler(event, _):
     """
     Handles a Lambda event.
@@ -87,6 +109,12 @@ def lambda_handler(event, _):
         }
 
     parameters = event.get('parameters', {})
+    # Append a deterministic UUID to the parameters as a notebook_key
+    # This will be used to identify the executed notebook in the S3 bucket
+    # and later to retrieve the output
+    # It will also be used as a means of tracking executions when we eventually
+    # handle retries and error handling via a persistent store
+    parameters['notebook_key'] = generate_deterministic_uuid(notebook_name, parameters)
     save_output = event.get('save_output', True)
     output_type = event.get('output_type', 'unknown')
     s3_bucket = aws_s3_notebook_output
@@ -100,7 +128,7 @@ def lambda_handler(event, _):
     s3_utils = S3Utils(
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
-        region_name=REGION_NAME
+        region_name=aws_default_region
     )
 
     # Define the source and output notebook paths
