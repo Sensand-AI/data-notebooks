@@ -114,7 +114,8 @@ def lambda_handler(event, _):
     # and later to retrieve the output
     # It will also be used as a means of tracking executions when we eventually
     # handle retries and error handling via a persistent store
-    parameters['notebook_key'] = generate_deterministic_uuid(notebook_name, parameters)
+    notebook_key = generate_deterministic_uuid(notebook_name, parameters)
+    parameters['notebook_key'] = notebook_key
     save_output = event.get('save_output', True)
     output_type = event.get('output_type', 'unknown')
     s3_bucket = aws_s3_notebook_output
@@ -128,7 +129,8 @@ def lambda_handler(event, _):
     s3_utils = S3Utils(
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
-        region_name=aws_default_region
+        region_name=aws_default_region,
+        s3_bucket=aws_s3_notebook_output
     )
 
     # Define the source and output notebook paths
@@ -157,7 +159,6 @@ def lambda_handler(event, _):
                     bucket=s3_bucket,
                     file_name=s3_output_key
                 )
-                presigned_url = s3_utils.generate_presigned_url(s3_bucket, s3_output_key)
 
             statsd.increment('notebook.execution.success')
             return {
@@ -168,7 +169,7 @@ def lambda_handler(event, _):
                 'body': {
                     "message": f"Notebook '{notebook_name}' executed successfully!",
                     "output_type": output_type,
-                    "output_url": presigned_url
+                    "output_files": s3_utils.generate_presigned_urls(prefix=notebook_key)
                 }
             }
         except (PapermillExecutionError, BotoCoreError) as e:
