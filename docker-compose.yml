@@ -50,11 +50,13 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_S3_BUCKET_NOTEBOOK_OUTPUT: ${AWS_S3_BUCKET_NOTEBOOK_OUTPUT}
-      AWS_DEFAULT_REGION: us-east-1
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
       AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 1024
       DATADOG_HOST: datadog-agent
+      ENVIRONMENT: ${ENVIRONMENT}
+      AWS_LAMBDA_FUNCTION_NAME: ${AWS_LAMBDA_FUNCTION_NAME}
     labels:
-      com.datadoghq.ad.logs: '[{"source": "docker-compose", "service": "notebook-executor"}]'
+      com.datadoghq.ad.logs: '[{"source": "docker-compose"}]'
       com.datadoghq.tags.env: development
-      com.datadoghq.tags.service: notebook-executor
+      com.datadoghq.tags.service: ${AWS_LAMBDA_FUNCTION_NAME}}
 
