@@ -4,6 +4,12 @@ Utility functions for use in the Agrefed data harvesting pipeline.
 
 --Function List--
 
+arc2meter: Converter arc seconds to meter and vice versa.
+
+meter2arc: Converter arc seconds to meter and vice versa.
+
+get_wcs_capabilities: Get capabilities from WCS layer. Can return some metadata about the dataset as well as individual layers contained in the wcs server.
+
 _getFeatures (internal): Extracts rasterio compatible test from geodataframe.
 
 reproj_mask: Masks a raster to the area of a shape, and reprojects.
@@ -50,9 +56,6 @@ import rioxarray as rxr
 
 from pyproj import CRS
 from pathlib import Path
-
-#import matplotlib.pyplot as plt
-#from matplotlib.ticker import FormatStrFormatter
 
 from numba import jit
 
@@ -128,9 +131,7 @@ def msg_success(message, log=False):
 
 
 ## ------------------------------------------------------------------------- ##
-"""
-Was orignally in a separate module (wwwwidgets module), moved it to here as I've cut down the package to just the essentials. JAG.
-"""
+
 def load_settings(fname_settings):
     # Load settings from yaml file
     with open(fname_settings, "r") as f:
@@ -145,11 +146,58 @@ def load_settings(fname_settings):
     return settings
 
 """
-get_capabilities() is duplicated in dem and slga - it should be extraced here if its being re-used.
+Converter arc seconds to meter and vice versa.
+
+Earth circumference around Equator is 40,075,017 meter
+1 arc second at equatorial sea level = 1855.325m/60 = 30.922m
+
+Earth circumference around Poles is 40,007,863 meter
+1 arc second latitude = 1852.216m/60 = 30.87m
+
+Formula for longitude: meters = arcsec * cos(degree latitude) * 30.922m
+(conversion for latitude stays constant: arcsec * 30.87m)
 """
+
+def calc_arc2meter(arcsec, latitude):
+	"""
+	Calculate arc seconds to meter
+
+	Input
+	-----
+	arcsec: float, arcsec
+	latitude: float, latitude
+
+	Return
+	------
+	(meters Long, meters Lat)
+	"""
+	meter_lng = arcsec * np.cos(latitude * np.pi/180) * 30.922
+	meter_lat = arcsec * 30.87
+	return (meter_lng, meter_lat)
+
+def calc_meter2arc(meter, latitude):
+	"""
+	Calculate meter to arc seconds
+
+	Input
+	-----
+	meter: float, meter
+	latitude: float, latitude
+
+	Return
+	------
+	(arcsec Long, arcsec Lat)
+	"""
+	arcsec_lng = meter / np.cos(latitude * np.pi/180) / 30.922
+	arcsec_lat = meter / 30.87
+	return (arcsec_lng, arcsec_lat)
+
+
 def get_wcs_capabilities(url):
     """
     Get capabilities from WCS layer
+    
+    NOTE: the url in this case is the 'layers_url' from the json config file. SLGA is different because there are multiple urls, but for DEM and radiometrics, use the single wcs url provided.
 
     Parameters
     ----------
@@ -169,15 +217,12 @@ def get_wcs_capabilities(url):
     """
 
     # Create WCS object
-    wcs = WebCoverageService(url, version="1.0.0",)
-
-    # Get coverages and content dict keys
+    wcs = WebCoverageService(url, version="1.0.0",timeout=600)
     content = wcs.contents
     keys = content.keys()
 
-    #print("Operations possible: ", [op.name for op in wcs.operations])
-
     # Get bounding boxes and crs for each coverage
+    print("Following data layers are available:")
     bbox_list = []
     title_list = []
     description_list = []

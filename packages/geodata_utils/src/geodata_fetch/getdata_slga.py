@@ -20,7 +20,7 @@ from geodata_fetch.utils import spin
 
 def get_slgadict():
 
-    with importlib.resources.open_text('config','slga_soil_urls.json') as f:
+    with importlib.resources.open_text('config','slga_soil.json') as f:
         slga_json = json.load(f)
     
     slgadict = {}
@@ -36,7 +36,6 @@ def get_slgadict():
     slgadict["depth_min"] = slga_json["depth_min"]
     slgadict["depth_max"] = slga_json["depth_max"]
     slgadict["layers_url"] = slga_json["layers_url"]
-
 
     return slgadict
 

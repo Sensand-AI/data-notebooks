@@ -21,7 +21,7 @@ from owslib.wcs import WebCoverageService
 
 
 def get_demdict():
-    with importlib.resources.open_text('config','ga_dem_urls.json') as f:
+    with importlib.resources.open_text('config','dem.json') as f:
         dem_json = json.load(f)
     
     demdict = {}

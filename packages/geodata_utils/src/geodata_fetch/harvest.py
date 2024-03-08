@@ -3,7 +3,7 @@ import geopandas as gpd
 import numpy as np
 from datetime import datetime, timedelta
 
-from geodata_fetch import getdata_slga,getdata_dem, utils
+from geodata_fetch import getdata_slga,getdata_dem, getdata_radiometric, utils
 from geodata_fetch.utils import  load_settings
 
 
@@ -92,6 +92,24 @@ def run(path_to_config):
             if len(files_dem) != len(dem_layernames):
                 # get filename stems of files_slga
                 dem_layernames = [Path(f).stem for f in files_dem]
+        else:
+            pass
+        
+        
+    if "Radiometric" in list_sources:
+        print("Downloading Radiometric data...")
+        rm_layernames = settings.target_sources["Radiometric"]
+        try:
+            files_rm = getdata_radiometric.get_radiometric_layers(
+                rm_layernames,
+                settings.target_bbox,
+                settings.outpath
+            )
+        except Exception as e:
+            print(e)
+        var_exists = "files_rm" in locals() or "files_rm" in globals()
+        if var_exists:
+            rm_layernames = [Path(f).stem for f in files_rm]
         else:
             pass
 
