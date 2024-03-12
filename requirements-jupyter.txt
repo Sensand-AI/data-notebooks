@@ -39,7 +39,15 @@ polars # A blazingly fast DataFrame library implemented in Rust
 sagemaker	# Open source library for training and deploying machine-learned models on Amazon SageMaker
 wheel # for package development
 #experimental for geodata-harvester package Jenna is working on
+<<<<<<< HEAD
 # owslib # client programming with Open Geospatial Consortium (OGC) web service (OWS) and their related content models.
+=======
+<<<<<<<< HEAD:requirements.txt
+# owslib # client programming with Open Geospatial Consortium (OGC) web service (OWS) and their related content models.
+========
+owslib # client programming with Open Geospatial Consortium (OGC) web service (OWS) and their related content models.
+>>>>>>>> 7d0edc90e9b2d9fd00377b0dbff60bb3889b32b6:requirements-jupyter.txt
+>>>>>>> 7d0edc90e9b2d9fd00377b0dbff60bb3889b32b6
 geodata-harvester
 
 # Development and Workflow tools
