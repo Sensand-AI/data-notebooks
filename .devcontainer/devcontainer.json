@@ -3,12 +3,16 @@
 {
 	"name": "Jupyter Data Science Notebooks",
 	"dockerComposeFile": ["../docker-compose.yml"],
-	"service": "jupyter",
-	"workspaceFolder": "/workspaces/data-notebooks",
+	"service": "devcontainer",
+	"workspaceFolder": "/workspace",
+	"runServices": ["jupyter"],
 	"shutdownAction": "stopCompose",
-	"remoteUser": "jovyan",
-	"updateRemoteUserUID": true,
-	"remoteEnv": { "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}" },
+	"remoteEnv": { 
+		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+	},
+	"containerEnv": {
+		"PYTHON_VERSION": "3.10"
+	},
 	"features": {
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
 			"moby": "true",
@@ -24,10 +28,6 @@
 			"requireLocalPort": true,
 			"onAutoForward": "ignore"
 		},
-		"5001":{
-			"label": "Flask",
-			"onAutoForward": "ignore"
-		},
 		"9090": {
 			"label": "S3 Mock",
 			"onAutoForward": "ignore"
@@ -40,7 +40,13 @@
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
 			"settings": {
-				"python.defaultInterpreterPath": "/opt/conda/bin/python"
+				"python.defaultInterpreterPath": "/usr/local/bin/python",
+				"python.dataScience.jupyterServerURI": "http://jupyter:8888/?token=vscode",
+				"python.pythonPath": "/usr/local/bin/python",
+				"python.jupyter.alwaysTrustNotebooks": true,
+				"python.dataScience.useDefaultConfigForJupyter": false,
+				"python.dataScience.searchForJupyter": false,
+				"python.dataScience.allowUnauthorizedRemoteConnection": true
 			},
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
@@ -49,7 +55,9 @@
 				"GitHub.copilot",
 				"ms-azuretools.vscode-docker",
 				"humao.rest-client",
-				"RandomFractalsInc.geo-data-viewer"
+				"RandomFractalsInc.geo-data-viewer",
+				"ms-python.vscode-pylance",
+				"ms-python.pylint"
 			]
 		}
 	}
