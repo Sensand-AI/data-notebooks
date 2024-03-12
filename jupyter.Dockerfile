@@ -1,21 +1,43 @@
-FROM jupyter/datascience-notebook
+FROM ghcr.io/lambgeo/lambda-gdal:3.6 as gdal
 
-# Install GDAL dependencies
-USER root
-RUN apt-get update && apt-get install -y \
-    libgdal-dev \
-    gdal-bin \ 
-    awscli \
-    && apt-get clean
+FROM public.ecr.aws/lambda/python:3.10
 
-# Set environment variable for GDAL
-ENV GDAL_CONFIG=/usr/bin/gdal-config
+# Bring C libs from lambgeo/lambda-gdal image
+COPY --from=gdal /opt/lib/ /opt/lib/
+COPY --from=gdal /opt/include/ /opt/include/
+COPY --from=gdal /opt/share/ /opt/share/
+COPY --from=gdal /opt/bin/ /opt/bin/
+ENV \
+  GDAL_DATA=/opt/share/gdal \
+  PROJ_LIB=/opt/share/proj \
+  GDAL_CONFIG=/opt/bin/gdal-config \
+  GEOS_CONFIG=/opt/bin/geos-config \
+  PATH=/opt/bin:$PATH
 
-# Switch back to the jovyan user
-USER jovyan
+RUN yum install -y gcc gcc-c++ && yum clean all && rm -rf /var/cache/yum /var/lib/yum/history
 
-# Upgrade pip and Install Python packages
-# Use --no-cache-dir to avoid storing cache, and --prefer-binary to prefer older binary packages over newer source distributions
-COPY requirements.txt /tmp/
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r /tmp/requirements.txt
+# Install Jupyter dependencies
+RUN pip install jupyterlab notebook jupyterhub nbclassic ipykernel
+
+# Upgrade pip
+RUN pip install --upgrade pip
+
+# Install Python packages
+COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/requirements.txt
+RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt
+
+# Install local packages
+COPY packages/ ${LAMBDA_TASK_ROOT}/packages
+COPY requirements-custom.txt ${LAMBDA_TASK_ROOT}/requirements-custom.txt
+RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt
+
+COPY notebooks/ ${LAMBDA_TASK_ROOT}/notebooks
+
+# Default port for Jupyter
+EXPOSE 8888
+
+# Copy script to start Jupyter
+COPY start-jupyter.sh ${LAMBDA_TASK_ROOT}/start-jupyter.sh
+
+# Run the Jupyter server using the start-jupyter.sh script
+ENTRYPOINT ["sh", "start-jupyter.sh"]

@@ -1,13 +1,14 @@
+
 from setuptools import find_packages, setup
 
 VERSION = '0.0.1'
 
 setup(
-    name="aws_utils",
+    name="gis_utils",
     version=VERSION,
     packages=find_packages(),
     install_requires=[
-        'boto3'
+        'pystac_client'
     ],
-	keywords=['aws', 'utils'],
+	keywords=['gis', 'utils', 'stac'],
 )

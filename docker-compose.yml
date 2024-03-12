@@ -1,22 +1,30 @@
 version: '3.8'
 
 services:
+
+  devcontainer:
+    build:
+      context: .
+      dockerfile: devcontainer.Dockerfile
+    command: /bin/sh -c "sleep infinity"
+    volumes:
+      - .:/workspace
+
   jupyter:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: jupyter.Dockerfile
     volumes:
-      - .:/workspaces/data-notebooks
-    command: /bin/bash -c "/workspaces/data-notebooks/startup.sh"
-    ports:
-      - "8888:8888"
-      - "5001:5000"
+      - ./notebooks:/var/task/notebooks
+      - ./packages:/var/task/packages
+      - ./start-juptyer.sh:/var/task/start-juptyer.sh
     env_file:
       - .env
+    ports:
+      - "8888:8888"
     depends_on:
-      # - postgis
       - s3mock
-
 
   s3mock:
     image: adobe/s3mock
@@ -27,18 +35,28 @@ services:
     volumes:
       - ./.s3mock-data:/s3mockroot
 
+  notebook-executor:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: lambdas/notebook-executor/notebook-executor.Dockerfile
+    ports:
+      - "9000:8080"
+    volumes:
+      - ./notebooks:/var/task/notebooks
+      - ./packages:/var/task/packages
+      - ./lambdas/notebook-executor/app:/var/task/app
+    environment:
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_S3_BUCKET_NOTEBOOK_OUTPUT: ${AWS_S3_BUCKET_NOTEBOOK_OUTPUT}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 1024
+      DATADOG_HOST: datadog-agent
+      ENVIRONMENT: ${ENVIRONMENT}
+      AWS_LAMBDA_FUNCTION_NAME: ${AWS_LAMBDA_FUNCTION_NAME}
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "docker-compose"}]'
+      com.datadoghq.tags.env: development
+      com.datadoghq.tags.service: ${AWS_LAMBDA_FUNCTION_NAME}}
 
-  # postgis:
-  #   image: postgis/postgis:16-3.4
-  #   environment:
-  #     POSTGRES_DB: ${POSTGRES_DB}
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #   volumes:
-  #     - ./postgis-data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-  #   env_file:
-  #     .env
-  #   command: 
-  #     -c 'listen_addresses=*'
