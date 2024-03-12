@@ -1,3 +1,8 @@
 # Local packages in editable mode
--e /workspaces/data-notebooks/packages/aws_utils
--e /workspaces/data-notebooks/packages/geodata_utils
+#-e /workspaces/data-notebooks/packages/aws_utils
+#-e /workspaces/data-notebooks/packages/geodata_utils
+
+# Local packages
+./packages/aws_utils
+./packages/gis_utils
+./packages/geodata_utils
