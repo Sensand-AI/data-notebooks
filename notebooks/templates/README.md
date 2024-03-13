@@ -5,6 +5,31 @@ Jupyter notebooks are awesome tools: they enable fast prototyping and easy resul
 In order to help keep Sensand's notebooks clean and properly formatted for moving to production pipelines, This folder of templates has been created. The template is also a productivity tool, speeding up common setup, such as library import and configuration.
 
 # Using the templates
+## Exploration and Execution templates
+
+**There are two types of notebook templates - exploration and execution.**
+
+**Exploration** templates should be used when developing new data products, and enable fast data exploration, testing, visualisation and internal demo-ing.
+
+**Execution** notebooks (and the execution templates) have more strict requirements. These notebook need to be parametized for production. Examples are included in the template.
+
+## Parameter definition and tags
+
+For execution notebooks to work, both `papermill comments` and `cell tags` must be included for each cell in the notebook. `Papermill comments` are different to regular comments, though the syntax is the same. Take care to not remove the papermill comments when cleaning up a notebook for production.
+
+### Parameter cell
+One cell must be designated `parameters`. This cell must have BOTH the `papermill comment` designating it as the aprameters cell, and the `tag`
+
+Example:
+
+#### papermill comment:
+`papermill_description=parameters`
+
+#### Jupyter tags in vscode:
+- use the 'more actions' button in the top right of a cell to access tags
+- select `add cell tag`
+- make cell tag `parameters`
+
 
 These templates should not be edited directly. Please make a copy of the template and move it to the apprioriate sub-directory before you begin working.
 
@@ -23,7 +48,3 @@ Adding new packages to any of the `*-requirements.txt` also requires the devcont
  - Data Import
  - Data processing
  - Data visualisation and exporting
-
-
-# parameters and Tags
-Nav to fill out this section with short explanation of tags and parameters
