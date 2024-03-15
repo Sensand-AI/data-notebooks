@@ -1,1 +1,1 @@
-from .stac import initialize_stac_client, query_stac_api
+from .stac import initialize_stac_client, query_stac_api, process_dem_asset, inspect_stac_item
