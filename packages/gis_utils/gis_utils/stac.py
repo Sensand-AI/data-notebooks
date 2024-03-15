@@ -120,15 +120,15 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
     - None
     """
     try:
-        logger.info(f"Opening DEM asset from: {dem_asset.href}")
+        logger.info("Opening DEM asset from: %s", dem_asset.href)
 
         with rasterio.open(dem_asset.href) as src:
             window = from_bounds(*bbox, transform=src.transform)
             data = src.read(window=window)
- 
+
             # Calculate the size of the data in bytes
             data_size_bytes = data.nbytes
-            logger.info(f"Read data size: {data_size_bytes} bytes")
+            logger.info("Read data size: %d bytes", data_size_bytes)
 
             kwargs = src.meta.copy()
             kwargs.update({
@@ -139,12 +139,13 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
 
             with rasterio.open(output_tiff_filename, 'w', **kwargs) as dst:
                 dst.write(data)
-                logger.info(f"Written data to {output_tiff_filename}")
+                logger.info("Written data to %s", output_tiff_filename)
 
             # Optionally, log the size of the written file
             output_file_size = os.path.getsize(output_tiff_filename)
-            logger.info(f"Output file size: {output_file_size} bytes")
+            logger.info("Output file size: %d bytes", output_file_size)
 
+        return data
     except Exception as e:
-        logger.error(f"Failed to process DEM asset: {e}", exc_info=True)
+        logger.error("Failed to process DEM asset: %s", e, exc_info=True)
         raise
