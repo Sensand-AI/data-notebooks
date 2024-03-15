@@ -1,7 +1,7 @@
 import logging
-
 import os
 import sys
+
 import pystac_client
 import rasterio
 from rasterio.windows import from_bounds
@@ -122,31 +122,33 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
     """
     try:
         logger.info("Opening DEM asset from: %s", dem_asset.href)
+        data, metadata = None, {}
 
         with rasterio.open(dem_asset.href) as src:
             window = from_bounds(*bbox, transform=src.transform)
             data = src.read(window=window)
 
-            # Calculate the size of the data in bytes
-            data_size_bytes = data.nbytes
-            logger.info("Read data size: %d bytes", data_size_bytes)
-
-            kwargs = src.meta.copy()
-            kwargs.update({
+            # Extract required metadata or other information from src
+            metadata = src.meta.copy()
+            metadata.update({
                 'height': window.height,
                 'width': window.width,
                 'transform': rasterio.windows.transform(window, src.transform)
             })
 
-            with rasterio.open(output_tiff_filename, 'w', **kwargs) as dst:
+            with rasterio.open(output_tiff_filename, 'w', **metadata) as dst:
                 dst.write(data)
                 logger.info("Written data to %s", output_tiff_filename)
+
+            # Calculate the size of the data in bytes
+            data_size_bytes = data.nbytes
+            logger.info("Read data size: %d bytes", data_size_bytes)
 
             # Optionally, log the size of the written file
             output_file_size = os.path.getsize(output_tiff_filename)
             logger.info("Output file size: %d bytes", output_file_size)
 
-        return data
+        return data, metadata
     except Exception as e:
         logger.error("Failed to process DEM asset: %s", e, exc_info=True)
         raise
