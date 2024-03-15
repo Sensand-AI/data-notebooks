@@ -62,10 +62,10 @@ class S3Utils:
         file_keys = []
         try:
             # Use the paginator because the list could be very large
-            file = {}
             paginator = self.s3_client.get_paginator('list_objects_v2')
             for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
                 for item in page.get('Contents', []):
+                    file = {}
                     file['file_name'] = page.get('Name', 'unknown')
                     file['prefix'] = page.get('Prefix', 'unknown')
                     file['key'] = item['Key']
@@ -135,26 +135,19 @@ class S3Utils:
     def generate_presigned_urls(self, bucket, prefix, expiration=3600):
         """
         Generate presigned URLs for all files within a specific prefix in the bucket.
-
-        :param prefix: The prefix (folder path) to list files under.
-        :param expiration: The expiration time in seconds for the presigned URLs.
-        :param bucket: The bucket from which to list files. Uses the default bucket if None.
-        :return: A dictionary with file keys as keys and their presigned URLs as values.
         """
-        presigned_urls = []
+        presigned_urls = {}  # Initialize `presigned_urls` as a dictionary
 
         try:
-            # Retrieve a list of all file keys under the specified prefix
             file_keys = self.list_files(prefix=prefix, bucket=bucket)
 
-            # Generate a presigned URL for each file
             for file_key in file_keys:
                 presigned_url = self.s3_client.generate_presigned_url(
                     'get_object',
                     Params={'Bucket': bucket, 'Key': file_key['key']},
                     ExpiresIn=expiration
                 )
-                presigned_urls[file_key['file_name']] = presigned_url
+                presigned_urls[file_key['file_name']] = presigned_url  # Correct usage as a dictionary
 
             return presigned_urls
         except ClientError as e:
