@@ -30,7 +30,7 @@ docker-login-staging:
 
 ## build-notebook-executor: Build the Docker image.
 build-notebook-executor:
-	docker build -t $(IMAGE_NAME) lambdas/notebook-executor/notebook-executor.Dockerfile --platform linux/amd64
+	docker build -t $(IMAGE_NAME) -f ./lambdas/notebook-executor/notebook-executor.Dockerfile . --platform linux/amd64
 
 ## help: Show a list of commands
 help : Makefile
