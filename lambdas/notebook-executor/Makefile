@@ -1,7 +1,8 @@
 # Define variables for Docker image name and container name
-IMAGE_NAME=lambda-notebook-executor
+IMAGE_NAME=notebook-executor
 CONTAINER_NAME=lambda-notebook-executor-container
 LOCAL_PORT=9000
+IMAGE_URL=622020772926.dkr.ecr.us-east-1.amazonaws.com
 
 # Default make command
 all: build
@@ -13,6 +14,18 @@ build:
 ## run: Run the Docker container.
 run:
 	docker run --name $(CONTAINER_NAME) -p $(LOCAL_PORT):8080 $(IMAGE_NAME)
+
+## docker-login-staging: Login to AWS ECR (Staging)
+docker-login-staging:
+	aws-vault exec senstag -- aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $(IMAGE_URL)
+
+## docker-tag-staging: Tag the Docker image (Staging)
+docker-tag-staging:
+	docker tag $(IMAGE_NAME):latest $(IMAGE_URL)/$(IMAGE_NAME):latest
+
+## docker-push-staging: Push the Docker image (Staging)
+docker-push-staging:
+	aws-vault exec senstag -- docker push $(IMAGE_URL):latest
 
 ## clean: Stop and remove the Docker container.
 clean:

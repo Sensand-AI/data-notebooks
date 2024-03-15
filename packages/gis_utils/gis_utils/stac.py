@@ -1,4 +1,10 @@
+import logging
+
 import pystac_client
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def initialize_stac_client(stac_url):
     """
@@ -10,8 +16,15 @@ def initialize_stac_client(stac_url):
     Returns:
     - A pystac_client.Client object
     """
-    client = pystac_client.Client.open(stac_url)
-    return client
+    try:
+        logger.info(f"Initializing STAC client for URL: {stac_url}")
+        client = pystac_client.Client.open(stac_url)
+        logger.info("STAC client initialized successfully")
+        return client
+    except Exception:
+        logger.error(f"Failed to initialize STAC client for URL: {stac_url}", exc_info=True)
+        raise
+
 
 def query_stac_api(client, bbox, collections, start_date=None, end_date=None, limit=10):
     """
@@ -28,19 +41,22 @@ def query_stac_api(client, bbox, collections, start_date=None, end_date=None, li
     Returns:
     - A list of STAC Items that match the query parameters.
     """
-
-    search_params = {
-        "bbox": bbox,
-        "collections": collections,
-        "limit": limit
-    }
-    if start_date and end_date:
-        search_params["datetime"] = f"{start_date}/{end_date}"
-    
-    search = client.search(**search_params)
-    
-    items = list(search.items())
-    return items
+    try: 
+        search_params = {
+            "bbox": bbox,
+            "collections": collections,
+            "limit": limit
+        }
+        if start_date and end_date:
+            search_params["datetime"] = f"{start_date}/{end_date}"
+        
+        search = client.search(**search_params)
+        items = list(search.items())
+        logger.info(f"Found {len(items)} items")
+        return items
+    except Exception:
+        logger.error("Failed to query STAC API", exc_info=True)
+        raise
 
 def inspect_stac_item(item):
     """
