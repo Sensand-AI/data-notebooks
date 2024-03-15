@@ -3,6 +3,7 @@ import logging
 import pystac_client
 import rasterio
 from rasterio.windows import from_bounds
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
