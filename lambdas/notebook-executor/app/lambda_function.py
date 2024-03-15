@@ -4,6 +4,7 @@ import datetime
 import json
 import uuid
 import os
+import sys
 from typing import Any, Dict
 
 import papermill as pm
@@ -156,7 +157,14 @@ def lambda_handler(event, _):
     # Execute the notebook with parameters
     with tracer.trace("execute_notebook", resource=notebook_name):
         try:
-            pm.execute_notebook(input_path, output_path, parameters=parameters)
+            pm.execute_notebook(
+                input_path=input_path, 
+                output_path=output_path,
+                parameters=parameters,
+                log_output=True,
+                stdout_file=sys.stdout,
+                stderr_file=sys.stderr,
+            )
 
             # If enabled, save the executed notebook to S3
             if save_output:
