@@ -148,7 +148,7 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
             output_file_size = os.path.getsize(output_tiff_filename)
             logger.info("Output file size: %d bytes", output_file_size)
 
-        return data, metadata
+        return data, metadata, src
     except Exception as e:
         logger.error("Failed to process DEM asset: %s", e, exc_info=True)
         raise
