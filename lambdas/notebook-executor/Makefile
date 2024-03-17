@@ -7,12 +7,12 @@ IMAGE_URL=622020772926.dkr.ecr.us-east-1.amazonaws.com
 # Default make command
 all: build
 
-## build: Build the Docker image.
-build:
-	docker build -t $(IMAGE_NAME) . --platform linux/amd64
+## docker-build: Build the Docker image.
+docker-build:
+	docker build -t $(IMAGE_NAME) lambdas/notebook-executor/notebook-executor.Dockerfile --platform linux/amd64
 
-## run: Run the Docker container.
-run:
+## docker-run: Run the Docker container.
+docker-run:
 	docker run --name $(CONTAINER_NAME) -p $(LOCAL_PORT):8080 $(IMAGE_NAME)
 
 ## docker-login-staging: Login to AWS ECR (Staging)
