@@ -47,12 +47,17 @@ import rasterio
 from rasterio.mask import mask
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.plot import show
+from rasterio.dtypes import uint8
+
+import rioxarray as rxr
+from shapely.geometry import box #try and remove later
+
 from owslib.wcs import WebCoverageService
 
 import numpy as np
 import pandas as pd
 import geopandas as gpd
-import rioxarray as rxr
+
 
 from pyproj import CRS
 from pathlib import Path
@@ -82,6 +87,52 @@ logging.basicConfig(
     filename="harvest.txt",
     filemode="w",
 )
+
+## ------ Setup rasterio profiles ------ ##
+
+class Profile:
+    """Base class for Rasterio dataset profiles.
+
+    Subclasses will declare a format driver and driver-specific
+    creation options.
+    """
+    driver = None
+    defaults = {}
+
+    def __call__(self, **kwargs):
+        """Returns a mapping of keyword args for writing a new datasets.
+
+        Example:
+
+            profile = SomeProfile()
+            with rasterio.open('foo.tif', 'w', **profile()) as dst:
+                # Write data ...
+
+        """
+        if kwargs.get('driver', self.driver) != self.driver:
+            raise ValueError(
+                "Overriding this profile's driver is not allowed.")
+        profile = self.defaults.copy()
+        profile.update(**kwargs)
+        profile['driver'] = self.driver
+        return profile
+
+
+class DefaultGTiffProfile(Profile):
+    """A tiled, band-interleaved, LZW-compressed, 8-bit GTiff profile."""
+    driver = 'GTiff'
+    defaults = {
+        'interleave': 'band',
+        'tiled': True,
+        'blockxsize': 256,
+        'blockysize': 256,
+        'compress': 'lzw',
+        'nodata': 0,
+        'dtype': uint8
+    }
+
+
+default_gtiff_profile = DefaultGTiffProfile()
 
 ## ------ Functions to show progress and provide feedback to the user ------ ##
 
@@ -131,6 +182,9 @@ def msg_success(message, log=False):
 
 
 ## ------------------------------------------------------------------------- ##
+
+def list_tif_files(path):
+    return [f for f in os.listdir(path) if f.endswith('.tif')]
 
 def load_settings(fname_settings):
     # Load settings from yaml file
@@ -253,44 +307,26 @@ def _getFeatures(gdf):
     return [json.loads(gdf.to_json())["features"][0]["geometry"]]
 
 
-def reproj_mask(filepath, bbox, crscode=4326, filepath_out=None):
+def reproj_mask(filename, input_filepath, bbox, crscode, output_filepath):
     """
-    Clips a raster to the area of a shape, and reprojects.
+    Clips a raster to the area of a shape, and reprojects. Also tiles the output geotif so it is cloud-optimised.
 
     INPUTS
-        filepath: input filename (tif)
-        bbox: shapely geometry(polygon) defining mask boundary
+        filepath: input filename
+        input_filepath: directory with harvested, unmasked source data
+        bbox: geometry(polygon) defining mask boundary
         crscode: optional, coordinate reference system as defined by EPSG
-        filepath_out: optional, the optional output filename of the raster. If False, 
-        does not save a new file
+        filepath_out: directory for saved masked geotifs to be placed
+     """
+    input_full_filepath = os.path.join(input_filepath, filename)
+    masked_filepath = "masked_" + filename
+    mask_outpath = os.path.join(output_filepath, masked_filepath)
+    
+    input_raster = rxr.open_rasterio(input_full_filepath)
+    clipped = input_raster.rio.clip(bbox.geometry.values)
+    clipped.rio.to_raster(mask_outpath, tiled=True)
 
-    RETURNS
-        out_img: numpy array of the clipped and reprojected raster
-    """
-    data = rasterio.open(filepath)
-    geo = gpd.GeoDataFrame({"geometry": bbox}, index=[0], crs=CRS.from_epsg(crscode))
-    geo = geo.to_crs(crs=CRS.from_epsg(crscode))
-    coords = _getFeatures(geo)
-    out_img, out_transform = mask(data, shapes=coords, crop=True)
-
-    if filepath_out:
-        out_meta = data.meta.copy()
-        out_meta.update(
-            {
-                "driver": "GTiff",
-                "height": out_img.shape[1],
-                "width": out_img.shape[2],
-                "transform": out_transform,
-                "crs": CRS.from_epsg(crscode),
-            }
-        )
-
-        with rasterio.open(filepath_out, "w", **out_meta) as dest:
-            dest.write(out_img)
-        print("Clipped raster written to:", filepath_out)
-
-    return out_img
-
+    return clipped
 
 def reproj_rastermatch(infile, matchfile, outfile, nodata):
     """

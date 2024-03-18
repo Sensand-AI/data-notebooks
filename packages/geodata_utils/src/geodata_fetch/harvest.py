@@ -1,16 +1,21 @@
+import os
 from pathlib import Path
 import geopandas as gpd
 import numpy as np
 from datetime import datetime, timedelta
 
 from geodata_fetch import getdata_slga,getdata_dem, getdata_radiometric, utils
-from geodata_fetch.utils import  load_settings
+from geodata_fetch.utils import  load_settings, reproj_mask, list_tif_files
 
 
-def run(path_to_config):
+def run(path_to_config, input_geom):
     print("Starting the data harvester -----")
 
     settings = load_settings(path_to_config)
+    output_data_dir = os.path.join(settings.outpath, "data")
+    output_masked_data_dir = os.path.join(settings.outpath, "masked-data")
+    data_mask = settings.data_mask
+    
     
     # Count number of sources to download from
     count_sources = len(settings.target_sources)
@@ -59,7 +64,7 @@ def run(path_to_config):
             files_slga = getdata_slga.get_slga_layers(
                 layernames=slga_layernames,
                 bbox=settings.target_bbox,
-                outpath=settings.outpath,
+                outpath=output_data_dir,
                 depth_min=depth_min,
                 depth_max=depth_max,
                 get_ci=False, #can this be added to the settings.json instead of being hard-coded here?
@@ -70,7 +75,7 @@ def run(path_to_config):
         if var_exists:
             if len(files_slga) != len(slga_layernames):
                 # get filename stems of files_slga
-                slga_layernames = [Path(f).stem for f in files_slga]
+                slga_layernames = [Path(f).stem for f in files_slga] # check this still works afer adding sub-dirs
         else:
             pass
     
@@ -82,7 +87,7 @@ def run(path_to_config):
             files_dem = getdata_dem.get_dem_layers(
                 dem_layernames,
                 settings.target_bbox,
-                settings.outpath,
+                output_data_dir,
             )
         except Exception as e:
             print(e)
@@ -103,7 +108,7 @@ def run(path_to_config):
             files_rm = getdata_radiometric.get_radiometric_layers(
                 rm_layernames,
                 settings.target_bbox,
-                settings.outpath
+                output_data_dir
             )
         except Exception as e:
             print(e)
@@ -114,6 +119,32 @@ def run(path_to_config):
             pass
 
 #--------------------------------------------------------------------------------------#
-
+    """
+    Add function here to apply mask and save copy of geotifs as COGS if mask boolean set to True.
+    Use rioxarray to force tiled tifs aka COGs.
+    """
+    
+    if data_mask is True:
+        print("data mask is True")
+        os.makedirs(output_masked_data_dir, exist_ok=True)
+        
+        # make a list of all the tif files in the 'data' package that were harvested from sources
+        tif_files = list_tif_files(output_data_dir)
+        print(tif_files)
+        try:
+            for tif in tif_files:
+                # Clips a raster to the area of a shape, and reprojects.
+                masked_data = reproj_mask(
+                    filename=tif,
+                    input_filepath = output_data_dir,
+                    bbox=input_geom,
+                    crscode=4326,
+                    output_filepath=output_masked_data_dir)
+        except Exception as e:
+            print("something went wrong")
+            print(e)
+            print(tif)
+    else:
+        print("data mask is false")
 
     print("\nHarvest complete")
