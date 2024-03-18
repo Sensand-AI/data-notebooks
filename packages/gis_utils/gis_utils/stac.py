@@ -135,7 +135,7 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
                 'width': window.width,
                 'transform': rasterio.windows.transform(window, src.transform)
             })
-
+            logger.info("Writing to file:  %s", output_tiff_filename)
             with rasterio.open(output_tiff_filename, 'w', **metadata) as dst:
                 dst.write(data)
                 logger.info("Written data to %s", output_tiff_filename)
