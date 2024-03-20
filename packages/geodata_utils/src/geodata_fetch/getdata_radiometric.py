@@ -7,9 +7,6 @@ LIMITATIONS: for some layers the server readout time can occasionally exceed 30s
 In case this happens please try later again when the NCI server is less loaded.
 
 This package is modified from the geodata-harvester developed for the Agricultural Research Federation (AgReFed).
-
-NOTE:
-get_capabilities() is no long in this package. It has been moved to utils and generalised so it can work with all of the individual data fetchers. use get_wcs_capabilities() instead.
 """
 
 import os
@@ -45,7 +42,7 @@ TODO: resolution is set to 1 here. But its 3.6 (100m) in the original data. Remo
 Ditto EPSG.
 """
 
-def get_radiometric_layers(layernames, bbox, outpath):
+def get_radiometric_layers(property_name, layernames, bbox, outpath):
     """
     Wrapper function for downloading radiometric data layers and save geotiffs from WCS layer.
 
@@ -70,8 +67,6 @@ def get_radiometric_layers(layernames, bbox, outpath):
     resolution = rm_data["resolution_arcsec"]
     crs = rm_data["crs"]   
     url = rm_data["layers_url"]
-    
-    print("CHECKPOINT 1")
      
     #for url to be called the getdict function needs to be called first
     #url = "https://gsky.nci.org.au/ows/national_geophysical_compilations?service=WCS"
@@ -82,8 +77,9 @@ def get_radiometric_layers(layernames, bbox, outpath):
     # Loop over all layers
     fnames_out = []
     for layername in layernames:
+        output_filename = "radiometric_" + layername + "_" + property_name + '.tif'
         outfname = os.path.join(
-            outpath, "radiometric_" + layername + '.tif')
+            outpath, "radiometric_" + layername + "_" + property_name + '.tif')
         ok = get_radiometric_image(
             outfname=outfname, 
             layername=layername, 
@@ -94,7 +90,6 @@ def get_radiometric_layers(layernames, bbox, outpath):
         )
         if ok:
             fnames_out.append(outfname)
-    print("CHECKPOINT 2")
     return fnames_out
 
 """
@@ -121,8 +116,6 @@ def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
     ------
     Exited ok: boolean
     """
-    
-    print("CHECKPOINT 3")
     # If the resolution passed is None, set to native resolution of datasource
     if resolution is None:
         resolution = get_radiometricdict()["resolution_arcsec"]
@@ -163,7 +156,6 @@ def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
             f.write(data.read())
         # print(f"Layer {layername} saved in {outfname}")
     
-    print("CHECKPOINT 4")
     return True
 
 
@@ -181,8 +173,7 @@ def get_times(url, layername, year=None):
     ------
     list of dates
     """
-    
-    print("CHECKPOINT 5")
+
     wcs = WebCoverageService(url, version="1.0.0", timeout=300)
     times = wcs[layername].timepositions
     if year is None:
@@ -193,5 +184,4 @@ def get_times(url, layername, year=None):
         for time in times:
             if datetime.fromisoformat(time[:-1]).astimezone(timezone.utc).year == year:
                 dates.append(time)
-        print("CHECKPOINT 6")
         return dates

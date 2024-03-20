@@ -42,7 +42,7 @@ def get_demdict():
 have removed get_capabilities() from here and put in utils
 """
 
-def getwcs_dem(url, crs, resolution, bbox, outpath):
+def getwcs_dem(url, crs, resolution, bbox, property_name, outpath):
     """
     Download and save geotiff from WCS layer
     
@@ -76,7 +76,7 @@ def getwcs_dem(url, crs, resolution, bbox, outpath):
             wcs = WebCoverageService(url, version="1.0.0", timeout=300)
             s(1)
         layername = wcs["1"].title
-        fname_out = layername.replace(" ", "_") + ".tif"
+        fname_out = layername.replace(" ", "_") + "_" + property_name + ".tif"
         outfname = os.path.join(outpath, fname_out)
         if os.path.exists(outfname):
             utils.msg_warn(f"{fname_out} already exists, skipping download")
@@ -102,7 +102,7 @@ def getwcs_dem(url, crs, resolution, bbox, outpath):
 
 
 
-def get_dem_layers(layernames, bbox, outpath):
+def get_dem_layers(property_name, layernames, bbox, outpath):
     """
     Download DEM-H layer and save as a geotif.
 
@@ -137,7 +137,12 @@ def get_dem_layers(layernames, bbox, outpath):
     fnames_out = []
     for layername in layernames:
         if layername == "DEM":
-            outfname = getwcs_dem(url=dem_url, crs=crs, resolution=resolution, bbox=bbox, outpath=outpath)
+            outfname = getwcs_dem(url=dem_url, 
+                                  crs=crs, 
+                                  resolution=resolution, 
+                                  bbox=bbox, 
+                                  property_name=property_name, 
+                                  outpath=outpath)
         fnames_out.append(outfname)
     
     return fnames_out

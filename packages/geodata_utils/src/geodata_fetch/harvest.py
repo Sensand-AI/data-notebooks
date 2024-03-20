@@ -12,6 +12,7 @@ def run(path_to_config, input_geom):
     print("Starting the data harvester -----")
 
     settings = load_settings(path_to_config)
+    property_name = settings.property_name
     output_data_dir = os.path.join(settings.outpath, "data")
     output_masked_data_dir = os.path.join(settings.outpath, "masked-data")
     data_mask = settings.data_mask
@@ -62,6 +63,7 @@ def run(path_to_config, input_geom):
             depth_max.append(dmax)
         try:
             files_slga = getdata_slga.get_slga_layers(
+                property_name=property_name,
                 layernames=slga_layernames,
                 bbox=settings.target_bbox,
                 outpath=output_data_dir,
@@ -85,9 +87,10 @@ def run(path_to_config, input_geom):
         dem_layernames = settings.target_sources["DEM"]
         try:
             files_dem = getdata_dem.get_dem_layers(
-                dem_layernames,
-                settings.target_bbox,
-                output_data_dir,
+                property_name=property_name,
+                layernames=dem_layernames,
+                bbox=settings.target_bbox,
+                outpath=output_data_dir
             )
         except Exception as e:
             print(e)
@@ -106,9 +109,10 @@ def run(path_to_config, input_geom):
         rm_layernames = settings.target_sources["Radiometric"]
         try:
             files_rm = getdata_radiometric.get_radiometric_layers(
-                rm_layernames,
-                settings.target_bbox,
-                output_data_dir
+                property_name=property_name,
+                layernames=rm_layernames,
+                bbox=settings.target_bbox,
+                outpath=output_data_dir
             )
         except Exception as e:
             print(e)
@@ -130,7 +134,6 @@ def run(path_to_config, input_geom):
         
         # make a list of all the tif files in the 'data' package that were harvested from sources
         tif_files = list_tif_files(output_data_dir)
-        print(tif_files)
         try:
             for tif in tif_files:
                 # Clips a raster to the area of a shape, and reprojects.
@@ -141,9 +144,7 @@ def run(path_to_config, input_geom):
                     crscode=4326,
                     output_filepath=output_masked_data_dir)
         except Exception as e:
-            print("something went wrong")
             print(e)
-            print(tif)
     else:
         print("data mask is false")
 
