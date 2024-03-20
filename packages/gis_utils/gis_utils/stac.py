@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-
+import json
 import pystac_client
 import rasterio
 from rasterio.windows import from_bounds
@@ -116,6 +116,7 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
     - dem_asset: The STAC asset object containing the href to the DEM file.
     - bbox (tuple): The bounding box for the region to extract (min_lon, min_lat, max_lon, max_lat).
     - output_tiff_filename (str): The file path where the output TIFF file will be written.
+    - asset_type (str): The type of the asset (typically 'overlay' considering we're using rasterio).
 
     Returns:
     - None
@@ -147,8 +148,56 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
             # Optionally, log the size of the written file
             output_file_size = os.path.getsize(output_tiff_filename)
             logger.info("Output file size: %d bytes", output_file_size)
-
         return data, metadata, src
     except Exception as e:
         logger.error("Failed to process DEM asset: %s", e, exc_info=True)
         raise
+
+def save_metadata_sidecar(file_path, metadata):
+    """
+    Saves metadata to a sidecar file in JSON format.
+
+    Parameters:
+    - file_path (str): The path to the primary file. The sidecar file will be named based on this path.
+    - metadata (dict): The metadata to save.
+    - asset_type (str, optional): The type of the asset, e.g., 'overlay' or 'meta'. If provided, it's added to the metadata.
+
+    Returns:
+    - None
+    """
+
+    # Construct the sidecar filename based on the primary file's path
+    sidecar_filename = f"{file_path}.meta.json"
+
+    # Save the metadata to the sidecar file
+    try:
+        with open(sidecar_filename, 'w', encoding='utf-8') as sidecar_file:
+            json.dump(metadata, sidecar_file)
+        logger.info("Metadata saved to %s", sidecar_filename)
+    except Exception as e:
+        logger.error("Failed to save metadata sidecar file: %s", e, exc_info=True)
+
+def read_metadata_sidecar(file_path):
+    """
+    Reads metadata from a sidecar file associated with the primary file.
+    
+    If the file is already a sidecar file (ending with .meta.json), it returns an empty dict.
+
+    Parameters:
+    - file_path (str): The path to the primary file.
+
+    Returns:
+    - dict: The metadata read from the sidecar file. Returns an empty dict if sidecar file is not found or if the input is already a sidecar file.
+    """
+    if file_path.endswith(".meta.json"):
+        logger.warning("Attempting to read a sidecar file for a sidecar file. Skipping.")
+        return {}
+
+    sidecar_filename = f"{file_path}.meta.json"
+    try:
+        with open(sidecar_filename, 'r', encoding='utf-8') as sidecar_file:
+            metadata = json.load(sidecar_file)
+        return metadata
+    except FileNotFoundError:
+        logger.warning(f"Sidecar file {sidecar_filename} not found.")
+        return {}

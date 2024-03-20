@@ -1,7 +1,13 @@
 import os
 import functools
+import logging
+import sys
 import boto3
 from botocore.exceptions import ClientError
+
+# Configure logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def use_default_bucket(func):
     """A decorator to set the default bucket for S3 operations."""
@@ -26,9 +32,7 @@ class S3Utils:
 
     def __init__(
         self,
-        aws_access_key_id,
-        aws_secret_access_key,
-        region_name,
+        region_name=None,
         s3_bucket=None,
         prefix=None,
         **kwargs
@@ -45,8 +49,6 @@ class S3Utils:
         """
         self.s3_client = boto3.client(
             's3',
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
             region_name=region_name,
             **kwargs
         )
@@ -77,7 +79,7 @@ class S3Utils:
 
     @use_default_bucket
     @use_default_prefix
-    def upload_file(self, file_path, bucket, prefix, file_name=None):
+    def upload_file(self, file_path, bucket=None, prefix=None, file_name=None, metadata=None):
         """
         Upload a file to a specific prefix in an S3 bucket.
         """
@@ -85,21 +87,29 @@ class S3Utils:
             # Use the provided file_name or fallback to the name from the file_path
             if not file_name:
                 file_name = os.path.basename(file_path)
+                logger.info("uploading file_name: %s and file_path: %x", file_name, file_path)
 
             full_key = f"{prefix}/{file_name}" if prefix else file_name
 
             # Open and read the file in binary mode
             with open(file_path, 'rb') as file_data:
-                self.s3_client.put_object(Bucket=bucket, Key=full_key, Body=file_data)
+                self.s3_client.put_object(
+                    Bucket=bucket, 
+                    Key=full_key, 
+                    Body=file_data,
+                    Metadata=metadata if metadata else {}
+                )
 
-            return f"File '{file_name}' uploaded successfully to '{full_key}' in bucket '{bucket}'."
+            logger.info("File %s uploaded successfully.", file_name)
+            return True
 
         except ClientError as e:
-            return f"An error occurred: {e}"
+            print(f"An error occurred: {e}")
+            raise e
 
     @use_default_bucket
     @use_default_prefix
-    def get_file(self, file_name, bucket, prefix):
+    def get_file(self, file_name, bucket=None, prefix=None):
         """
         Get a file from a specific prefix in an S3 bucket.
         """
@@ -112,7 +122,7 @@ class S3Utils:
 
     @use_default_bucket
     @use_default_prefix
-    def generate_presigned_url(self, bucket, prefix, file_name, expiration=3600):
+    def generate_presigned_url(self, file_name, bucket=None, prefix=None, expiration=3600):
         """
         Generate a presigned URL to share an S3 object.
         """
@@ -122,7 +132,7 @@ class S3Utils:
                 'get_object',
                 Params={
                     'Bucket': bucket,
-                    'Key': object_key
+                    'Key': file_name
                 },
                 ExpiresIn=expiration
             )
@@ -132,7 +142,7 @@ class S3Utils:
 
     @use_default_bucket
     @use_default_prefix
-    def generate_presigned_urls(self, bucket, prefix, expiration=3600):
+    def generate_presigned_urls(self, bucket=None, prefix=None, expiration=3600):
         """
         Generate presigned URLs for all files within a specific prefix in the bucket.
         """

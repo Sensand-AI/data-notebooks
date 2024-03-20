@@ -14,22 +14,27 @@ ENV \
   GEOS_CONFIG=/opt/bin/geos-config \
   PATH=/opt/bin:$PATH
 
-RUN yum install -y gcc gcc-c++ && yum clean all && rm -rf /var/cache/yum /var/lib/yum/history
+RUN yum install -y gcc gcc-c++ && \
+    yum clean all && \
+    rm -rf /var/cache/yum /var/lib/yum/history
 
 # Install Jupyter dependencies
 RUN pip install jupyter nbconvert ipykernel
 
+# Copy the Datadog Lambda Extension
+COPY --from=public.ecr.aws/datadog/lambda-extension:latest /opt/extensions/ /opt/extensions
+
 # Copy requirements and install Python dependencies
-COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/requirements.txt
-RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt -t ${LAMBDA_TASK_ROOT}
+COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/
+RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-jupyter.txt -t ${LAMBDA_TASK_ROOT}
 
 # Install local Python packages
 COPY packages/ ${LAMBDA_TASK_ROOT}/packages
-COPY requirements-custom.txt ${LAMBDA_TASK_ROOT}/requirements-custom.txt
-RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt -t ${LAMBDA_TASK_ROOT}
+COPY requirements-custom.txt ${LAMBDA_TASK_ROOT}/
+RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt -t ${LAMBDA_TASK_ROOT}
 
 # Copy your Lambda function code and notebooks into the container
 COPY lambdas/notebook-executor/app/ ${LAMBDA_TASK_ROOT}/app
 COPY notebooks/ ${LAMBDA_TASK_ROOT}/notebooks
 
-CMD ["app.lambda_function.lambda_handler"]
+CMD ["datadog_lambda.handler.handler"]

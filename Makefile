@@ -37,6 +37,10 @@ docker-tag:
 build-notebook-executor:
 	docker build -t $(IMAGE_NAME) -f ./lambdas/notebook-executor/notebook-executor.Dockerfile . --platform linux/amd64
 
+## build-notebook-executor-no-cache: Build the Docker image.
+build-notebook-executor-no-cache:
+	docker build -t $(IMAGE_NAME) -f ./lambdas/notebook-executor/notebook-executor.Dockerfile . --platform linux/amd64 --no-cache
+
 ## docker-push: Push the Docker image (Platform)
 docker-push:
 	docker push $(IMAGE_URL)/$(IMAGE_NAME):latest
