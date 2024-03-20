@@ -8,7 +8,9 @@ setup(
     version=VERSION,
     packages=find_packages(),
     install_requires=[
-        'pystac_client'
+        'pystac_client',
+        'rasterio',
+		'geopandas',
     ],
 	keywords=['gis', 'utils', 'stac'],
 )
