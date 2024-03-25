@@ -35,7 +35,7 @@ docker-tag:
 
 ## build-notebook-executor: Build the Docker image.
 build-notebook-executor:
-	docker build -t $(IMAGE_NAME) -f ./lambdas/notebook-executor/notebook-executor.Dockerfile . --platform linux/amd64
+	aws-vault exec $(AWS_PLATFORM_PROFILE) -- docker build -t $(IMAGE_NAME) -f ./lambdas/notebook-executor/notebook-executor.Dockerfile . --platform linux/amd64
 
 ## build-notebook-executor-no-cache: Build the Docker image.
 build-notebook-executor-no-cache:

@@ -40,6 +40,11 @@ services:
     build:
       context: .
       dockerfile: lambdas/notebook-executor/notebook-executor.Dockerfile
+      args:
+        AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+        AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
     # command: "app.lambda_function.lambda_handler"
     ports:
       - "9000:8080"
@@ -48,13 +53,13 @@ services:
       - ./packages:/var/task/packages
       - ./lambdas/notebook-executor/app:/var/task/app
     environment:
+      AWS_S3_BUCKET_NOTEBOOK_OUTPUT: ${AWS_S3_BUCKET_NOTEBOOK_OUTPUT}
+      AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 1024
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_S3_BUCKET_NOTEBOOK_OUTPUT: ${AWS_S3_BUCKET_NOTEBOOK_OUTPUT}
-      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-      AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 1024
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
       ENVIRONMENT: ${ENVIRONMENT}
-      DD_LAMBDA_HANDLER: app.lambda_function.lambda_handler
       DD_SITE: ${DD_SITE}
       DD_API_KEY: ${DD_API_KEY}
       DD_TRACE_ENABLED: true
