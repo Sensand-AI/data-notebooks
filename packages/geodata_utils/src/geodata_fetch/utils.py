@@ -48,6 +48,7 @@ from rasterio.mask import mask
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.plot import show
 from rasterio.dtypes import uint8
+from rasterio.enums import Resampling #for spatial resampling of pixels
 
 import rioxarray as rxr
 from shapely.geometry import box #try and remove later
@@ -325,7 +326,8 @@ def _read_file(file):
             # Returns array in form [channels, long, lat]
             return src.read()
 
-def reproj_mask(filename, input_filepath, bbox, crscode, output_filepath):
+
+def reproj_mask(filename, input_filepath, bbox, crscode, output_filepath, resample=False):
     """
     Clips a raster to the area of a shape, and reprojects. Also tiles the output geotif so it is cloud-optimised.
 
@@ -341,8 +343,24 @@ def reproj_mask(filename, input_filepath, bbox, crscode, output_filepath):
     mask_outpath = os.path.join(output_filepath, masked_filepath)
     
     input_raster = rxr.open_rasterio(input_full_filepath)
-    clipped = input_raster.rio.clip(bbox.geometry.values)
-    clipped.rio.to_raster(mask_outpath, tiled=True)
+    
+    #run pixel resampling if flag set to true
+    if resample is True:
+        upscale_factor = 3
+        
+        # Caluculate new height and width using upscale_factor
+        new_width = input_raster.rio.width * upscale_factor
+        new_height = input_raster.rio.height * upscale_factor
+        
+        #upsample raster
+        up_sampled = input_raster.rio.reproject(input_raster.rio.crs, shape=(int(new_height), int(new_width)), resampling=Resampling.nearest)
+        clipped = up_sampled.rio.clip(bbox.geometry.values)
+        reprojected = clipped.rio.reproject(crscode) #clip first as tif and geom need to be in same proejction
+        reprojected.rio.to_raster(mask_outpath, tiled=True)
+    else:
+        clipped = input_raster.rio.clip(bbox.geometry.values)
+        reprojected = clipped.rio.reproject(crscode) #clip first as tif and geom need to be in same proejction
+        reprojected.rio.to_raster(mask_outpath, tiled=True)
 
     return clipped
 
