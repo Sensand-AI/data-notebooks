@@ -24,14 +24,9 @@ COPY --link --from=aws-cli /usr/local/bin/ /usr/local/bin
 COPY --from=public.ecr.aws/datadog/lambda-extension:latest /opt/extensions/ /opt/extensions
 
 # Install some system dependencies
-RUN yum install -y gcc gcc-c++ unzip && \
+RUN yum install -y gcc gcc-c++ unzip jq && \
     yum clean all && \
     rm -rf /var/cache/yum /var/lib/yum/history
-
-# Install the AWS Lambda extension for AWS Secrets Manager and AWS Systems Manager
-RUN curl $(aws lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:177933569100:layer:AWS-Parameters-and-Secrets-Lambda-Extension:11 --query 'Content.Location' --output text) --output layer.zip
-RUN unzip layer.zip -d /opt
-RUN rm layer.zip
 
 # Bring C libs from lambgeo/lambda-gdal image
 COPY --from=gdal /opt/lib/ /opt/lib/
@@ -64,5 +59,12 @@ COPY notebooks/ ${LAMBDA_TASK_ROOT}/notebooks
 # Reference the Lambda handler in /app/lambda_function.py
 # This is needed for the Datadog Lambda Extension to find the handler
 ENV DD_LAMBDA_HANDLER="app.lambda_function.lambda_handler"
+# Some datadog specific environment variables
+ENV DD_SERVICE="notebook-executor"
+
+# For debugging
+RUN yum install -y procps net-tools && \
+    yum clean all && \
+    rm -rf /var/cache/yum /var/lib/yum/history
 
 CMD ["datadog_lambda.handler.handler"]

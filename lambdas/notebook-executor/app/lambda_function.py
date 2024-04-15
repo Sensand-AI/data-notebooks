@@ -1,21 +1,22 @@
 """Module to execute a Jupyter notebook with parameters as a Lambda function."""
-import shutil
 import datetime
 import json
-import uuid
-import os
-import sys
-from typing import Any, Dict
 import logging
+import os
+import shutil
+import sys
+import uuid
+from typing import Any, Dict
 
 import papermill as pm
 from aws_utils import S3Utils
-from botocore.exceptions import BotoCoreError
-from botocore.exceptions import ClientError
+from botocore.exceptions import BotoCoreError, ClientError
 from ddtrace import tracer
+from gis_utils.stac import read_metadata_sidecar
 from jsonschema import ValidationError, validate
 from papermill.exceptions import PapermillExecutionError
-from gis_utils.stac import read_metadata_sidecar
+
+# from datadog_lambda.metric import lambda_metric
 
 # initialize(statsd_host=os.environ.get('DATADOG_HOST'))
 aws_s3_notebook_output = os.getenv('AWS_S3_BUCKET_NOTEBOOK_OUTPUT')
@@ -116,6 +117,11 @@ def lambda_handler(event, _):
         dict: The output of the Lambda function. Must be JSON serializable.
     """
 
+    # Printing all environment variables in Python can be done using the following code snippet:
+
+    for key, value in os.environ.items():
+        print(f"{key} = {value}")
+
     # Extract notebook name and parameters from the event
     notebook_name = event.get('notebook_name')
 
@@ -162,7 +168,6 @@ def lambda_handler(event, _):
     print(f"Generated notebook key: {notebook_key}")
     parameters['notebook_key'] = notebook_key
     save_output = event.get('save_output', True)
-    output_type = event.get('output_type', 'unknown')
 
     # Generate a datetime stamp
     datetime_stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -224,18 +229,24 @@ def lambda_handler(event, _):
                     object_key = f"{notebook_key}/{file}"  # S3 object key with prefix
                     print(f"Uploading file {file} to {bucket_name}/{object_key}")
                     if file.endswith(".meta.json"):
+                        print(f"File path: {file_path}")
                         upload_success = s3_utils.upload_file(file_path=file_path)
                         if not upload_success:
                             print(f"Failed to upload metadata file {file} to {bucket_name}/{object_key}")
                     else:
                         # Read metadata from the sidecar file, if it exists
                         metadata = read_metadata_sidecar(file_path)
-                        upload_success = s3_utils.upload_file(file_path=file_path, metadata=metadata)
+                        # Remove the `data` property from the metadata
+                        # This is because `data` may contain far too much information to store as S3 metadata
+                        file_metadata = metadata['properties'] if metadata else {}
+                        upload_success = s3_utils.upload_file(file_path=file_path, metadata=file_metadata)
 
                         if upload_success:
                             print(f"File {file} uploaded successfully to {bucket_name}/{object_key}")
                             # Generate a pre-signed URL for the uploaded file
                             presigned_url = s3_utils.generate_presigned_url(object_key)
+
+                            # There's no need to return the metadata in the response.
 
                             uploaded_files.append({
                                 'file_name': file,
@@ -256,13 +267,23 @@ def lambda_handler(event, _):
                 logger.error(e)
                 return {
                     'statusCode': 500,
-                    'body': f"Error uploading file: {e}"
+                    'headers': {
+                        'Content-Type': 'application/json'
+                    },
+                    'body': json.dumps({
+                        'message': f"Error uploading file: {e}"
+                    })
                 }
             except FileNotFoundError:
                 logger.error(f"Directory not found: {output_dir}")
                 return {
                     'statusCode': 404,
-                    'body': f"Directory not found: {output_dir}"
+                    'headers': {
+                        'Content-Type': 'application/json'
+                    },
+                    'body': json.dumps({
+                        'message': f"Directory not found: {output_dir}"
+                    })
                 }
 
             # Delete the temporary directory
@@ -286,7 +307,7 @@ def lambda_handler(event, _):
                     'Content-Type': 'application/json'
                 },
                 'body': {
-                    "message": f"Notebook '{notebook_name}' executed successfully!",
+                    'message': f"Notebook '{notebook_name}' executed successfully!",
                     "output_files": uploaded_files
                 }
             }
@@ -309,5 +330,7 @@ def lambda_handler(event, _):
                 'headers': {
                     'Content-Type': 'application/json'
                 },
-                'body': f'Error executing notebook "{notebook_name}": {str(e)}'
+                'body': json.dumps({
+                    'message': f'Error executing notebook "{notebook_name}": {str(e)}'
+                })
             }
