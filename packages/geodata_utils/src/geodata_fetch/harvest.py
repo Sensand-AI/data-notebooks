@@ -12,6 +12,9 @@ def run(path_to_config, input_geom):
     print("Starting the data harvester -----")
 
     settings = load_settings(path_to_config)
+    target_crs = settings.target_crs
+    add_buffer = settings.add_buffer
+    resample = settings.resample
     property_name = settings.property_name
     output_data_dir = os.path.join(settings.outpath, "data")
     output_masked_data_dir = os.path.join(settings.outpath, "masked-data")
@@ -31,6 +34,11 @@ def run(path_to_config, input_geom):
     # Stop if bounding box cannot be calculated or was not provided
     if settings.target_bbox is None:
         raise ValueError("No bounding box provided")
+    
+    if settings.add_buffer is True:
+        # Add buffer to the bounding box
+        input_geom = input_geom.buffer(0.002, join_style=2, resolution=15)
+        #input_geom = gpd.GeoDataFrame(geometry=[radius])
 
     # Temporal range
     # convert date strings to datetime objects
@@ -141,8 +149,9 @@ def run(path_to_config, input_geom):
                     filename=tif,
                     input_filepath = output_data_dir,
                     bbox=input_geom,
-                    crscode=4326,
-                    output_filepath=output_masked_data_dir)
+                    crscode=target_crs,
+                    output_filepath=output_masked_data_dir,
+                    resample=resample)
         except Exception as e:
             print(e)
     else:
