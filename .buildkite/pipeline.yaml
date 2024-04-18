@@ -1,0 +1,38 @@
+# assume roles
+ecr-sensand-plugin: &ecr-sensand
+  ecr#v2.7.0:
+    login: true
+    account-ids: "622020772926" # AWS Platform account
+    region: us-east-1
+    assume_role:
+      role_arn: arn:aws:iam::622020772926:role/BuildkiteEcrPushPullRole
+
+# ecr-staging: &ecr-staging #from blockbase
+#   ecr#v2.7.0:
+#     login: true
+#     account-ids: "005168020145"
+#     region: us-east-1
+#     assume_role:
+#       role_arn: "arn:aws:iam::005168020145:role/BuildkiteRole"
+
+# assume-role-staging-plugin: &assume-role-staging #from blockbase
+#   cultureamp/aws-assume-role#v0.1.0:
+#     role: "arn:aws:iam::005168020145:role/BuildkiteRole"
+
+steps:
+  - group: "Notebook-Executor Deploy"
+    key: "notebook-executor-deploy"
+    steps:
+      # TODO: lint & test
+      - label: ":docker: Notebook Executor Build & Push"
+        plugins:
+          - docker-compose#v4.14.0:
+              build: notebook-executor
+              image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
+              image-name: latest
+              cache-from:
+                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
+              config:
+                - docker-compose.yml
+          - *ecr-sensand
+      # TODO: update lambda (if not automatically detected)
