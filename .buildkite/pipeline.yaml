@@ -20,7 +20,7 @@ ecr-sensand-plugin: &ecr-sensand
 #     role: "arn:aws:iam::005168020145:role/BuildkiteRole"
 
 steps:
-  - group: "Notebook-Executor Deploy"
+  - group: "Notebook-Executor Deploy test"
     key: "notebook-executor-deploy"
     steps:
       # TODO: lint & test
