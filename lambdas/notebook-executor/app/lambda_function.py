@@ -117,11 +117,6 @@ def lambda_handler(event, _):
         dict: The output of the Lambda function. Must be JSON serializable.
     """
 
-    # Printing all environment variables in Python can be done using the following code snippet:
-
-    for key, value in os.environ.items():
-        print(f"{key} = {value}")
-
     # Extract notebook name and parameters from the event
     notebook_name = event.get('notebook_name')
 
@@ -228,6 +223,7 @@ def lambda_handler(event, _):
                     file_path = os.path.join(output_dir, file)
                     object_key = f"{notebook_key}/{file}"  # S3 object key with prefix
                     print(f"Uploading file {file} to {bucket_name}/{object_key}")
+                    # sidecar files don't need to be returned as presigned URLs
                     if file.endswith(".meta.json"):
                         print(f"File path: {file_path}")
                         upload_success = s3_utils.upload_file(file_path=file_path)
@@ -243,16 +239,20 @@ def lambda_handler(event, _):
 
                         if upload_success:
                             print(f"File {file} uploaded successfully to {bucket_name}/{object_key}")
-                            # Generate a pre-signed URL for the uploaded file
-                            presigned_url = s3_utils.generate_presigned_url(object_key)
 
-                            # There's no need to return the metadata in the response.
+                            # Does the file contain a `.public` before the extension?
+                            # If so, we want to generate a pre-signed URL for it
+                            if ".public" in file:
+                                print(f"Generating pre-signed URL for {file}")
+                                # Generate a pre-signed URL for the uploaded file
+                                presigned_url = s3_utils.generate_presigned_url(object_key)
+                                print(f"Pre-signed URL generated: {presigned_url}")
 
-                            uploaded_files.append({
-                                'file_name': file,
-                                'presigned_url': presigned_url,
-                                'metadata': metadata
-                            })
+                                uploaded_files.append({
+                                    'file_name': file,
+                                    'presigned_url': presigned_url,
+                                    'metadata': metadata
+                                })
 
                         else:
                             print(f"Failed to upload file {file} to {bucket_name}/{object_key}")
@@ -330,7 +330,7 @@ def lambda_handler(event, _):
                 'headers': {
                     'Content-Type': 'application/json'
                 },
-                'body': json.dumps({
+                'body': {
                     'message': f'Error executing notebook "{notebook_name}": {str(e)}'
-                })
+                }
             }

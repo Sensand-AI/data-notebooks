@@ -136,6 +136,12 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
                 'width': window.width,
                 'transform': rasterio.windows.transform(window, src.transform)
             })
+
+            # Ensure the directory exists
+            output_directory = os.path.dirname(output_tiff_filename)
+            # Create the directory if it does not exist
+            os.makedirs(output_directory, exist_ok=True)
+
             logger.info("Writing to file:  %s", output_tiff_filename)
             with rasterio.open(output_tiff_filename, 'w', **metadata) as dst:
                 dst.write(data)
