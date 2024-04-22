@@ -7,7 +7,7 @@ ecr-sensand-plugin: &ecr-sensand
     assume_role:
       role_arn: arn:aws:iam::622020772926:role/BuildkiteEcrPushPullRole
 
-# ecr-staging: &ecr-staging #from blockbase
+# ecr-staging: &ecr-staging
 #   ecr#v2.7.0:
 #     login: true
 #     account-ids: "005168020145"
@@ -15,12 +15,18 @@ ecr-sensand-plugin: &ecr-sensand
 #     assume_role:
 #       role_arn: "arn:aws:iam::005168020145:role/BuildkiteRole"
 
-# assume-role-staging-plugin: &assume-role-staging #from blockbase
-#   cultureamp/aws-assume-role#v0.1.0:
-#     role: "arn:aws:iam::005168020145:role/BuildkiteRole"
+assume-role-staging-plugin: &assume-role-staging
+  cultureamp/aws-assume-role#v0.1.0:
+    role: "arn:aws:iam::005168020145:role/BuildkiteRole"
+
+aws-ssm-notebook-executor-plugin: &aws-ssm-notebook-executor
+  aws-ssm#v1.0.0:
+    parameters:
+      DD_SITE: /notebook-executor/datadog_site
+      DD_API_KEY: /notebook-executor/datadog_api_key
 
 steps:
-  - group: "Notebook-Executor Deploy test"
+  - group: "Notebook-Executor Deploy"
     key: "notebook-executor-deploy"
     steps:
       # TODO: lint & test
@@ -35,4 +41,6 @@ steps:
               config:
                 - docker-compose.yml
           - *ecr-sensand
+          - *assume-role-staging
+          - *aws-ssm-notebook-executor
       # TODO: update lambda (if not automatically detected)
