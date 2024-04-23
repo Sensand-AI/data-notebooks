@@ -7,6 +7,10 @@ ecr-sensand-plugin: &ecr-sensand
     assume_role:
       role_arn: arn:aws:iam::622020772926:role/BuildkiteEcrPushPullRole
 
+assume-role-staging-plugin: &assume-role-staging
+  cultureamp/aws-assume-role#v0.1.0:
+    role: "arn:aws:iam::005168020145:role/BuildkiteRole"
+
 aws-ssm-notebook-executor-plugin: &aws-ssm-notebook-executor
   aws-ssm#v1.0.0:
     parameters:
@@ -18,7 +22,9 @@ steps:
   - group: "Notebook-Executor Deploy"
     key: "notebook-executor-deploy"
     steps:
+
       - label: ":docker: Notebook Executor Build & Push"
+        branches: main # 
         plugins:
           - docker-compose#v4.14.0:
               build: notebook-executor
@@ -29,5 +35,6 @@ steps:
               config:
                 - docker-compose.yml
           - *ecr-sensand
+          - *assume-role-staging # assume staging role to pull ssm params
           - *aws-ssm-notebook-executor
-      # TODO: update lambda (if not automatically detected)
+      ### TODO: update lambda (if not automatically detected)
