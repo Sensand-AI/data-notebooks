@@ -7,18 +7,6 @@ ecr-sensand-plugin: &ecr-sensand
     assume_role:
       role_arn: arn:aws:iam::622020772926:role/BuildkiteEcrPushPullRole
 
-# ecr-staging: &ecr-staging
-#   ecr#v2.7.0:
-#     login: true
-#     account-ids: "005168020145"
-#     region: us-east-1
-#     assume_role:
-#       role_arn: "arn:aws:iam::005168020145:role/BuildkiteRole"
-
-assume-role-staging-plugin: &assume-role-staging
-  cultureamp/aws-assume-role#v0.1.0:
-    role: "arn:aws:iam::005168020145:role/BuildkiteRole"
-
 aws-ssm-notebook-executor-plugin: &aws-ssm-notebook-executor
   aws-ssm#v1.0.0:
     parameters:
@@ -27,33 +15,6 @@ aws-ssm-notebook-executor-plugin: &aws-ssm-notebook-executor
 
 steps:
   ### TODO: lint & test
-  # - group: ":nail_care: Linting"
-  #   key: "linting"
-  #   steps:
-  #     - label: ":docker: Build image cache"
-  #       env: *docker-compose-lint-env
-  #       plugins:
-  #         - artifacts#v1.9.2:
-  #             download:
-  #               [
-  #                 "artifacts/sensand-blockbase-ts-public-*.tgz",
-  #                 "artifacts/sensand-blockbase-ts-private-*.tgz",
-  #                 "artifacts/sensand-blockbase-analytics-*.tgz",
-  #               ]
-  #         - docker-compose#v4.15.0:
-  #             # https://github.com/buildkite-plugins/docker-compose-buildkite-plugin#cli-version-optional-string-or-integer
-  #             cli-version: 2
-  #             build:
-  #               - api
-  #               - blockbase-app
-  #               - inty
-  #             config:
-  #               - .buildkite/docker/docker-compose.lint.yaml
-  #             cache-from:
-  #               - api:622020772926.dkr.ecr.us-east-1.amazonaws.com/blockbase-api:${BUILDKITE_COMMIT}
-  #               - api:622020772926.dkr.ecr.us-east-1.amazonaws.com/blockbase-api:latest
-  #         - *ecr-sensand
-
   - group: "Notebook-Executor Deploy"
     key: "notebook-executor-deploy"
     steps:
@@ -68,6 +29,5 @@ steps:
               config:
                 - docker-compose.yml
           - *ecr-sensand
-          - *assume-role-staging
           - *aws-ssm-notebook-executor
       # TODO: update lambda (if not automatically detected)
