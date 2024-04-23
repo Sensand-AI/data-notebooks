@@ -22,19 +22,24 @@ steps:
   - group: "Notebook-Executor Deploy"
     key: "notebook-executor-deploy"
     steps:
+      - label: "test"
+        command:
+          - echo ${BUILDKITE_BRANCH}
+          - echo ${BUILDKITE_COMMIT}
+          - echo "${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
 
-      - label: ":docker: Notebook Executor Build & Push"
-        branches: main # 
-        plugins:
-          - docker-compose#v4.14.0:
-              build: notebook-executor
-              image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
-              image-name: latest
-              cache-from:
-                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
-              config:
-                - docker-compose.yml
-          - *ecr-sensand
-          - *assume-role-staging # assume staging role to pull ssm params
-          - *aws-ssm-notebook-executor
+      # - label: ":docker: Notebook Executor Build & Push"
+      #   branches: main # 
+      #   plugins:
+      #     - docker-compose#v4.14.0:
+      #         build: notebook-executor
+      #         image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
+      #         image-name: latest
+      #         cache-from:
+      #           - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
+      #         config:
+      #           - docker-compose.yml
+      #     - *ecr-sensand
+      #     - *assume-role-staging # assume staging role to pull ssm params
+      #     - *aws-ssm-notebook-executor
       ### TODO: update lambda (if not automatically detected)
