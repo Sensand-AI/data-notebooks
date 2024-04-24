@@ -66,6 +66,7 @@ services:
       DD_VERSION: 0.0.1
       DD_APM_ENABLED: true
       DD_LOG_LEVEL: ${DD_LOG_LEVEL}
+      DD_CAPTURE_LAMBDA_PAYLOAD: true
       DD_LAMBDA_HANDLER: app.lambda_function.lambda_handler
     labels:
       com.datadoghq.ad.logs: '[{"source": "docker-compose", "service": "notebook-executor"}]'
