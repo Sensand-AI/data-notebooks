@@ -41,6 +41,9 @@ geodata-harvester
 # Time
 pytz  # World timezone definitions, modern and historical
 
+# Visualizations
+plotly	# Interactive, browser-based graphing library for Python
+
 # Development and Workflow tools
 ddtrace # Datadog tracing library
 datadog # Datadog monitoring library
