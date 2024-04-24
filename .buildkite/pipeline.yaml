@@ -22,10 +22,10 @@ steps:
   - group: "Notebook Executor Deploy (Staging)"
     key: "notebook-executor-deploy"
     steps:
-      - label: "test step"
+      - label: "[TEST STEP]"
         command:
-          - echo "test step cmd"
-        if: "build.pull_request.draft != null"
+          - echo "This should only run when this branch has an open PR"
+        if: "!build.pull_request.draft" # only run on open PR (NOT FULLY TESTED)
         
       - label: "condtional test"
         command:
