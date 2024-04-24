@@ -1,0 +1,38 @@
+# assume roles
+ecr-sensand-plugin: &ecr-sensand
+  ecr#v2.7.0:
+    login: true
+    account-ids: "622020772926" # AWS Platform account
+    region: us-east-1
+    assume_role:
+      role_arn: arn:aws:iam::622020772926:role/BuildkiteEcrPushPullRole
+
+# assume-role-staging-plugin: &assume-role-staging
+#   cultureamp/aws-assume-role#v0.1.0:
+#     role: "arn:aws:iam::005168020145:role/BuildkiteRole"
+
+# aws-ssm-notebook-executor-plugin: &aws-ssm-notebook-executor
+#   aws-ssm#v1.0.0:
+#     parameters:
+#       DD_SITE: /notebook-executor/datadog_site
+#       DD_API_KEY: /notebook-executor/datadog_api_key
+
+steps:
+  # TODO: lint & test
+  - group: "Notebook Executor Deploy (Staging)"
+    key: "notebook-executor-deploy"
+    steps:
+      - label: ":docker: Notebook Executor Build & Push"
+        plugins:
+          - docker-compose#v4.14.0:
+              build: notebook-executor
+              image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
+              image-name: latest #"${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+              cache-from:
+                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
+              config:
+                - docker-compose.yml
+          - *ecr-sensand
+      # TODO: update lambda
+      # - label: ":aws: Update Notebook Executor Lambda (Staging)"
+      
