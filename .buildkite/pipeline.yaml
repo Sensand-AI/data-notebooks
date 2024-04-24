@@ -25,10 +25,13 @@ steps:
       - label: "test step"
         command:
           - echo "test step cmd"
+        if: "build.pull_request != null"
+        
       - label: "condtional test"
         command:
           - echo "conditional test"
-        if: "build.pull_request != ''"
+          - echo ${build.pull_request.base_branch}
+        
         
 
       # - label: ":docker: Notebook Executor Build & Push"
