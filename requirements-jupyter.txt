@@ -17,7 +17,8 @@ matplotlib  # Comprehensive library for creating static, animated, and interacti
 geopandas  # Extends pandas for geospatial data operations
 shapely  # Manipulation and analysis of geometric objects
 rasterio[s3]	# Rasterio with S3 support
-rioxarray # read  in raster data as xarrays. Needed for some processing packages
+rioxarray # read in raster data as xarrays. Needed for some processing packages
+rio_cogeo # Cloud Optimized GeoTIFF (COG) creation and validation
 
 # Geospatial data processing tools
 pystac  # Python library for working with SpatioTemporal Asset Catalog (STAC)
@@ -36,6 +37,12 @@ wheel # for package development
 #experimental for geodata-harvester package Jenna is working on
 
 geodata-harvester
+
+# Time
+pytz  # World timezone definitions, modern and historical
+
+# Visualizations
+plotly	# Interactive, browser-based graphing library for Python
 
 # Development and Workflow tools
 ddtrace # Datadog tracing library

@@ -41,13 +41,20 @@ build-notebook-executor:
 build-notebook-executor-no-cache:
 	docker build -t $(IMAGE_NAME) -f ./lambdas/notebook-executor/notebook-executor.Dockerfile . --platform linux/amd64 --no-cache
 
-## docker-push: Push the Docker image (Platform)
-docker-push:
+## docker-push-notebook-executor: Push the Docker image (Platform)
+docker-push-notebook-executor:
 	docker push $(IMAGE_URL)/$(IMAGE_NAME):latest
+
+## docker-push: Push the Docker image (Platform)
+docker-push: docker-tag docker-push-notebook-executor
 
 ## lambda-update: Update the lambda function with the latest image.
 lambda-update:
 	aws-vault exec $(AWS_STAGING_PROFILE) -- aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $(IMAGE_URL)/$(IMAGE_NAME):latest --region us-east-1
+
+## lambda-details: Get the lambda function details.
+lambda-details:
+	aws-vault exec $(AWS_STAGING_PROFILE) -- aws lambda get-function --function-name NotebookExecutorFunction --region us-east-1
 
 ## help: Show a list of commands
 help : Makefile

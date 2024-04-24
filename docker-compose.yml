@@ -21,15 +21,13 @@ services:
       - ./start-juptyer.sh:/var/task/start-juptyer.sh
     ports:
       - "8888:8888"
-    depends_on:
-      - s3mock
 
   s3mock:
     image: adobe/s3mock
     environment:
       - initialBuckets=notebooks,output
     ports:
-      - "9090:9090"
+      - "9099:9090"
     volumes:
       - ./.s3mock-data:/s3mockroot
 
@@ -38,29 +36,36 @@ services:
     build:
       context: .
       dockerfile: lambdas/notebook-executor/notebook-executor.Dockerfile
+      args:
+        AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+        AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
     # command: "app.lambda_function.lambda_handler"
     ports:
-      - "9000:8080"
+      - "9002:8080"
     volumes:
       - ./notebooks:/var/task/notebooks
       - ./packages:/var/task/packages
       - ./lambdas/notebook-executor/app:/var/task/app
     environment:
+      AWS_S3_BUCKET_NOTEBOOK_OUTPUT: ${AWS_S3_BUCKET_NOTEBOOK_OUTPUT}
+      AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 1024
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      AWS_S3_BUCKET_NOTEBOOK_OUTPUT: ${AWS_S3_BUCKET_NOTEBOOK_OUTPUT}
-      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-      AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 1024
-      ENVIRONMENT: ${ENVIRONMENT}
-      DD_LAMBDA_HANDLER: app.lambda_function.lambda_handler
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+      ENV: ${ENVIRONMENT}
       DD_SITE: ${DD_SITE}
       DD_API_KEY: ${DD_API_KEY}
       DD_TRACE_ENABLED: true
       DD_SERVICE: notebook-executor
       DD_ENV: ${ENVIRONMENT}
       DD_VERSION: 0.0.1
-      DD_TRACE_DEBUG: false
       DD_APM_ENABLED: true
+      DD_LOG_LEVEL: ${DD_LOG_LEVEL}
+      DD_CAPTURE_LAMBDA_PAYLOAD: true
+      DD_LAMBDA_HANDLER: app.lambda_function.lambda_handler
     labels:
       com.datadoghq.ad.logs: '[{"source": "docker-compose", "service": "notebook-executor"}]'
       com.datadoghq.tags.env: development
