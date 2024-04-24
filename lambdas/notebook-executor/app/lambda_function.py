@@ -15,6 +15,7 @@ from ddtrace import tracer
 from gis_utils.stac import read_metadata_sidecar
 from jsonschema import ValidationError, validate
 from papermill.exceptions import PapermillExecutionError
+from pprint import pprint
 
 # from datadog_lambda.metric import lambda_metric
 
@@ -116,6 +117,8 @@ def lambda_handler(event, _):
     Returns:
         dict: The output of the Lambda function. Must be JSON serializable.
     """
+
+    pprint(event)
 
     # Extract notebook name and parameters from the event
     notebook_name = event.get('notebook_name')
@@ -296,8 +299,6 @@ def lambda_handler(event, _):
                 s3_utils.upload_file(
                     file_path=output_path,
                 )
-
-            print(uploaded_files)
 
             # statsd.increment('notebook.execution.success')
 
