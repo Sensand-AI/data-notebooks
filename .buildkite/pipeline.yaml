@@ -25,7 +25,7 @@ steps:
       - label: "test step"
         command:
           - echo "test step cmd"
-        if: "build.pull_request != null"
+        if: "build.pull_request.draft != null"
         
       - label: "condtional test"
         command:
