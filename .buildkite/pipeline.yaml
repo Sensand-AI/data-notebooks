@@ -25,7 +25,7 @@ steps:
       - label: "[TEST STEP]"
         command:
           - echo "This should only run when this branch has an open PR"
-        if: "!build.pull_request.draft" # only run on open PR (NOT FULLY TESTED)
+        if: "build.pull_request.draft != null" # only run on open PR (NOT FULLY TESTED)
         
       - label: "condtional test"
         command:
