@@ -19,8 +19,6 @@ services:
       - ./notebooks:/var/task/notebooks
       - ./packages:/var/task/packages
       - ./start-juptyer.sh:/var/task/start-juptyer.sh
-    env_file:
-      - .env
     ports:
       - "8888:8888"
     depends_on:
