@@ -17,8 +17,9 @@ ENV \
     AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
 
 # Install aws-cli
-COPY --link --from=aws-cli /usr/local/aws-cli/ /usr/local/aws-cli/
-COPY --link --from=aws-cli /usr/local/bin/ /usr/local/bin
+# Not needed currently but keeping it here for future reference
+# COPY --link --from=aws-cli /usr/local/aws-cli/ /usr/local/aws-cli/
+# COPY --link --from=aws-cli /usr/local/bin/ /usr/local/bin
 
 # Copy the Datadog Lambda Extension
 COPY --from=public.ecr.aws/datadog/lambda-extension:latest /opt/extensions/ /opt/extensions
