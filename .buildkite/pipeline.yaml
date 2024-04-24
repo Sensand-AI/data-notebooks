@@ -28,7 +28,8 @@ steps:
       - label: "condtional test"
         command:
           - echo "conditional test"
-        if: "!build.pull_request.draft"
+        if: "build.pull_request != ''"
+        
 
       # - label: ":docker: Notebook Executor Build & Push"
       #   plugins:
