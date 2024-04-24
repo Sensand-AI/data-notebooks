@@ -1,7 +1,5 @@
 FROM ghcr.io/lambgeo/lambda-gdal:3.6 as gdal
 
-FROM public.ecr.aws/aws-cli/aws-cli as aws-cli
-
 FROM public.ecr.aws/lambda/python:3.10
 
 ARG \
@@ -15,11 +13,6 @@ ENV \
     AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
     AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
     AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
-
-# Install aws-cli
-# Not needed currently but keeping it here for future reference
-# COPY --link --from=aws-cli /usr/local/aws-cli/ /usr/local/aws-cli/
-# COPY --link --from=aws-cli /usr/local/bin/ /usr/local/bin
 
 # Copy the Datadog Lambda Extension
 COPY --from=public.ecr.aws/datadog/lambda-extension:latest /opt/extensions/ /opt/extensions
