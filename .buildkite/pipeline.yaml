@@ -22,17 +22,26 @@ steps:
   - group: "Notebook Executor Deploy (Staging)"
     key: "notebook-executor-deploy"
     steps:
-      - label: ":docker: Notebook Executor Build & Push"
-        plugins:
-          - docker-compose#v4.14.0:
-              build: notebook-executor
-              image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
-              image-name: latest #"${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
-              cache-from:
-                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
-              config:
-                - docker-compose.yml
-          - *ecr-sensand
+      - label: "test step"
+        command:
+          - echo "test step cmd"
+      - label: "condtional test"
+        command:
+          - echo "conditional test"
+        if: "!build.pull_request.draft"
+
+      # - label: ":docker: Notebook Executor Build & Push"
+      #   plugins:
+      #     - docker-compose#v4.14.0:
+      #         build: notebook-executor
+      #         image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
+      #         image-name: latest #"${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+      #         cache-from:
+      #           - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
+      #         config:
+      #           - docker-compose.yml
+      #     - *ecr-sensand
+        
       # TODO: update lambda
       # - label: ":aws: Update Notebook Executor Lambda (Staging)"
       
