@@ -49,6 +49,10 @@ docker-push:
 lambda-update:
 	aws-vault exec $(AWS_STAGING_PROFILE) -- aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $(IMAGE_URL)/$(IMAGE_NAME):latest --region us-east-1
 
+## lambda-details: Get the lambda function details.
+lambda-details:
+	aws-vault exec $(AWS_STAGING_PROFILE) -- aws lambda get-function --function-name NotebookExecutorFunction --region us-east-1
+
 ## help: Show a list of commands
 help : Makefile
 	@echo "Usage:"
