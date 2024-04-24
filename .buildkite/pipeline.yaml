@@ -27,10 +27,10 @@ steps:
           - echo "This should only run when this branch has an open PR"
         if: "build.pull_request.draft != null" # only run on open PR (NOT FULLY TESTED)
         
-      - label: "condtional test"
+      - label: "conditional test"
         command:
           - echo "conditional test"
-          #- echo ${build.pull_request.base_branch}
+          - build.env()
         
         
 
