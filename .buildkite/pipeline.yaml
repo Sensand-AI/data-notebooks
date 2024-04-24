@@ -30,7 +30,7 @@ steps:
       - label: "condtional test"
         command:
           - echo "conditional test"
-          - echo ${build.pull_request.base_branch}
+          #- echo ${build.pull_request.base_branch}
         
         
 
