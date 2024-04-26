@@ -52,13 +52,15 @@ steps:
         env:
           IMAGE_NAME: test-name
         command:
-          - echo $$IMAGE_NAME
-          - which aws
+          #- echo $$IMAGE_NAME
+          #- which aws
+          - aws ecs list-clusters
           - aws s3 ls
+          - aws lambda get-function --function-name NotebookExecutorFunction
           # - ./buildkite/.buildkite/ecs-deploy.sh -c blockbase -n api -i $$IMAGE_NAME --enable-rollback
         #retry: *auto-retries
         #concurrency: 1
         #concurrency_group: "staging-backend/deploy"
         plugins:
-          #- *assume-role-staging
+          - *assume-role-staging
           - *docker-compose-deploy
