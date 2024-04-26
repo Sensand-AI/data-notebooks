@@ -7,15 +7,23 @@ ecr-sensand-plugin: &ecr-sensand
     assume_role:
       role_arn: arn:aws:iam::622020772926:role/BuildkiteEcrPushPullRole
 
-# assume-role-staging-plugin: &assume-role-staging
-#   cultureamp/aws-assume-role#v0.1.0:
-#     role: "arn:aws:iam::005168020145:role/BuildkiteRole"
+assume-role-staging-plugin: &assume-role-staging
+  cultureamp/aws-assume-role#v0.1.0:
+    role: "arn:aws:iam::005168020145:role/BuildkiteRole"
 
-# aws-ssm-notebook-executor-plugin: &aws-ssm-notebook-executor
-#   aws-ssm#v1.0.0:
-#     parameters:
-#       DD_SITE: /notebook-executor/datadog_site
-#       DD_API_KEY: /notebook-executor/datadog_api_key
+# plugins
+docker-compose-deploy-plugin: &docker-compose-deploy
+  docker-compose#v4.15.0:
+    run: deploy
+    config:
+      - .buildkite/docker/docker-compose.deploy.yaml
+    volumes:
+      - "./:/buildkite"
+    env:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
+      - IMAGE_NAME
 
 steps:
   # TODO: lint & test
@@ -27,13 +35,6 @@ steps:
           - echo "This should only run when this branch has an open PR"
         if: "build.pull_request.draft != null" # only run on open PR (NOT FULLY TESTED)
         
-      - label: "conditional test"
-        command:
-          - echo "conditional test"
-          - build.env()
-        
-        
-
       # - label: ":docker: Notebook Executor Build & Push"
       #   plugins:
       #     - docker-compose#v4.14.0:
@@ -47,5 +48,17 @@ steps:
       #     - *ecr-sensand
         
       # TODO: update lambda
-      # - label: ":aws: Update Notebook Executor Lambda (Staging)"
-      
+      - label: ":aws: Update Notebook Executor Lambda (Staging)"
+        env:
+          IMAGE_NAME: test-name
+        command:
+          - echo $$IMAGE_NAME
+          - which aws
+          - aws s3 ls
+          # - ./buildkite/.buildkite/ecs-deploy.sh -c blockbase -n api -i $$IMAGE_NAME --enable-rollback
+        #retry: *auto-retries
+        #concurrency: 1
+        #concurrency_group: "staging-backend/deploy"
+        plugins:
+          #- *assume-role-staging
+          - *docker-compose-deploy
