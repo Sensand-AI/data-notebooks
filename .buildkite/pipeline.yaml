@@ -52,7 +52,7 @@ steps:
         # env:
         #   IMAGE_NAME: test-name
         command:
-          - aws ecs list-clusters
+          - aws ecs list-clusters --region us-east-1
           # - ./buildkite/.buildkite/ecs-deploy.sh -c blockbase -n api -i $$IMAGE_NAME --enable-rollback
         #retry: *auto-retries
         #concurrency: 1
