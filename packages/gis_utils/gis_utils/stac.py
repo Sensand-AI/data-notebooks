@@ -2,10 +2,11 @@ import logging
 import os
 import sys
 import json
+import numpy as np #added to use nan for masking.
 import pystac_client
 import rasterio
 from rasterio.windows import from_bounds
-import rasterio.mask
+import rasterio.mask #added for masking/cliping rasters
 
 # Configure logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -183,7 +184,8 @@ def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, 
         data, metadata = None, {}
 
         with rasterio.open(dem_asset.href) as src:
-            data, out_transform = rasterio.mask.mask(src, geometry, crop=True, nodata=0)
+            # Nodata value here is being set to 0. This works for DEM but is not OK for indices.
+            data, out_transform = rasterio.mask.mask(src, geometry, crop=True, nodata=np.nan)
             
             #window = from_bounds(*bbox, transform=src.transform)
             #data = src.read(window=window)
