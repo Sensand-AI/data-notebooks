@@ -1,0 +1,59 @@
+{
+    "property_name": "nannup_truffles",
+    "outpath": "/workspace/notebooks/sandbox/adhoc_client_work/nannup_truffles",
+    "data_mask": true,
+    "target_res": "3",
+    "date_start": "2023-01-01",
+    "date_end": "2024-01-01",
+    "time_intervals": 0,
+    "target_sources": {
+        "DEM": "DEM",
+        "SLGA": {
+            "Bulk_Density": [
+                "0-5cm",
+                "5-15cm"
+            ],
+            "Organic_Carbon": [
+                "0-5cm",
+                "5-15cm"
+            ],
+            "Clay": [
+                "0-5cm",
+                "5-15cm"
+            ],
+            "Silt": [
+                "0-5cm",
+                "5-15cm"
+            ],
+            "Sand": [
+                "0-5cm",
+                "5-15cm"
+            ],
+            "vailable_Water_Capacity": [
+                "0-5cm",
+                "5-15cm"
+            ],
+            "Total_Nitrogen": [
+                "0-5cm",
+                "5-15cm"
+            ],
+            "Total_Phosphorus": [
+                "0-5cm",
+                "5-15cm"
+            ]
+        },
+        "Radiometric": [
+            "radmap2019_grid_k_conc_filtered_awags_rad_2019",
+            "radmap2019_grid_th_conc_filtered_awags_rad_2019",
+            "radmap2019_grid_u_conc_filtered_awags_rad_2019"
+        ]
+    },
+    "target_centroid_lat": -33.78903325699275,
+    "target_centroid_lng": 115.8004025950942,
+    "target_bbox": [
+        115.79365304260892,
+        -33.797619484931424,
+        115.80339273514568,
+        -33.78405009322897
+    ]
+}

@@ -17,15 +17,13 @@ matplotlib  # Comprehensive library for creating static, animated, and interacti
 geopandas  # Extends pandas for geospatial data operations
 shapely  # Manipulation and analysis of geometric objects
 rasterio[s3]	# Rasterio with S3 support
-rioxarray # read  in raster data as xarrays. Needed for some processing packages
-earthengine-api  # Google Earth Engine API
+rioxarray # read in raster data as xarrays. Needed for some processing packages
+rio_cogeo # Cloud Optimized GeoTIFF (COG) creation and validation
 
 # Geospatial data processing tools
-gdal2tiles  # For converting raster datasets to directory structures of tiles
 pystac  # Python library for working with SpatioTemporal Asset Catalog (STAC)
 pystac_client  # Python client for working with STAC APIs
 stackstac[viz]  # Turn STAC Items into dask-based xarrays
-mapboxgl  # Python interface for Mapbox GL JS, a JavaScript library for interactive maps
 
 # geospatial data visualisation tools
 hvplot # collection of tools for mapping and tabular data viz
@@ -35,13 +33,18 @@ datashader #required for hvplot to render raster data
 
 # Experimental
 papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks. Added version to resolve docker build issue.
-polars # A blazingly fast DataFrame library implemented in Rust
-sagemaker	# Open source library for training and deploying machine-learned models on Amazon SageMaker
 wheel # for package development
 #experimental for geodata-harvester package Jenna is working on
 
 geodata-harvester
 
+# Time
+pytz  # World timezone definitions, modern and historical
+
+# Visualizations
+plotly	# Interactive, browser-based graphing library for Python
+
 # Development and Workflow tools
 ddtrace # Datadog tracing library
 datadog # Datadog monitoring library
+datadog-lambda # Datadog monitoring library for AWS Lambda

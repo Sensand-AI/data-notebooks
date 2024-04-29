@@ -1,16 +1,25 @@
+import os
 from pathlib import Path
 import geopandas as gpd
 import numpy as np
 from datetime import datetime, timedelta
 
 from geodata_fetch import getdata_slga,getdata_dem, getdata_radiometric, utils
-from geodata_fetch.utils import  load_settings
+from geodata_fetch.utils import  load_settings, reproj_mask, list_tif_files
 
 
-def run(path_to_config):
+def run(path_to_config, input_geom):
     print("Starting the data harvester -----")
 
     settings = load_settings(path_to_config)
+    target_crs = settings.target_crs
+    add_buffer = settings.add_buffer
+    resample = settings.resample
+    property_name = settings.property_name
+    output_data_dir = os.path.join(settings.outpath, "data")
+    output_masked_data_dir = os.path.join(settings.outpath, "masked-data")
+    data_mask = settings.data_mask
+    
     
     # Count number of sources to download from
     count_sources = len(settings.target_sources)
@@ -25,6 +34,11 @@ def run(path_to_config):
     # Stop if bounding box cannot be calculated or was not provided
     if settings.target_bbox is None:
         raise ValueError("No bounding box provided")
+    
+    if settings.add_buffer is True:
+        # Add buffer to the bounding box
+        input_geom = input_geom.buffer(0.002, join_style=2, resolution=15)
+        #input_geom = gpd.GeoDataFrame(geometry=[radius])
 
     # Temporal range
     # convert date strings to datetime objects
@@ -57,9 +71,10 @@ def run(path_to_config):
             depth_max.append(dmax)
         try:
             files_slga = getdata_slga.get_slga_layers(
+                property_name=property_name,
                 layernames=slga_layernames,
                 bbox=settings.target_bbox,
-                outpath=settings.outpath,
+                outpath=output_data_dir,
                 depth_min=depth_min,
                 depth_max=depth_max,
                 get_ci=False, #can this be added to the settings.json instead of being hard-coded here?
@@ -70,7 +85,7 @@ def run(path_to_config):
         if var_exists:
             if len(files_slga) != len(slga_layernames):
                 # get filename stems of files_slga
-                slga_layernames = [Path(f).stem for f in files_slga]
+                slga_layernames = [Path(f).stem for f in files_slga] # check this still works afer adding sub-dirs
         else:
             pass
     
@@ -80,9 +95,10 @@ def run(path_to_config):
         dem_layernames = settings.target_sources["DEM"]
         try:
             files_dem = getdata_dem.get_dem_layers(
-                dem_layernames,
-                settings.target_bbox,
-                settings.outpath,
+                property_name=property_name,
+                layernames=dem_layernames,
+                bbox=settings.target_bbox,
+                outpath=output_data_dir
             )
         except Exception as e:
             print(e)
@@ -101,9 +117,10 @@ def run(path_to_config):
         rm_layernames = settings.target_sources["Radiometric"]
         try:
             files_rm = getdata_radiometric.get_radiometric_layers(
-                rm_layernames,
-                settings.target_bbox,
-                settings.outpath
+                property_name=property_name,
+                layernames=rm_layernames,
+                bbox=settings.target_bbox,
+                outpath=output_data_dir
             )
         except Exception as e:
             print(e)
@@ -114,6 +131,30 @@ def run(path_to_config):
             pass
 
 #--------------------------------------------------------------------------------------#
-
+    """
+    Add function here to apply mask and save copy of geotifs as COGS if mask boolean set to True.
+    Use rioxarray to force tiled tifs aka COGs.
+    """
+    
+    if data_mask is True:
+        print("data mask is True")
+        os.makedirs(output_masked_data_dir, exist_ok=True)
+        
+        # make a list of all the tif files in the 'data' package that were harvested from sources
+        tif_files = list_tif_files(output_data_dir)
+        try:
+            for tif in tif_files:
+                # Clips a raster to the area of a shape, and reprojects.
+                masked_data = reproj_mask(
+                    filename=tif,
+                    input_filepath = output_data_dir,
+                    bbox=input_geom,
+                    crscode=target_crs,
+                    output_filepath=output_masked_data_dir,
+                    resample=resample)
+        except Exception as e:
+            print(e)
+    else:
+        print("data mask is false")
 
     print("\nHarvest complete")

@@ -1,4 +1,14 @@
+import logging
+import os
+import sys
+import json
 import pystac_client
+import rasterio
+from rasterio.windows import from_bounds
+
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def initialize_stac_client(stac_url):
     """
@@ -10,8 +20,15 @@ def initialize_stac_client(stac_url):
     Returns:
     - A pystac_client.Client object
     """
-    client = pystac_client.Client.open(stac_url)
-    return client
+    try:
+        logger.info(f"Initializing STAC client for URL: {stac_url}")
+        client = pystac_client.Client.open(stac_url)
+        logger.info("STAC client initialized successfully")
+        return client
+    except Exception:
+        logger.error(f"Failed to initialize STAC client for URL: {stac_url}", exc_info=True)
+        raise
+
 
 def query_stac_api(client, bbox, collections, start_date=None, end_date=None, limit=10):
     """
@@ -28,19 +45,22 @@ def query_stac_api(client, bbox, collections, start_date=None, end_date=None, li
     Returns:
     - A list of STAC Items that match the query parameters.
     """
-
-    search_params = {
-        "bbox": bbox,
-        "collections": collections,
-        "limit": limit
-    }
-    if start_date and end_date:
-        search_params["datetime"] = f"{start_date}/{end_date}"
-    
-    search = client.search(**search_params)
-    
-    items = list(search.items())
-    return items
+    try: 
+        search_params = {
+            "bbox": bbox,
+            "collections": collections,
+            "limit": limit
+        }
+        if start_date and end_date:
+            search_params["datetime"] = f"{start_date}/{end_date}"
+        
+        search = client.search(**search_params)
+        items = list(search.items())
+        logger.info(f"Found {len(items)} items")
+        return items
+    except Exception:
+        logger.error("Failed to query STAC API", exc_info=True)
+        raise
 
 def inspect_stac_item(item):
     """
@@ -58,24 +78,24 @@ def inspect_stac_item(item):
     Returns:
     - None: This function does not return any value. It only prints information to the console.
     """
-    
+
     # Print the unique identifier of the STAC item
     print("Item ID:", item.id)
-    
+
     # Print the acquisition date of the data, which is stored in the item's properties
     print("Date:", item.properties.get('datetime'))
-    
+
     # Begin iterating over the assets associated with this STAC item.
     # Assets represent individual data files or resources related to this item.
     print("Assets:")
     for asset_key, asset in item.assets.items():
         # asset_key is the name used to refer to this asset in the STAC item's assets dictionary.
         # asset is the actual asset object, which contains metadata about the data file or resource.
-        
+
         # Print the key of the asset and its title. The title is a human-readable name for the asset.
         # If no title is provided, it defaults to 'No title'.
         print(f"  - {asset_key}: {asset.title or 'No title'}")
-        
+
         # Print a description of the asset, which can provide more context about the data it contains.
         # If no description is provided, it defaults to 'No description'.
         print(f"    Description: {asset.description or 'No description'}")
@@ -87,3 +107,103 @@ def inspect_stac_item(item):
         # such as whether it's the primary data ('data'), metadata about the item ('metadata'), a thumbnail image ('thumbnail'), etc.
         # The roles are joined by a comma in case there are multiple roles.
         print(f"    Roles: {', '.join(asset.roles)}")
+
+def process_dem_asset(dem_asset, bbox, output_tiff_filename):
+    """
+    Process a DEM asset by reading a specific region defined by a bounding box and writing it to a new file.
+
+    Parameters:
+    - dem_asset: The STAC asset object containing the href to the DEM file.
+    - bbox (tuple): The bounding box for the region to extract (min_lon, min_lat, max_lon, max_lat).
+    - output_tiff_filename (str): The file path where the output TIFF file will be written.
+    - asset_type (str): The type of the asset (typically 'overlay' considering we're using rasterio).
+
+    Returns:
+    - None
+    """
+    try:
+        logger.info("Opening DEM asset from: %s", dem_asset.href)
+        data, metadata = None, {}
+
+        with rasterio.open(dem_asset.href) as src:
+            window = from_bounds(*bbox, transform=src.transform)
+            data = src.read(window=window)
+
+            # Extract required metadata or other information from src
+            metadata = src.meta.copy()
+            metadata.update({
+                'height': window.height,
+                'width': window.width,
+                'transform': rasterio.windows.transform(window, src.transform)
+            })
+
+            # Ensure the directory exists
+            output_directory = os.path.dirname(output_tiff_filename)
+            # Create the directory if it does not exist
+            os.makedirs(output_directory, exist_ok=True)
+
+            logger.info("Writing to file:  %s", output_tiff_filename)
+            with rasterio.open(output_tiff_filename, 'w', **metadata) as dst:
+                dst.write(data)
+                logger.info("Written data to %s", output_tiff_filename)
+
+            # Calculate the size of the data in bytes
+            data_size_bytes = data.nbytes
+            logger.info("Read data size: %d bytes", data_size_bytes)
+
+            # Optionally, log the size of the written file
+            output_file_size = os.path.getsize(output_tiff_filename)
+            logger.info("Output file size: %d bytes", output_file_size)
+        return data, metadata, src
+    except Exception as e:
+        logger.error("Failed to process DEM asset: %s", e, exc_info=True)
+        raise
+
+def save_metadata_sidecar(file_path, metadata):
+    """
+    Saves metadata to a sidecar file in JSON format.
+
+    Parameters:
+    - file_path (str): The path to the primary file. The sidecar file will be named based on this path.
+    - metadata (dict): The metadata to save.
+    - asset_type (str, optional): The type of the asset, e.g., 'overlay' or 'meta'. If provided, it's added to the metadata.
+
+    Returns:
+    - None
+    """
+
+    # Construct the sidecar filename based on the primary file's path
+    sidecar_filename = f"{file_path}.meta.json"
+
+    # Save the metadata to the sidecar file
+    try:
+        with open(sidecar_filename, 'w', encoding='utf-8') as sidecar_file:
+            json.dump(metadata, sidecar_file)
+        logger.info("Metadata saved to %s", sidecar_filename)
+    except Exception as e:
+        logger.error("Failed to save metadata sidecar file: %s", e, exc_info=True)
+
+def read_metadata_sidecar(file_path):
+    """
+    Reads metadata from a sidecar file associated with the primary file.
+    
+    If the file is already a sidecar file (ending with .meta.json), it returns an empty dict.
+
+    Parameters:
+    - file_path (str): The path to the primary file.
+
+    Returns:
+    - dict: The metadata read from the sidecar file. Returns an empty dict if sidecar file is not found or if the input is already a sidecar file.
+    """
+    if file_path.endswith(".meta.json"):
+        logger.warning("Attempting to read a sidecar file for a sidecar file. Skipping.")
+        return {}
+
+    sidecar_filename = f"{file_path}.meta.json"
+    try:
+        with open(sidecar_filename, 'r', encoding='utf-8') as sidecar_file:
+            metadata = json.load(sidecar_file)
+        return metadata
+    except FileNotFoundError:
+        logger.warning(f"Sidecar file {sidecar_filename} not found.")
+        return {}
