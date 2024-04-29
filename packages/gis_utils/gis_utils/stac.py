@@ -183,7 +183,7 @@ def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, 
         data, metadata = None, {}
 
         with rasterio.open(dem_asset.href) as src:
-            out_img, out_transform = rasterio.mask.mask(src, geometry, crop=True)
+            data, out_transform = rasterio.mask.mask(src, geometry, crop=True, nodata=0)
             
             #window = from_bounds(*bbox, transform=src.transform)
             #data = src.read(window=window)
@@ -193,14 +193,11 @@ def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, 
             
             # Jenna modified metadata update to work with mask:
             metadata.update({
-                'height': out_img.shape[1],
-                'width': out_img.shape[2],
+                'height': data.shape[1],
+                'width': data.shape[2],
                 'transform': out_transform
             })
             
-            print(metadata)
-            
-
             # Ensure the directory exists
             output_directory = os.path.dirname(output_tiff_filename)
             # Create the directory if it does not exist
@@ -208,7 +205,7 @@ def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, 
 
             logger.info("Writing to mask file:  %s", output_tiff_filename)
             with rasterio.open(output_tiff_filename, 'w', **metadata) as dst:
-                dst.write(out_img)
+                dst.write(data)
                 logger.info("Written masked data to %s", output_tiff_filename)
 
             # Calculate the size of the data in bytes
