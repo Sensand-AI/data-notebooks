@@ -5,6 +5,7 @@ import json
 import pystac_client
 import rasterio
 from rasterio.windows import from_bounds
+import rasterio.mask
 
 # Configure logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -136,6 +137,9 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
                 'width': window.width,
                 'transform': rasterio.windows.transform(window, src.transform)
             })
+            
+            print(metadata)
+            
 
             # Ensure the directory exists
             output_directory = os.path.dirname(output_tiff_filename)
@@ -154,6 +158,67 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
             # Optionally, log the size of the written file
             output_file_size = os.path.getsize(output_tiff_filename)
             logger.info("Output file size: %d bytes", output_file_size)
+        return data, metadata, src
+    except Exception as e:
+        logger.error("Failed to process DEM asset: %s", e, exc_info=True)
+        raise
+    
+def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, masked=True):
+    """
+    Process a DEM asset by reading a specific region defined by a bounding box and writing it to a new file.
+
+    Parameters:
+    - dem_asset: The STAC asset object containing the href to the DEM file.
+    - geometry (geopandas Dataframe): Geodataframe containing the poygon shape for masking, formatted for rasterio
+    - bbox (tuple): The bounding box for the region to extract (min_lon, min_lat, max_lon, max_lat).
+    - output_tiff_filename (str): The file path where the output TIFF file will be written.
+    - asset_type (str): The type of the asset (typically 'overlay' considering we're using rasterio).
+    - masked (boolean): If true, apply masking to the raster.
+
+    Returns:
+    - None
+    """
+    try:
+        logger.info("Opening DEM asset from: %s", dem_asset.href)
+        data, metadata = None, {}
+
+        with rasterio.open(dem_asset.href) as src:
+            out_img, out_transform = rasterio.mask.mask(src, geometry, crop=True)
+            
+            #window = from_bounds(*bbox, transform=src.transform)
+            #data = src.read(window=window)
+
+            # Extract required metadata or other information from src
+            metadata = src.meta.copy()
+            
+            # Jenna modified metadata update to work with mask:
+            metadata.update({
+                'height': out_img.shape[1],
+                'width': out_img.shape[2],
+                'transform': out_transform
+            })
+            
+            print(metadata)
+            
+
+            # Ensure the directory exists
+            output_directory = os.path.dirname(output_tiff_filename)
+            # Create the directory if it does not exist
+            os.makedirs(output_directory, exist_ok=True)
+
+            logger.info("Writing to mask file:  %s", output_tiff_filename)
+            with rasterio.open(output_tiff_filename, 'w', **metadata) as dst:
+                dst.write(out_img)
+                logger.info("Written masked data to %s", output_tiff_filename)
+
+            # Calculate the size of the data in bytes
+            # turned these off temporarily as nodata mask is messing with it.
+            #data_size_bytes = data.nbytes
+            #logger.info("Read data size: %d bytes", data_size_bytes)
+
+            # Optionally, log the size of the written file
+            output_file_size = os.path.getsize(output_tiff_filename)
+            logger.info("Output mask file size: %d bytes", output_file_size)
         return data, metadata, src
     except Exception as e:
         logger.error("Failed to process DEM asset: %s", e, exc_info=True)
