@@ -33,31 +33,32 @@ steps:
       - label: "[TEST STEP]"
         command:
           - echo "This should only run when this branch has an open PR"
-        if: "build.pull_request.draft != null" # only run on open PR (NOT FULLY TESTED)
+        if: "build.pull_request.draft != null" # should only run on open PR (TODO: test w/open PR)
         
-      # - label: ":docker: Notebook Executor Build & Push"
-      #   plugins:
-      #     - docker-compose#v4.14.0:
-      #         build: notebook-executor
-      #         image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
-      #         image-name: latest #"${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
-      #         cache-from:
-      #           - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
-      #         config:
-      #           - docker-compose.yml
-      #     - *ecr-sensand
+      - label: ":docker: Notebook Executor Build & Push"
+        plugins:
+          - docker-compose#v4.14.0:
+              build: notebook-executor
+              image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
+              image-name: latest # TODO: change image tag "${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+              cache-from:
+                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
+              config:
+                - docker-compose.yml
+          - *ecr-sensand
+        if: "build.pull_request.draft != null"
         
-      # TODO: update lambda
       - label: ":aws: Update Notebook Executor Lambda (Staging)"
-        # env:
-        #   IMAGE_NAME: test-name
+        env:
+          IMAGE_NAME: notebook-executor
+          IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
         command:
-          #- aws ecs list-clusters --region us-east-1 # this worked
           - aws lambda get-function --function-name NotebookExecutorFunction --region us-east-1
-          # - ./buildkite/.buildkite/ecs-deploy.sh -c blockbase -n api -i $$IMAGE_NAME --enable-rollback
+          - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:latest --region us-east-1
         #retry: *auto-retries
         #concurrency: 1
         #concurrency_group: "staging-backend/deploy"
         plugins:
           - *assume-role-staging
           - *docker-compose-deploy
+          
