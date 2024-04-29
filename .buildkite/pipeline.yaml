@@ -33,7 +33,6 @@ steps:
       - label: "[TEST STEP]"
         command:
           - echo "This should only run when this branch has an open PR"
-        if: "build.pull_request.draft != null" # should only run on open PR (TODO: test w/open PR)
         
       - label: ":docker: Notebook Executor Build & Push"
         plugins:
@@ -46,7 +45,6 @@ steps:
               config:
                 - docker-compose.yml
           - *ecr-sensand
-        if: "build.pull_request.draft != null"
         
       - label: ":aws: Update Notebook Executor Lambda (Staging)"
         env:
