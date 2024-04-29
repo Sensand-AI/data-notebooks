@@ -19,17 +19,9 @@
         },
         "propertyName": {
           "type": "string"
-        },
-        "start_date": {
-          "type": "string",
-          "format": "date"
-        },
-        "end_date": {
-          "type": "string",
-          "format": "date"
         }
       },
-      "required": ["geojson", "propertyName", "start_date", "end_date"]
+      "required": ["geojson", "propertyName"]
     }
   },
   "required": ["notebook_name", "parameters", "output_type"]
