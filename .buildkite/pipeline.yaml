@@ -52,15 +52,12 @@ steps:
           IMAGE_NAME: notebook-executor
           IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
         command:
-          - echo $$IMAGE_URL
-          - echo $$IMAGE_NAME
-          # - aws lambda get-function --function-name NotebookExecutorFunction --region us-east-1
           - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:latest --region us-east-1
         #retry: *auto-retries
         #concurrency: 1
         #concurrency_group: "staging-backend/deploy"
         plugins:
           - *ecr-sensand
-          - *assume-role-staging
+          #- *assume-role-staging
           - *docker-compose-deploy
           
