@@ -56,9 +56,4 @@ ENV DD_LAMBDA_HANDLER="app.lambda_function.lambda_handler"
 # Some datadog specific environment variables
 ENV DD_SERVICE="notebook-executor"
 
-# For debugging
-RUN yum install -y procps net-tools && \
-    yum clean all && \
-    rm -rf /var/cache/yum /var/lib/yum/history
-
 CMD ["datadog_lambda.handler.handler"]
