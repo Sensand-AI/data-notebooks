@@ -24,33 +24,36 @@ docker-compose-deploy-plugin: &docker-compose-deploy
       - AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN
       - IMAGE_NAME
+      - IMAGE_URL
 
 steps:
   # TODO: lint & test
   - group: "Notebook Executor Deploy (Staging)"
     key: "notebook-executor-deploy"
     steps:
-      - label: "[TEST STEP]"
-        command:
-          - echo "This should only run when this branch has an open PR"
+      # - label: "[TEST STEP]"
+      #   command:
+      #     - echo "This should only run when this branch has an open PR"
         
-      - label: ":docker: Notebook Executor Build & Push"
-        plugins:
-          - docker-compose#v4.14.0:
-              build: notebook-executor
-              image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
-              image-name: latest # TODO: change image tag "${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
-              cache-from:
-                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
-              config:
-                - docker-compose.yml
-          - *ecr-sensand
+      # - label: ":docker: Notebook Executor Build & Push"
+      #   plugins:
+      #     - docker-compose#v4.14.0:
+      #         build: notebook-executor
+      #         image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
+      #         image-name: latest # TODO: change image tag "${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+      #         cache-from:
+      #           - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
+      #         config:
+      #           - docker-compose.yml
+      #     - *ecr-sensand
         
       - label: ":aws: Update Notebook Executor Lambda (Staging)"
         env:
           IMAGE_NAME: notebook-executor
           IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
         command:
+          - echo $$IMAGE_URL
+          - echo $$IMAGE_NAME
           # - aws lambda get-function --function-name NotebookExecutorFunction --region us-east-1
           - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:latest --region us-east-1
         #retry: *auto-retries
