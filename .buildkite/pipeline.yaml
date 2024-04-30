@@ -60,6 +60,7 @@ steps:
         #concurrency: 1
         #concurrency_group: "staging-backend/deploy"
         plugins:
+          - *ecr-sensand
           - *assume-role-staging
           - *docker-compose-deploy
           
