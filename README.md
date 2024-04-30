@@ -96,3 +96,23 @@ Click on the Kernel dropdown on the top right of the notebook and select the ker
 Enter the URL of the jupyter server (http://jupyter:8888/?token=vscode) and click `Connect`.
 
 You will get another prompt to select the kernel. Select the kernel listed with `ipykernel`.
+
+
+## Testing notebook executor outputs
+
+- in terminal run `docker compose build notebook-executor` and `docker compose up notebook-executor` to ensure container is up to date
+- in Postman, set up a new collection and create a `POST` request using the port that the docker container is mapped to
+   - e.g. `http://localhost:9002/2015-03-31/functions/function/invocations`
+- Make sure the 'body' of the request is set to JSON and add the following (note geometry not included in example):
+```{
+    "notebook_name": "dem",
+    "save_output": true,
+    "output_type": "overlay",
+    "parameters": {
+        "propertyName": "ncaorana",
+        "start_date": "2023-01-01",
+        "end_date": "2023-03-01",
+        "geojson": {...
+```
+- Send the postman request. It should timeout after 180 second and return a response. In the response there will be a presigned url link.
+- download the tiff from the link and open it in QGIS to test.
