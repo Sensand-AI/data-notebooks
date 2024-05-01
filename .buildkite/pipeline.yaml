@@ -48,7 +48,7 @@ steps:
       - wait
 
       - label: ":aws: Update Notebook Executor Lambda (Staging)"
-        #branches: main
+        branches: main
         env:
           IMAGE_NAME: notebook-executor
           IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
