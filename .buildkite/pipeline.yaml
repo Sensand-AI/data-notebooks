@@ -53,6 +53,9 @@ steps:
           IMAGE_NAME: notebook-executor
           IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
         command:
+          - build.env(IMAGE_NAME)
+          - build.env(BUILDKITE_BRANCH)
+          - build.env(BUILDKITE_COMMIT)
           - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:$$BUILDKITE_BRANCH-$$BUILDKITE_COMMIT --region us-east-1
         plugins:
           - *assume-role-staging
