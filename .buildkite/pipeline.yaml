@@ -31,33 +31,30 @@ steps:
   - group: "Notebook Executor Deploy (Staging)"
     key: "notebook-executor-deploy"
     steps:
-      - label: "TEST"
+      - label: ":docker: Notebook Executor Build & Push"
+        plugins:
+          - docker-compose#v4.14.0:
+              build: notebook-executor
+              image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
+              image-name: "${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+              cache-from:
+                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}
+                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
+              config:
+                - docker-compose.yml
+          - *ecr-sensand
+        if: "!build.pull_request.draft"
+
+      - wait
+
+      - label: ":aws: Update Notebook Executor Lambda (Staging)"
+        branches: main
+        env:
+          IMAGE_NAME: notebook-executor
+          IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
         command:
-        - echo $$BUILDKITE_BRANCH $$BUILDKITE_COMMIT
-      
-      # - label: ":docker: Notebook Executor Build & Push"
-      #   plugins:
-      #     - docker-compose#v4.14.0:
-      #         build: notebook-executor
-      #         image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
-      #         image-name: "${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
-      #         cache-from:
-      #           - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
-      #         config:
-      #           - docker-compose.yml
-      #     - *ecr-sensand
-      #   if: "!build.pull_request.draft"
-
-      # - wait
-
-      # - label: ":aws: Update Notebook Executor Lambda (Staging)"
-      #   branches: main
-      #   env:
-      #     IMAGE_NAME: notebook-executor
-      #     IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
-      #   command:
-      #     - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:latest --region us-east-1
-      #   plugins:
-      #     - *assume-role-staging
-      #     - *docker-compose-deploy
+          - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:$$BUILDKITE_BRANCH-$$BUILDKITE_COMMIT --region us-east-1
+        plugins:
+          - *assume-role-staging
+          - *docker-compose-deploy
           
