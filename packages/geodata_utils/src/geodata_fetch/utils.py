@@ -187,10 +187,15 @@ def msg_success(message, log=False):
 def list_tif_files(path):
     return [f for f in os.listdir(path) if f.endswith('.tif')]
 
-def load_settings(fname_settings):
-    # Load settings from yaml file
-    with open(fname_settings, "r") as f:
-        settings = json.load(f)
+def load_settings(input_settings):
+    # Check if the input is a string (path) or a file-like object
+    if isinstance(input_settings, str):
+        # If string, open the file as usual
+        with open(input_settings, "r") as f:
+            settings = json.load(f)
+    else:
+        # If file-like object, load directly without opening a file
+        settings = json.load(input_settings)
         
     # Parse settings dictinary as namespace (settings are available as
     # settings.variable_name rather than settings['variable_name'])

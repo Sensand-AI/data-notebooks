@@ -1,0 +1,15 @@
+2024-05-01 05:40:47,433 Found credentials in environment variables.
+2024-05-01 05:41:01,363 Found credentials in environment variables.
+2024-05-01 05:41:52,519 Found credentials in environment variables.
+2024-05-01 05:41:52,548 Found credentials in environment variables.
+2024-05-01 05:41:52,565 Found credentials in environment variables.
+2024-05-01 05:41:52,590 Found credentials in environment variables.
+2024-05-01 05:41:52,605 Found credentials in environment variables.
+2024-05-01 05:41:52,623 Found credentials in environment variables.
+2024-05-01 05:41:52,638 Found credentials in environment variables.
+2024-05-01 05:41:52,648 Found credentials in environment variables.
+2024-05-01 05:41:52,684 Found credentials in environment variables.
+2024-05-01 05:41:52,721 Found credentials in environment variables.
+2024-05-01 05:41:52,730 Found credentials in environment variables.
+2024-05-01 05:41:52,758 Found credentials in environment variables.
+2024-05-01 05:42:26,125 GDAL signalled an error: err_no=4, msg='/workspace/notebooks/sandbox/data/output-data/geodata-package-testing/masked-data/DEM_SRTM_1_Second_Hydro_Enforced_stardewvalley.tif: No such file or directory'
