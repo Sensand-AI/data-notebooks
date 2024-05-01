@@ -118,6 +118,8 @@ def lambda_handler(event, _):
         dict: The output of the Lambda function. Must be JSON serializable.
     """
 
+    print("Received event: ", event)
+
     # If invoked with a function url there's a body key
     if 'body' in event:
         event = json.loads(event['body'])
