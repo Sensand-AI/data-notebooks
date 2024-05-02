@@ -1,1 +1,8 @@
-2024-05-01 07:15:09,142 Found credentials in environment variables.
+2024-05-02 01:08:14,459 Found credentials in environment variables.
+2024-05-02 01:08:14,977 Starting the data harvester -----
+2024-05-02 01:08:14,979 Downloading SLGA data.
+2024-05-02 01:08:14,981 Successfully loaded SLGA dictionary.
+2024-05-02 01:08:15,292 Downloaded SLGA_Organic_Carbon_0-5cm_test.tif
+2024-05-02 01:08:15,638 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public.tif.meta.json
+2024-05-02 01:08:15,663 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_colored_cog.public.tif.meta.json
+2024-05-02 01:08:15,690 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_cog.public.tif.meta.json

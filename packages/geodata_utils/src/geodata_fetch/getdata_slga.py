@@ -11,33 +11,42 @@ The SLGA layers, metadata, licensing and atttribution are described in the confi
 """
 
 import os
+import sys
 import json
+import logging
 import importlib.resources #to read in slga.json during runtime
 from owslib.wcs import WebCoverageService
 from geodata_fetch import utils
 from geodata_fetch.utils import spin
 
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_slgadict():
+    try:
+        with importlib.resources.open_text('config','slga_soil.json') as f:
+            slga_json = json.load(f)
+        
+        slgadict = {}
+        slgadict["title"] = slga_json["title"]
+        slgadict["description"] = slga_json["description"]
+        slgadict["license"] = slga_json["license"]
+        slgadict["source_url"] = slga_json["source_url"]
+        slgadict["copyright"] = slga_json["copyright"]
+        slgadict["attribution"] = slga_json["attribution"]
+        slgadict["crs"] = slga_json["crs"]
+        slgadict["bbox"] = slga_json["bbox"]
+        slgadict["resolution_arcsec"] = slga_json["resolution_arcsec"]
+        slgadict["depth_min"] = slga_json["depth_min"]
+        slgadict["depth_max"] = slga_json["depth_max"]
+        slgadict["layers_url"] = slga_json["layers_url"]
 
-    with importlib.resources.open_text('config','slga_soil.json') as f:
-        slga_json = json.load(f)
-    
-    slgadict = {}
-    slgadict["title"] = slga_json["title"]
-    slgadict["description"] = slga_json["description"]
-    slgadict["license"] = slga_json["license"]
-    slgadict["source_url"] = slga_json["source_url"]
-    slgadict["copyright"] = slga_json["copyright"]
-    slgadict["attribution"] = slga_json["attribution"]
-    slgadict["crs"] = slga_json["crs"]
-    slgadict["bbox"] = slga_json["bbox"]
-    slgadict["resolution_arcsec"] = slga_json["resolution_arcsec"]
-    slgadict["depth_min"] = slga_json["depth_min"]
-    slgadict["depth_max"] = slga_json["depth_max"]
-    slgadict["layers_url"] = slga_json["layers_url"]
-
-    return slgadict
+        logging.info("Successfully loaded SLGA dictionary.")
+        return slgadict
+    except Exception as e:
+        logging.error(f"Failed to load SLGA dictionary: {str(e)}")
+        return None
 
 
 """
@@ -69,11 +78,7 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         
     # Create WCS object
     filename = outfname.split(os.sep)[-1]
-    if os.path.exists(outfname):
-        utils.msg_warn(f"{filename} already exists, skipping download")
-
-        return False
-    else:
+    try:
         with spin(f"Downloading {filename}") as s:
             wcs = WebCoverageService(url, version="1.0.0", timeout=300)
             # Get data
@@ -90,7 +95,11 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         # Save data
         with open(outfname, "wb") as f:
             f.write(data.read())
+        logging.info(f"Downloaded {filename}")
         return True
+    except Exception as e:
+        logging.error(f"Failed to download {filename}: {str(e)}")
+        return False
 
 
 def depth2identifier(depth_min, depth_max):
@@ -111,27 +120,31 @@ def depth2identifier(depth_min, depth_max):
     depth_lower : lower depth of interval
     depth_upper : upper depth of interval
     """
-    depth_intervals = [0, 5, 15, 30, 60, 100, 200]
-    identifiers = []
-    identifiers_ci_5pc = []
-    identifiers_ci_95pc = []
-    depths_lower = []
-    depths_upper = []
-    # Loop over depth intervals
-    for i in range(len(depth_intervals) - 1):
-        if (depth_min <= depth_intervals[i]) & (depth_max >= depth_intervals[i + 1]):
-            identifiers.append(str(3 * i + 1))
-            identifiers_ci_5pc.append(str(3 * i + 3))
-            identifiers_ci_95pc.append(str(3 * i + 2))
-            depths_lower.append(depth_intervals[i])
-            depths_upper.append(depth_intervals[i + 1])
-    return (
-        identifiers,
-        identifiers_ci_5pc,
-        identifiers_ci_95pc,
-        depths_lower,
-        depths_upper,
-    )
+    try:
+        depth_intervals = [0, 5, 15, 30, 60, 100, 200]
+        identifiers = []
+        identifiers_ci_5pc = []
+        identifiers_ci_95pc = []
+        depths_lower = []
+        depths_upper = []
+        # Loop over depth intervals
+        for i in range(len(depth_intervals) - 1):
+            if (depth_min <= depth_intervals[i]) & (depth_max >= depth_intervals[i + 1]):
+                identifiers.append(str(3 * i + 1))
+                identifiers_ci_5pc.append(str(3 * i + 3))
+                identifiers_ci_95pc.append(str(3 * i + 2))
+                depths_lower.append(depth_intervals[i])
+                depths_upper.append(depth_intervals[i + 1])
+        return (
+            identifiers,
+            identifiers_ci_5pc,
+            identifiers_ci_95pc,
+            depths_lower,
+            depths_upper,
+        )
+    except Exception as e:
+        logging.error(f"Failed to get identifiers: {str(e)}")
+        return None, None, None, None, None
 
 
 def identifier2depthbounds(depths):
@@ -150,21 +163,25 @@ def identifier2depthbounds(depths):
     depth_options = ["0-5cm", "5-15cm", "15-30cm",
                      "30-60cm", "60-100cm", "100-200cm"]
     depth_intervals = [0, 5, 15, 30, 60, 100, 200]
-    # Check first if entries valid
-    for depth in depth_options:
-        assert (
-            depth in depth_options
-        ), f"depth should be one of the following options {depth_options}"
-    # find min and max depth
-    ncount = 0
-    for i in range(len(depth_options)):
-        if depth_options[i] in depths:
-            depth_max = depth_intervals[i + 1]
-            if ncount == 0:
-                depth_min = depth_intervals[i]
-            ncount += 1
-    assert ncount == len(depths), f"ncount = {ncount}"
-    return depth_min, depth_max
+    try:
+        # Check first if entries valid
+        for depth in depths:
+            assert (
+                depth in depth_options
+            ), f"depth should be one of the following options {depth_options}"
+        # find min and max depth
+        ncount = 0
+        for i in range(len(depth_options)):
+            if depth_options[i] in depths:
+                depth_max = depth_intervals[i + 1]
+                if ncount == 0:
+                    depth_min = depth_intervals[i]
+                ncount += 1
+        assert ncount == len(depths), f"ncount = {ncount}"
+        return depth_min, depth_max
+    except Exception as e:
+        logging.error(f"Failed to get min and max depth: {str(e)}")
+        return None, None
 
 
 def get_slga_layers(
@@ -172,10 +189,10 @@ def get_slga_layers(
     layernames,
     bbox,
     outpath,
-    resolution=3, #remove hard coding, pull from settings json. remember this is a default and should be able to be overridden
-    depth_min=0, #remove hard coding, pull from settings json
-    depth_max=200, #remove hard coding, pull from settings json
-    get_ci=False #ammend to set this in the json/API call instead of being hard-coded here
+    resolution=3,
+    depth_min=0,
+    depth_max=200,
+    get_ci=False
 ):
     """
     Download layers from SLGA and saves as geotif.
@@ -193,88 +210,88 @@ def get_slga_layers(
     -------
     fnames_out : list of output file names
     """
+    try:
+        # Check if layernames is a list
+        if not isinstance(layernames, list):
+            layernames = [layernames]
 
-    # Check if layernames is a list
-    if not isinstance(layernames, list):
-        layernames = [layernames]
+        # Check if depth_min and depth_max are lists:
+        if not isinstance(depth_min, list):
+            depth_min = [depth_min] * len(layernames)
+        if not isinstance(depth_max, list):
+            depth_max = [depth_max] * len(layernames)
 
+        assert len(depth_min) == len(depth_max), "depth_min and depth_max should be lists of same length"
+        assert len(depth_min) == len(layernames), "depth_min and depth_max should be lists with same length as layernames"
 
-    # Check if depth_min and depth_max are lists:
-    if not isinstance(depth_min, list):
-        depth_min = [depth_min] * len(layernames)
-    if not isinstance(depth_max, list):
-        depth_max = [depth_max] * len(layernames)
+        # Check if outpath exist, if not create it
+        os.makedirs(outpath, exist_ok=True)
 
-    assert len(depth_min) == len(depth_max), "depth_min and depth_max should be lists of same length"
-    assert len(depth_min) == len(layernames), "depth_min and depth_max should be lists with same length as layernames"
-    
+        # If the resolution passed is None, set to native resolution of datasource
+        if resolution is None:
+            resolution = get_slgadict()["resolution_arcsec"]
 
-    # Check if outpath exist, if not create it
-    os.makedirs(outpath, exist_ok=True)
+        # Get SLGA dictionary
+        slgadict = get_slgadict()
+        layers_url = slgadict["layers_url"]
 
-    # If the resolution passed is None, set to native resolution of datasource
-    if resolution is None:
-        resolution = get_slgadict()["resolution_arcsec"]
+        # Convert resolution from arcsec to degree
+        resolution_deg = resolution / 3600.0
 
-    # Get SLGA dictionary
-    slgadict = get_slgadict()
-    layers_url = slgadict["layers_url"]
+        # set target crs based on config json
+        crs = slgadict["crs"]
 
-    # Convert resolution from arcsec to degree
-    #is this needed? Why can't it stay in arcsecond?
-    resolution_deg = resolution / 3600.0
-    
-    # set target crs based on config json
-    crs = slgadict["crs"]
-
-    fnames_out = []
-    for idx, layername in enumerate(layernames):
-        # Get layer url
-        layer_url = layers_url[layername]
-        # Get depth identifiers for layers
-        (identifiers,
-        identifiers_ci_5pc,
-        identifiers_ci_95pc,
-        depth_lower,
-        depth_upper,
-        ) = depth2identifier(depth_min[idx], depth_max[idx])
-        for i in range(len(identifiers)):
-            identifier = identifiers[i]
-            # Get layer name
-            layer_depth_name = f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
-            # Layer fname
-            fname_out = os.path.join(outpath, layer_depth_name + "_" + property_name + ".tif")
-            # download data
-            dl = get_wcsmap(layer_url, identifier, crs,
-                            bbox, resolution_deg, fname_out)
-            fnames_out.append(fname_out)
-        if get_ci:
+        fnames_out = []
+        for idx, layername in enumerate(layernames):
+            # Get layer url
+            layer_url = layers_url[layername]
+            # Get depth identifiers for layers
+            (identifiers,
+            identifiers_ci_5pc,
+            identifiers_ci_95pc,
+            depth_lower,
+            depth_upper,
+            ) = depth2identifier(depth_min[idx], depth_max[idx])
             for i in range(len(identifiers)):
-                # 5th percentile
-                identifier = identifiers_ci_5pc[i]
+                identifier = identifiers[i]
                 # Get layer name
-                layer_depth_name = (
-                    f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
-                )
+                layer_depth_name = f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
                 # Layer fname
-                fname_out = os.path.join(
-                    outpath, layer_depth_name + "_" + property_name + "_5percentile.tif")
+                fname_out = os.path.join(outpath, layer_depth_name + "_" + property_name + ".tif")
                 # download data
-                get_wcsmap(layer_url, identifier, crs,
-                           bbox, resolution_deg, fname_out)
-                # 95th percentile
-                identifier = identifiers_ci_95pc[i]
-                # Get layer name
-                layer_depth_name = (
-                    f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
-                )
-                # Layer fname
-                fname_out = os.path.join(
-                    outpath, layer_depth_name + "_" + property_name + "_95percentile.tif"
-                )
-                # download data
-                dl = get_wcsmap(
-                    layer_url, identifier, crs, bbox, resolution_deg, fname_out)
+                dl = get_wcsmap(layer_url, identifier, crs,
+                                bbox, resolution_deg, fname_out)
+                fnames_out.append(fname_out)
+            if get_ci:
+                for i in range(len(identifiers)):
+                    # 5th percentile
+                    identifier = identifiers_ci_5pc[i]
+                    # Get layer name
+                    layer_depth_name = (
+                        f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
+                    )
+                    # Layer fname
+                    fname_out = os.path.join(
+                        outpath, layer_depth_name + "_" + property_name + "_5percentile.tif")
+                    # download data
+                    get_wcsmap(layer_url, identifier, crs,
+                                bbox, resolution_deg, fname_out)
+                    # 95th percentile
+                    identifier = identifiers_ci_95pc[i]
+                    # Get layer name
+                    layer_depth_name = (
+                        f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
+                    )
+                    # Layer fname
+                    fname_out = os.path.join(
+                        outpath, layer_depth_name + "_" + property_name + "_95percentile.tif"
+                    )
+                    # download data
+                    dl = get_wcsmap(
+                        layer_url, identifier, crs, bbox, resolution_deg, fname_out)
 
-    return fnames_out
+        return fnames_out
+    except Exception as e:
+        logging.error(f"Failed to get SLGA layers: {str(e)}")
+        return None
 

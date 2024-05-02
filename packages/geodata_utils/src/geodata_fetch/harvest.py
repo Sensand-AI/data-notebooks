@@ -1,4 +1,6 @@
 import os
+import sys
+import logging
 from pathlib import Path
 import geopandas as gpd
 import numpy as np
@@ -7,9 +9,12 @@ from datetime import datetime, timedelta
 from geodata_fetch import getdata_slga,getdata_dem, getdata_radiometric, utils
 from geodata_fetch.utils import  load_settings, reproj_mask, list_tif_files
 
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def run(path_to_config, input_geom):
-    print("Starting the data harvester -----")
+    logger.info("Starting the data harvester -----")
 
     settings = load_settings(path_to_config)
     target_crs = settings.target_crs
@@ -54,12 +59,12 @@ def run(path_to_config, input_geom):
     # process each data source
     utils.msg_info(
         f"Found the following {count_sources} sources: {list_sources}")
-    print("\nDownloading from API sources -----")
+    #print("\nDownloading from API sources -----")
 
 #-----add getdata functions here---------------------------------------------------------#
 
     if "SLGA" in list_sources:
-        print("Downloading SLGA data...")
+        logger.info("Downloading SLGA data.")
         slga_layernames = list(settings.target_sources["SLGA"].keys())
         # get min and max depth for each layername
         depth_min = []
@@ -91,7 +96,7 @@ def run(path_to_config, input_geom):
     
     
     if "DEM" in list_sources:
-        print("Downloading DEM data...")
+        logger.info("Downloading DEM data.")
         dem_layernames = settings.target_sources["DEM"]
         try:
             files_dem = getdata_dem.get_dem_layers(
@@ -113,7 +118,7 @@ def run(path_to_config, input_geom):
         
         
     if "Radiometric" in list_sources:
-        print("Downloading Radiometric data...")
+        logger.info("Downloading Radiometric data.")
         rm_layernames = settings.target_sources["Radiometric"]
         try:
             files_rm = getdata_radiometric.get_radiometric_layers(
@@ -137,7 +142,6 @@ def run(path_to_config, input_geom):
     """
     
     if data_mask is True:
-        print("data mask is True")
         os.makedirs(output_masked_data_dir, exist_ok=True)
         
         # make a list of all the tif files in the 'data' package that were harvested from sources
@@ -152,9 +156,11 @@ def run(path_to_config, input_geom):
                     crscode=target_crs,
                     output_filepath=output_masked_data_dir,
                     resample=resample)
+                
+                return masked_data
         except Exception as e:
             print(e)
     else:
-        print("data mask is false")
+        pass
 
     print("\nHarvest complete")
