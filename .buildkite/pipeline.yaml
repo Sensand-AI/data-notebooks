@@ -44,6 +44,8 @@ steps:
       - label: "!pull_request.draft test"
         command:
           - echo "test"
+          - echo $BUILDKITE_PULL_REQUEST_DRAFT
+          - echo "$BUILDKITE_PULL_REQUEST_DRAFT"
         if: "build.pull_request.draft"
 
       - label: "both test"
