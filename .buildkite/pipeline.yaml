@@ -42,7 +42,7 @@ steps:
         if: |
           $BUILDKITE_PULL_REQUEST
 
-      - label: "!pull_request.draft TEST"
+      - label: "!pull_request.draft test"
         command:
           - echo "test"
         if: |
