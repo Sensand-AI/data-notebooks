@@ -35,7 +35,13 @@ steps:
   - group: "Notebook Executor Deploy"
     key: "notebook-executor-deploy"
     steps:
+    
+      - label: "TEST"
+        command:
+          - echo ${BUILDKITE_PULL_REQUEST}
+
       - label: ":docker: Notebook Executor Build & Push (Platform)"
+        key: "notebook-executor-build-and-push"
         plugins:
           - docker-compose#v4.14.0:
               build: notebook-executor
@@ -49,10 +55,11 @@ steps:
           - *ecr-sensand
         if: "!build.pull_request.draft"
 
-      - wait
-
       - block: "Deploy Staging (Manual)"
         prompt: "Update Lambda Function in Staging?"
+        key: "deploy-staging-manual"
+        depends_on:
+          - "notebook-executor-build-and-push"
 
       - label: ":aws: Update Notebook Executor Lambda (Staging)"
         branches: main
@@ -61,12 +68,17 @@ steps:
           IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
         command:
           - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT} --region us-east-1
+        depends_on:
+          - "deploy-staging-manual"
         plugins:
           - *assume-role-staging
           - *docker-compose-deploy
       
       - block: "Deploy Production (Manual)"
         prompt: "Update Lambda Function in Production?"
+        key: "deploy-production-manual"
+        depends_on:
+          - "notebook-executor-build-and-push"
 
       - label: ":aws: Update Notebook Executor Lambda (Production)"
         branches: main
@@ -75,6 +87,8 @@ steps:
           IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
         command:
           - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT} --region us-east-1
+        depends_on:
+          - "deploy-production-manual"
         plugins:
           - *assume-role-production
           - *docker-compose-deploy
