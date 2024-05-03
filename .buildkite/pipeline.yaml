@@ -46,12 +46,12 @@ steps:
           - echo "test"
         if: "build.pull_request.draft"
 
-      - label: "both test"
-        command:
-          - echo "test"
-        if: |
-          $BUILDKITE_PULL_REQUEST &&
-          !build.pull_request.draft
+      # - label: "both test"
+      #   command:
+      #     - echo "test"
+      #   if: |
+      #     $BUILDKITE_PULL_REQUEST &&
+      #     !build.pull_request.draft
 
       # - label: ":docker: Notebook Executor Build & Push (Platform)"
       #   key: "notebook-executor-build-and-push"
