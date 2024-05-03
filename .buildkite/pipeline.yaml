@@ -43,7 +43,7 @@ steps:
       - label: "CONDITIONAL TEST"
         command:
           - echo "cond test"
-        if: "$BUILDKITE_PULL_REQUEST"
+        if: "!$BUILDKITE_PULL_REQUEST"
 
       # - label: ":docker: Notebook Executor Build & Push (Platform)"
       #   key: "notebook-executor-build-and-push"
