@@ -44,12 +44,12 @@ steps:
         command:
           - echo $BUILDKITE_PULL_REQUEST_DRAFT
 
-      - label: "both test"
-        command:
-          - echo "test"
-        if: |
-          $BUILDKITE_PULL_REQUEST != null &&
-          !$BUILDKITE_PULL_REQUEST_DRAFT
+      # - label: "both test"
+      #   command:
+      #     - echo "test"
+      #   if: |
+      #     $BUILDKITE_PULL_REQUEST != null &&
+      #     !$BUILDKITE_PULL_REQUEST_DRAFT
 
       # - label: ":docker: Notebook Executor Build & Push (Platform)"
       #   key: "notebook-executor-build-and-push"
