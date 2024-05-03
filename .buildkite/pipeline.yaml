@@ -39,19 +39,19 @@ steps:
       - label: "BUILDKITE_PULL_REQUEST test"
         command:
           - echo "$BUILDKITE_PULL_REQUEST"
-        #if: "$BUILDKITE_PULL_REQUEST"
+        if: "$BUILDKITE_PULL_REQUEST != null"
 
       - label: "!pull_request.draft test"
         command:
           - echo "test"
         if: "build.pull_request.draft"
 
-      # - label: "both test"
-      #   command:
-      #     - echo "test"
-      #   if: |
-      #     $BUILDKITE_PULL_REQUEST &&
-      #     !build.pull_request.draft
+      - label: "both test"
+        command:
+          - echo "test"
+        if: |
+          $BUILDKITE_PULL_REQUEST != null &&
+          !build.pull_request.draft
 
       # - label: ":docker: Notebook Executor Build & Push (Platform)"
       #   key: "notebook-executor-build-and-push"
