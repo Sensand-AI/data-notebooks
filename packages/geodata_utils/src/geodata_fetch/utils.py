@@ -37,40 +37,45 @@ extract_values_from_rasters: Given a list of rasters, extract the values at coor
 
 """
 
-from glob import glob
 import os
+import sys
 import json
+import logging
+import warnings
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+import rioxarray as rxr
+import rasterio
+import matplotlib.pyplot as plt
 
 from types import SimpleNamespace
-
-import rasterio
 from rasterio.mask import mask
 from rasterio.warp import calculate_default_transform, reproject, Resampling
 from rasterio.plot import show
 from rasterio.dtypes import uint8
 from rasterio.enums import Resampling #for spatial resampling of pixels
+from rasterio.io import MemoryFile
+from rasterio.warp import calculate_default_transform, reproject, Resampling
+from rasterio.plot import reshape_as_raster
 
-import rioxarray as rxr
+from rio_cogeo.cogeo import cog_translate
+from rio_cogeo.profiles import cog_profiles
+
+from matplotlib import cm
+from matplotlib.colors import Normalize
+
 from shapely.geometry import box #try and remove later
-
 from owslib.wcs import WebCoverageService
-
-import numpy as np
-import pandas as pd
-import geopandas as gpd
-
-
 from pyproj import CRS
 from pathlib import Path
-
 from numba import jit
-
-import warnings
-import logging
-
-
+from glob import glob
 from alive_progress import alive_bar, config_handler
 
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 config_handler.set_global(
     force_tty=True,
@@ -360,11 +365,13 @@ def reproj_mask(filename, input_filepath, bbox, crscode, output_filepath, resamp
         #upsample raster
         up_sampled = input_raster.rio.reproject(input_raster.rio.crs, shape=(int(new_height), int(new_width)), resampling=Resampling.nearest)
         clipped = up_sampled.rio.clip(bbox.geometry.values)
-        reprojected = clipped.rio.reproject(crscode) #clip first as tif and geom need to be in same proejction
+        clipped.rio.write_nodata(np.nan, inplace=True)
+        reprojected = clipped.rio.reproject(crscode, nodata=np.nan) #clip first as tif and geom need to be in same proejction, and encode the nodata values as nan
         reprojected.rio.to_raster(mask_outpath, tiled=True)
     else:
         clipped = input_raster.rio.clip(bbox.geometry.values)
-        reprojected = clipped.rio.reproject(crscode) #clip first as tif and geom need to be in same proejction
+        clipped.rio.write_nodata(np.nan, inplace=True)
+        reprojected = clipped.rio.reproject(crscode, nodata=np.nan) #clip first as tif and geom need to be in same proejction, and encode the nodata values as nan
         reprojected.rio.to_raster(mask_outpath, tiled=True)
 
     return clipped
@@ -694,3 +701,73 @@ def extract_values_from_rasters(coords, raster_files, method = "nearest"):
     gdf.insert(1, 'Latitude', coords[:,1])
 
     return gdf
+
+
+def colour_geotiff_and_save_cog(input_geotiff, colour_map):
+    """
+    Colorizes a GeoTIFF image using a specified color map and saves it as a COG (Cloud-Optimized GeoTIFF).
+
+    Args:
+        input_geotiff (str): The path to the input GeoTIFF file.
+        colour_map (str): The name of the color map to use for colorizing the image.
+
+    Raises:
+        Exception: If unable to convert the colored GeoTIFF to a COG.
+
+    Returns:
+        None
+    """
+    
+    output_colored_tiff_filename = input_geotiff.replace('.tif', '_colored.tif')
+    output_cog_filename = input_geotiff.replace('.tif', '_cog.tif')
+    
+    with rasterio.open(input_geotiff) as src:
+        meta = src.meta.copy()
+        dst_crs = rasterio.crs.CRS.from_epsg(4326) #change so not hardcoded?
+        transform, width, height = calculate_default_transform(
+            src.crs, dst_crs, src.width, src.height, *src.bounds
+        )
+
+        meta.update({
+            'crs': dst_crs,
+            'transform': transform,
+            'width': width,
+            'height': height
+        })
+
+        tif_data = src.read(1, masked=True).astype('float32') #setting masked=True here tells rasterio to use masking information if present, but we need to add the mask itself first.
+        tif_formatted = tif_data.filled(np.nan)
+
+        cmap = cm.get_cmap(colour_map) #can also use 'terrain' cmap to keep this the same as the preview image from above.
+        na = tif_formatted[~np.isnan(tif_formatted)]
+
+        min_value = min(na)
+        max_value = max(na)
+
+        norm = Normalize(vmin=min_value, vmax=max_value)
+
+        coloured_data = (cmap(norm(tif_formatted))[:, :, :3] * 255).astype(np.uint8)
+
+        meta.update({"count":3})
+
+
+        with rasterio.open(output_colored_tiff_filename, 'w', **meta) as dst:
+            reshape = reshape_as_raster(coloured_data)
+            dst.write(reshape)
+
+    try:
+        dst_profile = cog_profiles.get('deflate')
+        with MemoryFile() as mem_dst:
+            cog_translate(
+                output_colored_tiff_filename,
+                output_cog_filename,
+                config=dst_profile,
+                in_memory=True,
+                dtype="uint8",
+                add_mask=False,
+                nodata=0,
+                dst_kwargs=dst_profile
+            )
+        
+    except:
+        raise Exception('Unable to convert to cog')

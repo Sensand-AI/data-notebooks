@@ -1,8 +1,23 @@
-2024-05-02 01:08:14,459 Found credentials in environment variables.
-2024-05-02 01:08:14,977 Starting the data harvester -----
-2024-05-02 01:08:14,979 Downloading SLGA data.
-2024-05-02 01:08:14,981 Successfully loaded SLGA dictionary.
-2024-05-02 01:08:15,292 Downloaded SLGA_Organic_Carbon_0-5cm_test.tif
-2024-05-02 01:08:15,638 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public.tif.meta.json
-2024-05-02 01:08:15,663 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_colored_cog.public.tif.meta.json
-2024-05-02 01:08:15,690 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_cog.public.tif.meta.json
+2024-05-03 04:25:58,197 Found credentials in environment variables.
+2024-05-03 04:25:58,656 Starting the data harvester -----
+2024-05-03 04:25:58,657 Downloading SLGA data.
+2024-05-03 04:25:58,658 Successfully loaded SLGA dictionary.
+2024-05-03 04:25:59,888 Downloaded SLGA_Organic_Carbon_0-5cm_test.tif
+2024-05-03 04:26:00,429 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public.tif.meta.json
+2024-05-03 04:26:00,453 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_colored_cog.public.tif.meta.json
+2024-05-03 04:26:00,472 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_colored_cog.public_cog.public.tif.meta.json
+2024-05-03 04:26:00,495 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_colored_colored_cog.public.tif.meta.json
+2024-05-03 04:26:00,518 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_cog.public_cog.public.tif.meta.json
+2024-05-03 04:26:00,539 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_colored_cog.public_colored_cog.public.tif.meta.json
+2024-05-03 04:26:00,563 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_colored_cog.public.tif.meta.json
+2024-05-03 04:26:00,587 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_colored_cog.public.tif.meta.json
+2024-05-03 04:26:00,608 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_colored_cog.public.tif.meta.json
+2024-05-03 04:26:00,633 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_colored_colored_cog.public.tif.meta.json
+2024-05-03 04:26:00,657 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_colored_cog.public_cog.public_cog.public.tif.meta.json
+2024-05-03 04:26:00,679 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_cog.public_cog.public_cog.public.tif.meta.json
+2024-05-03 04:26:00,703 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_colored_cog.public_cog.public.tif.meta.json
+2024-05-03 04:26:00,723 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_cog.public_colored_cog.public.tif.meta.json
+2024-05-03 04:26:00,743 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_colored_colored_colored_cog.public.tif.meta.json
+2024-05-03 04:26:00,764 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_colored_colored_cog.public_cog.public.tif.meta.json
+2024-05-03 04:26:00,787 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_colored_colored_cog.public_cog.public.tif.meta.json
+2024-05-03 04:26:00,808 Metadata saved to /tmp/localjupyter/masked-data/masked_SLGA_Organic_Carbon_0-5cm_test_cog.public_cog.public.tif.meta.json
