@@ -38,8 +38,8 @@ steps:
 
       - label: "BUILDKITE_PULL_REQUEST test"
         command:
-          - echo "test"
-        if: "$BUILDKITE_PULL_REQUEST"
+          - echo "$BUILDKITE_PULL_REQUEST"
+        #if: "$BUILDKITE_PULL_REQUEST"
 
       - label: "!pull_request.draft test"
         command:
