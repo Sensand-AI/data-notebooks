@@ -47,7 +47,8 @@ steps:
       - label: "both test"
         command:
           - echo "test"
-        if: $BUILDKITE_PULL_REQUEST != null 
+        if: | 
+          $BUILDKITE_PULL_REQUEST != null 
         # && $BUILDKITE_PULL_REQUEST_DRAFT != true
 
       # - label: ":docker: Notebook Executor Build & Push (Platform)"
@@ -65,29 +66,29 @@ steps:
       #     - *ecr-sensand
       #   if: "$BUILDKITE_PULL_REQUEST"
 
-      - block: "Deploy Staging (Manual)"
-        prompt: "Update Lambda Function in Staging?"
-        key: "deploy-staging-manual"
-        depends_on:
-          - "notebook-executor-build-and-push"
+      # - block: "Deploy Staging (Manual)"
+      #   prompt: "Update Lambda Function in Staging?"
+      #   key: "deploy-staging-manual"
+      #   depends_on:
+      #     - "notebook-executor-build-and-push"
 
-      - label: "TEST"
-        command:
-          - echo "block dependency test"
-        depends_on:
-          - "deploy-staging-manual"
+      # - label: "TEST"
+      #   command:
+      #     - echo "block dependency test"
+      #   depends_on:
+      #     - "deploy-staging-manual"
 
-      - label: ":aws: Update Notebook Executor Lambda (Staging)"
-        env:
-          IMAGE_NAME: notebook-executor
-          IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
-        command:
-          - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT} --region us-east-1
-        depends_on:
-          - "deploy-staging-manual"
-        plugins:
-          - *assume-role-staging
-          - *docker-compose-deploy
+      # - label: ":aws: Update Notebook Executor Lambda (Staging)"
+      #   env:
+      #     IMAGE_NAME: notebook-executor
+      #     IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
+      #   command:
+      #     - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT} --region us-east-1
+      #   depends_on:
+      #     - "deploy-staging-manual"
+      #   plugins:
+      #     - *assume-role-staging
+      #     - *docker-compose-deploy
       
       # - block: "Deploy Production (Manual)"
       #   prompt: "Update Lambda Function in Production?"
