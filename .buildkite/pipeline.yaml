@@ -36,19 +36,20 @@ steps:
     key: "notebook-executor-deploy"
     steps:
 
-      - label: "BUILDKITE_PULL_REQUEST"
-        command:
-          - echo "$BUILDKITE_PULL_REQUEST"
+      # - label: "BUILDKITE_PULL_REQUEST"
+      #   command:
+      #     - echo "$BUILDKITE_PULL_REQUEST"
 
       - label: "BUILDKITE_PULL_REQUEST_DRAFT"
         command:
           - echo $BUILDKITE_PULL_REQUEST_DRAFT
+        if: $BUILDKITE_PULL_REQUEST_DRAFT != "true"
 
-      - label: "both test"
-        command:
-          - echo "test"
-        if: | 
-          $BUILDKITE_PULL_REQUEST != null && $BUILDKITE_PULL_REQUEST_DRAFT != "true"
+      # - label: "both test"
+      #   command:
+      #     - echo "test"
+      #   if: | 
+      #     $BUILDKITE_PULL_REQUEST != null && $BUILDKITE_PULL_REQUEST_DRAFT != "true"
 
       # - label: ":docker: Notebook Executor Build & Push (Platform)"
       #   key: "notebook-executor-build-and-push"
