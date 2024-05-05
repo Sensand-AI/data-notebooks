@@ -43,7 +43,7 @@ steps:
       - label: "BUILDKITE_PULL_REQUEST_DRAFT"
         command:
           - echo $BUILDKITE_PULL_REQUEST_DRAFT
-        if: $BUILDKITE_PULL_REQUEST_DRAFT != "true"
+        if: $BUILDKITE_PULL_REQUEST_DRAFT == null
 
       # - label: "both test"
       #   command:
