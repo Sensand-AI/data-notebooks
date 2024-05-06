@@ -50,8 +50,7 @@ steps:
                 - docker-compose.yml
           - *ecr-sensand
         if: |
-          build.pull_request.id != null &&
-          build.pull_request.draft == false 
+          build.branch == "main" || (build.pull_request.id != null && !build.pull_request.draft)
 
       - block: "Deploy Staging (Manual)"
         prompt: "Update Lambda Function in Staging?"
