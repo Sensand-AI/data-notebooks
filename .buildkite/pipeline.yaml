@@ -51,7 +51,7 @@ steps:
           - *ecr-sensand
         if: |
           build.pull_request.id != null &&
-          build.pull_request.draft == null 
+          build.pull_request.draft == false 
 
       - block: "Deploy Staging (Manual)"
         prompt: "Update Lambda Function in Staging?"
