@@ -34,19 +34,18 @@ steps:
 
       - label: "echo"
         command:
-          - echo "build.pull_request.draft"
-          - echo {build.pull_request.draft}
+          - echo build.pull_request.draft
+          - echo $build.pull_request.draft
 
       - label: "false check"
         command:
           - echo "test"
-        if: "build.pull_request.draft"
+        if: "build.pull_request.draft == false"
 
-      # - label: "null check"
-      #   command:
-      #     - echo "test"
-      #   if: | 
-      #     !$BUILDKITE_PULL_REQUEST_DRAFT   
+      - label: "null check"
+        command:
+          - echo "test"
+        if: "build.pull_request.draft == null" 
 
       # - label: ":docker: Notebook Executor Build & Push"
       #   plugins:
