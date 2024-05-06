@@ -49,8 +49,9 @@ steps:
               config:
                 - docker-compose.yml
           - *ecr-sensand
-        if: | 
-          $BUILDKITE_PULL_REQUEST != null
+        if: |
+          $BUILDKITE_PULL_REQUEST != false &&
+          build.pull_request.draft == null 
 
       - block: "Deploy Staging (Manual)"
         prompt: "Update Lambda Function in Staging?"
