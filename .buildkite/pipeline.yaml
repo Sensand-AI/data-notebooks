@@ -41,7 +41,7 @@ steps:
         command:
           - echo "test"
         if: |
-          $BUILDKITE_PULL_REQUEST == "false"
+          $BUILDKITE_PULL_REQUEST == false
 
       - label: "null check"
         command:
