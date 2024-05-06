@@ -37,8 +37,8 @@ steps:
           - echo $BUILDKITE_PULL_REQUEST
           - echo "$BUILDKITE_PULL_REQUEST"
 
-      - label: "false check"
-        if: $BUILDKITE_PULL_REQUEST == "false"
+      # - label: "false check"
+      #   if: $BUILDKITE_PULL_REQUEST == "false"
 
       - label: "null check"
         if: $BUILDKITE_PULL_REQUEST == null        
