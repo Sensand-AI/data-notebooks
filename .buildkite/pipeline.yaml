@@ -50,7 +50,7 @@ steps:
                 - docker-compose.yml
           - *ecr-sensand
         if: |
-          $BUILDKITE_PULL_REQUEST != false &&
+          build.pull_request.id != null &&
           build.pull_request.draft == null 
 
       - block: "Deploy Staging (Manual)"
