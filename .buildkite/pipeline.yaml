@@ -45,8 +45,6 @@ steps:
       - label: "diff lines"
         command:
           - echo "test"
-        if: |
-          build.branch == "main" ||
-          (build.pull_request.id == null &&
-          build.pull_request.draft == null)
+        if: | 
+          build.branch == "main" || (build.pull_request.id == null && build.pull_request.draft == null)
           
