@@ -32,21 +32,21 @@ steps:
     key: "notebook-executor-deploy"
     steps:
 
-      # - label: "echo"
-      #   command:
-      #     - echo $BUILDKITE_PULL_REQUEST
-      #     - echo "$BUILDKITE_PULL_REQUEST"
+      - label: "echo"
+        command:
+          - echo $BUILDKITE_PULL_REQUEST_DRAFT
+          - echo "$BUILDKITE_PULL_REQUEST_DRAFT"
 
       - label: "false check"
         command:
           - echo "test"
-        if: "$BUILDKITE_PULL_REQUEST == false"
+        if: "$BUILDKITE_PULL_REQUEST_DRAFT == false"
 
-      - label: "not null check"
+      - label: "null check"
         command:
           - echo "test"
         if: | 
-          $BUILDKITE_PULL_REQUEST != null        
+          $BUILDKITE_PULL_REQUEST_DRAFT == null        
 
       # - label: ":docker: Notebook Executor Build & Push"
       #   plugins:
