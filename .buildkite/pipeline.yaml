@@ -37,42 +37,15 @@ steps:
       #     - echo build.pull_request.draft
       #     - echo $build.pull_request.draft
 
-      - label: "same line check"
-        command:
-          - echo "test"
-        if: "$BUILDKITE_PULL_REQUEST == false && build.pull_request.draft == null"
+      # - label: "same line check"
+      #   command:
+      #     - echo "test"
+      #   if: "$BUILDKITE_PULL_REQUEST == false && build.pull_request.draft == null"
 
       - label: "diff lines"
         command:
           - echo "test"
-        if: | 
-          $BUILDKITE_PULL_REQUEST == false &&
+        if: |
+          $BUILDKITE_PULL_REQUEST != false &&
           build.pull_request.draft == null 
-
-      # - label: ":docker: Notebook Executor Build & Push"
-      #   plugins:
-      #     - docker-compose#v4.14.0:
-      #         build: notebook-executor
-      #         image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
-      #         image-name: "${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
-      #         cache-from:
-      #           - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}
-      #           - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
-      #         config:
-      #           - docker-compose.yml
-      #     - *ecr-sensand
-      #   if: "!build.pull_request.draft"
-
-      # - wait
-
-      # - label: ":aws: Update Notebook Executor Lambda (Staging)"
-      #   branches: main
-      #   env:
-      #     IMAGE_NAME: notebook-executor
-      #     IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
-      #   command:
-      #     - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT} --region us-east-1
-      #   plugins:
-      #     - *assume-role-staging
-      #     - *docker-compose-deploy
           
