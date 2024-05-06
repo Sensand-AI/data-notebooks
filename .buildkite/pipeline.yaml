@@ -37,10 +37,14 @@ steps:
           - echo $BUILDKITE_PULL_REQUEST
           - echo "$BUILDKITE_PULL_REQUEST"
 
-      # - label: "false check"
-      #   if: $BUILDKITE_PULL_REQUEST == "false"
+      - label: "false check"
+        command:
+          - echo "test"
+        if: $BUILDKITE_PULL_REQUEST == "false"
 
       - label: "null check"
+        command:
+          - echo "test"
         if: $BUILDKITE_PULL_REQUEST == null        
 
       # - label: ":docker: Notebook Executor Build & Push"
