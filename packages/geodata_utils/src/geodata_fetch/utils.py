@@ -349,7 +349,7 @@ def reproj_mask(filename, input_filepath, bbox, crscode, output_filepath, resamp
         filepath_out: directory for saved masked geotifs to be placed
      """
     input_full_filepath = os.path.join(input_filepath, filename)
-    masked_filepath = "masked_" + filename
+    masked_filepath = filename.replace(".tif", "_masked.tif")
     mask_outpath = os.path.join(output_filepath, masked_filepath)
     
     input_raster = rxr.open_rasterio(input_full_filepath)

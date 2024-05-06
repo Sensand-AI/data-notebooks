@@ -3,17 +3,12 @@ import os
 import sys
 import json
 import numpy as np 
-import pystac_client
 import rasterio
-from rasterio.windows import from_bounds
 from rasterio.io import MemoryFile
-from rasterio.warp import calculate_default_transform, reproject, Resampling
+from rasterio.warp import calculate_default_transform #reproject, Resampling
 from rasterio.plot import reshape_as_raster
-
 from rio_cogeo.cogeo import cog_translate
 from rio_cogeo.profiles import cog_profiles
-
-import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.colors import Normalize
 

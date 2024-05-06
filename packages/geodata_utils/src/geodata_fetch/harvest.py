@@ -21,8 +21,9 @@ def run(path_to_config, input_geom):
     add_buffer = settings.add_buffer
     resample = settings.resample
     property_name = settings.property_name
-    output_data_dir = os.path.join(settings.outpath, "data")
-    output_masked_data_dir = os.path.join(settings.outpath, "masked-data")
+    output_data_dir = settings.outpath #removing sub-dirs as they mess up lambda.
+    #output_data_dir = os.path.join(settings.outpath, "data")
+    #output_masked_data_dir = os.path.join(settings.outpath, "masked-data")
     data_mask = settings.data_mask
     
     
@@ -86,13 +87,13 @@ def run(path_to_config, input_geom):
             )
         except Exception as e:
             print(e)
-        var_exists = "files_slga" in locals() or "files_slga" in globals()
-        if var_exists:
-            if len(files_slga) != len(slga_layernames):
-                # get filename stems of files_slga
-                slga_layernames = [Path(f).stem for f in files_slga] # check this still works afer adding sub-dirs
-        else:
-            pass
+        # var_exists = "files_slga" in locals() or "files_slga" in globals()
+        # if var_exists:
+        #     if len(files_slga) != len(slga_layernames):
+        #         # get filename stems of files_slga
+        #         slga_layernames = [Path(f).stem for f in files_slga] # check this still works afer adding sub-dirs
+        # else:
+        #     pass
     
     
     if "DEM" in list_sources:
@@ -142,25 +143,26 @@ def run(path_to_config, input_geom):
     """
     
     if data_mask is True:
-        os.makedirs(output_masked_data_dir, exist_ok=True)
+        #os.makedirs(output_data_dir, exist_ok=True)
         
         # make a list of all the tif files in the 'data' package that were harvested from sources
         tif_files = list_tif_files(output_data_dir)
         try:
             for tif in tif_files:
-                # Clips a raster to the area of a shape, and reprojects.
-                masked_data = reproj_mask(
+                if not tif.endswith(("_masked.tif", "_colored.tif", "_cog.tif", "_cog.public.tif")):
+                    # Clips a raster to the area of a shape, and reprojects.
+                    masked_data = reproj_mask(
                     filename=tif,
-                    input_filepath = output_data_dir,
+                    input_filepath=output_data_dir,
                     bbox=input_geom,
                     crscode=target_crs,
-                    output_filepath=output_masked_data_dir,
+                    output_filepath=output_data_dir,
                     resample=resample)
-                
-                return masked_data
+                    
+                    return masked_data
         except Exception as e:
             print(e)
-    else:
-        pass
+        else:
+            pass
 
     print("\nHarvest complete")

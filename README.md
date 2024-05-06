@@ -102,7 +102,7 @@ You will get another prompt to select the kernel. Select the kernel listed with 
 
 - in terminal run `docker compose build notebook-executor` and `docker compose up notebook-executor` to ensure container is up to date
 - in Postman, set up a new collection and create a `POST` request using the port that the docker container is mapped to
-   - e.g. `http://localhost:9002/2015-03-31/functions/function/invocations`
+   - This url: `http://localhost:9002/2015-03-31/functions/function/invocations`
 - Make sure the 'body' of the request is set to JSON and add the following (note geometry not included in example):
 ```{
     "notebook_name": "dem",
