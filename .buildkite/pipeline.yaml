@@ -46,6 +46,6 @@ steps:
         command:
           - echo "test"
         if: |
-          $BUILDKITE_PULL_REQUEST != false &&
+          build.pull_request.id != null &&
           build.pull_request.draft == null 
           
