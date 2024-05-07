@@ -16,7 +16,6 @@ import json
 import logging
 import importlib.resources #to read in slga.json during runtime
 from owslib.wcs import WebCoverageService
-from geodata_fetch import utils
 from geodata_fetch.utils import spin
 
 # Configure logging
@@ -42,10 +41,10 @@ def get_slgadict():
         slgadict["depth_max"] = slga_json["depth_max"]
         slgadict["layers_url"] = slga_json["layers_url"]
 
-        logging.info("Successfully loaded SLGA dictionary.")
+        logger.info("Successfully loaded SLGA dictionary.")
         return slgadict
     except Exception as e:
-        logging.error(f"Failed to load SLGA dictionary: {str(e)}")
+        logger.error(f"Failed to load SLGA dictionary: {str(e)}")
         return None
 
 
@@ -79,7 +78,7 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
     # Create WCS object
     filename = outfname.split(os.sep)[-1]
     try:
-        with spin(f"Downloading {filename}") as s:
+        with filename as s:
             wcs = WebCoverageService(url, version="1.0.0", timeout=300)
             # Get data
             data = wcs.getCoverage(
@@ -95,10 +94,10 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         # Save data
         with open(outfname, "wb") as f:
             f.write(data.read())
-        logging.info(f"Downloaded {filename}")
+        logger.info(f"Downloaded {filename}")
         return True
     except Exception as e:
-        logging.error(f"Failed to download {filename}: {str(e)}")
+        logger.error(f"Failed to download {filename}: {str(e)}")
         return False
 
 
@@ -290,6 +289,7 @@ def get_slga_layers(
                     dl = get_wcsmap(
                         layer_url, identifier, crs, bbox, resolution_deg, fname_out)
 
+        print(f"testing fnam_out: {fnames_out}")
         return fnames_out
     except Exception as e:
         logging.error(f"Failed to get SLGA layers: {str(e)}")

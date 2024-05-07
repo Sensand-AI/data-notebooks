@@ -14,7 +14,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def run(path_to_config, input_geom):
-    logger.info("Starting the data harvester -----")
+    logger.info("Starting the data harvester")
 
     settings = load_settings(path_to_config)
     target_crs = settings.target_crs
@@ -58,9 +58,7 @@ def run(path_to_config, input_geom):
         period_days = None
 
     # process each data source
-    utils.msg_info(
-        f"Found the following {count_sources} sources: {list_sources}")
-    #print("\nDownloading from API sources -----")
+    logger.info(f"Found the following {count_sources} sources: {list_sources}")
 
 #-----add getdata functions here---------------------------------------------------------#
 
@@ -87,13 +85,13 @@ def run(path_to_config, input_geom):
             )
         except Exception as e:
             print(e)
-        # var_exists = "files_slga" in locals() or "files_slga" in globals()
-        # if var_exists:
-        #     if len(files_slga) != len(slga_layernames):
-        #         # get filename stems of files_slga
-        #         slga_layernames = [Path(f).stem for f in files_slga] # check this still works afer adding sub-dirs
-        # else:
-        #     pass
+        var_exists = "files_slga" in locals() or "files_slga" in globals()
+        if var_exists:
+            if len(files_slga) != len(slga_layernames):
+                # get filename stems of files_slga
+                slga_layernames = [Path(f).stem for f in files_slga] # check this still works afer adding sub-dirs
+        else:
+            pass
     
     
     if "DEM" in list_sources:
