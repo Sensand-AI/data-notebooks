@@ -36,8 +36,6 @@ papermill>=2.0.0  # Tool for parameterizing, executing, and analyzing Jupyter No
 wheel # for package development
 #experimental for geodata-harvester package Jenna is working on
 
-geodata-harvester
-
 # Time
 pytz  # World timezone definitions, modern and historical
 

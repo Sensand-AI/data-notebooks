@@ -8,14 +8,12 @@ In case this happens please try later again when the NCI server is less loaded.
 
 This package is modified from the geodata-harvester developed for the Agricultural Research Federation (AgReFed).
 """
-
 import os
 import json
 from owslib.wcs import WebCoverageService
-import importlib.resources #to read in slga.json during runtime
+import importlib.resources
 from datetime import datetime, timezone
 from geodata_fetch import utils
-from geodata_fetch.utils import spin, get_wcs_capabilities
 
 
 def get_radiometricdict():
@@ -77,24 +75,21 @@ def get_radiometric_layers(property_name, layernames, bbox, outpath):
     # Loop over all layers
     fnames_out = []
     for layername in layernames:
-        output_filename = "radiometric_" + layername + "_" + property_name + '.tif'
         outfname = os.path.join(
             outpath, "radiometric_" + layername + "_" + property_name + '.tif')
         ok = get_radiometric_image(
-            outfname=outfname, 
-            layername=layername, 
-            bbox=bbox, 
-            url=url, 
-            resolution=resolution, 
+            outfname=outfname,
+            layername=layername,
+            bbox=bbox,
+            url=url,
+            resolution=resolution,
             crs=crs
         )
         if ok:
             fnames_out.append(outfname)
     return fnames_out
 
-"""
-TODO: a wcs is defined here as well as in get_wcs_capabilities - unpack and understand if this is duplicate code or separate functions.
-"""
+
 
 def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
     """
@@ -135,20 +130,18 @@ def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
         utils.msg_warn(f"{layername}.tif already exists, skipping download")
     else:
         try:
-            with spin(f"Downloading {layername}") as s:
-                wcs = WebCoverageService(url, version="1.0.0", timeout=300)
-                data = wcs.getCoverage(
-                    identifier=layername,
-                    time=[date],
-                    bbox=bbox,
-                    format="GeoTIFF",
-                    crs=crs,
-                    width=nwidth,
-                    height=nheight,
-                )
-                s(1)
-        except:
-            utils.msg_err("Download failed")
+            wcs = WebCoverageService(url, version="1.0.0", timeout=300)
+            data = wcs.getCoverage(
+                identifier=layername,
+                time=[date],
+                bbox=bbox,
+                format="GeoTIFF",
+                crs=crs,
+                width=nwidth,
+                height=nheight,
+            )
+        except Exception as e:
+            print(e)
             return False
 
         # Save data

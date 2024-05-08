@@ -9,18 +9,11 @@ Core functionality:
 The SLGA layers, metadata, licensing and atttribution are described in the config folder in slga_soil_urls.json, and are read into a dictionary in the module function get_slgadict()
 
 """
-
 import os
 import sys
 import json
-import logging
-import importlib.resources #to read in slga.json during runtime
+import importlib.resources
 from owslib.wcs import WebCoverageService
-from geodata_fetch.utils import spin
-
-# Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 def get_slgadict():
     try:
@@ -35,17 +28,16 @@ def get_slgadict():
         slgadict["copyright"] = slga_json["copyright"]
         slgadict["attribution"] = slga_json["attribution"]
         slgadict["crs"] = slga_json["crs"]
-        slgadict["bbox"] = slga_json["bbox"]
         slgadict["resolution_arcsec"] = slga_json["resolution_arcsec"]
         slgadict["depth_min"] = slga_json["depth_min"]
         slgadict["depth_max"] = slga_json["depth_max"]
         slgadict["layers_url"] = slga_json["layers_url"]
-
-        logger.info("Successfully loaded SLGA dictionary.")
+        
         return slgadict
     except Exception as e:
-        logger.error(f"Failed to load SLGA dictionary: {str(e)}")
+        print(f"Error loading slga_soil.json: {e}")
         return None
+
 
 
 """
@@ -94,10 +86,10 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         # Save data
         with open(outfname, "wb") as f:
             f.write(data.read())
-        logger.info(f"Downloaded {filename}")
+        print(f"Downloaded {filename}")
         return True
     except Exception as e:
-        logger.error(f"Failed to download {filename}: {str(e)}")
+        print(f"Failed to download {filename}: {str(e)}")
         return False
 
 
@@ -142,7 +134,7 @@ def depth2identifier(depth_min, depth_max):
             depths_upper,
         )
     except Exception as e:
-        logging.error(f"Failed to get identifiers: {str(e)}")
+        print(f"Failed to get identifiers: {str(e)}")
         return None, None, None, None, None
 
 
@@ -179,7 +171,7 @@ def identifier2depthbounds(depths):
         assert ncount == len(depths), f"ncount = {ncount}"
         return depth_min, depth_max
     except Exception as e:
-        logging.error(f"Failed to get min and max depth: {str(e)}")
+        print(f"Failed to get min and max depth: {str(e)}")
         return None, None
 
 
@@ -289,9 +281,9 @@ def get_slga_layers(
                     dl = get_wcsmap(
                         layer_url, identifier, crs, bbox, resolution_deg, fname_out)
 
-        print(f"testing fnam_out: {fnames_out}")
+        print(f"testing fnames_out: {fnames_out}")
         return fnames_out
     except Exception as e:
-        logging.error(f"Failed to get SLGA layers: {str(e)}")
+        print(f"Failed to get SLGA layers: {str(e)}")
         return None
 

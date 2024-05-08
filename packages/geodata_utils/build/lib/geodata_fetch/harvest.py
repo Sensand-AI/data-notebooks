@@ -1,129 +1,67 @@
-"""
-This script is running the headless version of the geodata-harvester.
-
-The following main steps are automatically executed within the run() function:
-    - loading settings from config file
-    - creating bounding box from input file points if not provided
-    - downloading data layers as specified in config file
-    - processing data layers as specified in config file
-    - save downloaded image files to disk as GeoTiffs
-    - save summary table of downloaded files as CSV
-    - extract data for point locations provided in input file (name specified in settings)
-    - save extracted point results to disk as CSV and as geopackage 
-
-Example call within Python:
-    from geodata_harvester import harvest
-    harvest.run(path_to_config))
-"""
-
-
 import os
+import sys
+import logging
 from pathlib import Path
 import geopandas as gpd
-from termcolor import cprint
-import yaml
-import shutil
-import argparse
 import numpy as np
 from datetime import datetime, timedelta
 
-from geodata_lite import (getdata_slga, utils, temporal, spatial)
-from geodata_lite.utils import init_logtable, update_logtable, load_settings
+from geodata_fetch import getdata_slga,getdata_dem, getdata_radiometric
+from geodata_fetch.utils import  load_settings, reproj_mask, list_tif_files,colour_geotiff_and_save_cog
 
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def run(path_to_config, log_name="download_summary", preview=False, return_df=False):
-    """
-    A headless version of the Data-Harvester (with some limitations).
-    Results are saved to disk.
+def run(path_to_config, input_geom):
+    logger.info("Starting the data harvester")
 
-    Parameters
-    ----------
-    path_to_config : str
-        Path to YAML config file
-    log_name: name of log file (default: "download_log")
-    preview : bool, optional
-        Plots a matrix of downloaded images if set to True, by default False
-    return_df : bool, optional (Default: False)
-        if True, returns dataframe with results
-
-    Returns
-    -------
-    None (if return_df is False)
-    dataframe (if return_df is True)
-    """
-    cprint("Starting the data harvester -----", "magenta", attrs=["bold"])
-
-    # Load config file (based on notebook for now, will optimise later)
-    
-    """
-    NOTE: load_settings was in harvesterwidgets, but in the slimmed version could probably just go into utils. JAG.
-    """
     settings = load_settings(path_to_config)
-
+    target_crs = settings.target_crs
+    add_buffer = settings.add_buffer
+    resample = settings.resample
+    property_name = settings.property_name
+    output_data_dir = settings.outpath #removing sub-dirs as they mess up lambda.
+    #output_data_dir = os.path.join(settings.outpath, "data")
+    #output_masked_data_dir = os.path.join(settings.outpath, "masked-data")
+    data_mask = settings.data_mask
+    
     # Count number of sources to download from
     count_sources = len(settings.target_sources)
     list_sources = list(settings.target_sources.keys())
 
-    # If no infile provided, generate a blank one (including colnames)
-    try:
-        settings.infile
-        if settings.infile is None:
-            points_available = False
-        else:
-            points_available = True
-    except (AttributeError, KeyError):
-        settings.infile = None
-        settings.colname_lng = None
-        settings.colname_lat = None
-        points_available = False
+    # Set coordinates absed on the lat and long given in input file
+    longs = settings.target_centroid_lng
+    lats = settings.target_centroid_lat
+    coords = np.vstack((longs, lats)).T
 
-    # If no resolution set, make it 1 arc-second
-    if settings.target_res is None:
-        utils.msg_info(
-            "No target resolution specified, using default of 1 arc-sec")
-        settings.target_res = 1
-
-    # Create bounding box if infile is provided and target_bbox is not provided
-    if settings.infile is not None:
-        gdfpoints = gpd.read_file(settings.infile)
-        longs = gdfpoints[settings.colname_lng].astype(float)
-        lats = gdfpoints[settings.colname_lat].astype(float)
-        coords = np.vstack((longs, lats)).T
-
-        if settings.target_bbox is None:
-            settings.target_bbox = (
-                min(longs) - 0.05,
-                min(lats) - 0.05,
-                max(longs) + 0.05,
-                max(lats) + 0.05,
-            )
 
     # Stop if bounding box cannot be calculated or was not provided
-    if settings.infile is None and settings.target_bbox is None:
-        raise ValueError("No sampling file or bounding box provided")
+    if settings.target_bbox is None:
+        raise ValueError("No bounding box provided")
+    
+    if settings.add_buffer is True:
+        # Add buffer to the bounding box
+        input_geom = input_geom.buffer(0.002, join_style=2, resolution=15)
 
     # Temporal range
     # convert date strings to datetime objects
-    date_diff = (datetime.strptime(settings.date_max, "%Y-%m-%d") 
-        - datetime.strptime(settings.date_min, "%Y-%m-%d")).days
-    if settings.time_intervals is not None:
-        period_days = date_diff // settings.time_intervals
+    date_diff = (datetime.strptime(settings.date_end, "%Y-%m-%d") 
+        - datetime.strptime(settings.date_start, "%Y-%m-%d")).days
+    if settings.time_intervals > 0:
+        period_days = date_diff / settings.time_intervals
         if period_days == 0:
             period_days = 1
     else:
         period_days = None
 
-    # Create download log
-    download_log = init_logtable()
     # process each data source
-    utils.msg_info(
-        f"Found the following {count_sources} sources: {list_sources}")
-    cprint("\nDownloading from API sources -----", "magenta", attrs=["bold"])
+    logger.info(f"Found the following {count_sources} sources: {list_sources}")
 
+#-----add getdata functions here---------------------------------------------------------#
 
     if "SLGA" in list_sources:
-        cprint("\n⌛ Downloading SLGA data...", attrs=["bold"])
-        # get data from SLGA
+        logger.info("Downloading SLGA data.")
         slga_layernames = list(settings.target_sources["SLGA"].keys())
         # get min and max depth for each layername
         depth_min = []
@@ -135,65 +73,93 @@ def run(path_to_config, log_name="download_summary", preview=False, return_df=Fa
             depth_max.append(dmax)
         try:
             files_slga = getdata_slga.get_slga_layers(
-                slga_layernames,
-                settings.target_bbox,
-                settings.outpath,
+                property_name=property_name,
+                layernames=slga_layernames,
+                bbox=settings.target_bbox,
+                outpath=output_data_dir,
                 depth_min=depth_min,
                 depth_max=depth_max,
-                get_ci=True,
+                get_ci=False, #can this be added to the settings.json instead of being hard-coded here?
+            )
+            logger.info(f"SLGA data downloaded successfully: {files_slga}")
+        except Exception as e:
+            print(e)
+        # var_exists = "files_slga" in locals() or "files_slga" in globals()
+        # if var_exists:
+        #     if len(files_slga) != len(slga_layernames):
+        #         # get filename stems of files_slga
+        #         slga_layernames = [Path(f).stem for f in files_slga] # check this still works afer adding sub-dirs
+        # else:
+        #     pass
+    
+    
+    if "DEM" in list_sources:
+        logger.info("Downloading DEM data.")
+        dem_layernames = settings.target_sources["DEM"]
+        try:
+            files_dem = getdata_dem.get_dem_layers(
+                property_name=property_name,
+                layernames=dem_layernames,
+                bbox=settings.target_bbox,
+                outpath=output_data_dir
             )
         except Exception as e:
             print(e)
-        var_exists = "files_slga" in locals() or "files_slga" in globals()
+            # Check if output if False (no data available) and skip if so
+        var_exists = "files_dem" in locals() or "files_dem" in globals()
         if var_exists:
-            if len(files_slga) != len(slga_layernames):
+            if len(files_dem) != len(dem_layernames):
                 # get filename stems of files_slga
-                slga_layernames = [Path(f).stem for f in files_slga]
-            download_log = update_logtable(
-                download_log,
-                files_slga,
-                slga_layernames,
-                "SLGA",
-                settings,
-                layertitles=[],
-                loginfos="downloaded",
+                dem_layernames = [Path(f).stem for f in files_dem]
+        else:
+            pass
+        
+        
+    if "Radiometric" in list_sources:
+        logger.info("Downloading Radiometric data.")
+        rm_layernames = settings.target_sources["Radiometric"]
+        try:
+            files_rm = getdata_radiometric.get_radiometric_layers(
+                property_name=property_name,
+                layernames=rm_layernames,
+                bbox=settings.target_bbox,
+                outpath=output_data_dir
             )
+        except Exception as e:
+            print(e)
+        var_exists = "files_rm" in locals() or "files_rm" in globals()
+        if var_exists:
+            rm_layernames = [Path(f).stem for f in files_rm]
         else:
             pass
 
-    # save log to file
-    download_log.to_csv(os.path.join(settings.outpath, log_name + ".csv"), index=False)
+#--------------------------------------------------------------------------------------#
+    """
+    Add function here to apply mask and save copy of geotifs as COGS if mask boolean set to True.
+    Use rioxarray to force tiled tifs aka COGs.
+    """
+    
+    if data_mask is True:
+        #os.makedirs(output_data_dir, exist_ok=True)
+        
+        # make a list of all the tif files in the 'data' package that were harvested from sources
+        tif_files = list_tif_files(output_data_dir)
+        try:
+            for tif in tif_files:
+                if not tif.endswith(("_masked.tif", "_colored.tif", "_cog.tif", "_cog.public.tif")):
+                    # Clips a raster to the area of a shape, and reprojects.
+                    masked_data = reproj_mask(
+                    filename=tif,
+                    input_filepath=output_data_dir,
+                    bbox=input_geom,
+                    crscode=target_crs,
+                    output_filepath=output_data_dir,
+                    resample=resample)
+                    
+                    return masked_data
+        except Exception as e:
+            print(e)
+        else:
+            pass
 
-    # extract filename from settings.infile
-    # Select all processed data
-    df_sel = download_log.copy()
-    rasters = df_sel["filename_out"].values.tolist()
-    titles = df_sel["layertitle"].values.tolist()
-    if points_available:
-        fn = Path(settings.infile).resolve().name
-        cprint(
-            f"\nExtracting data points for {fn}  -----", "magenta", attrs=["bold"])
-        # Extract datatable from rasters given input coordinates
-        # gdf = utils.raster_query(longs, lats, rasters, titles) # old slower version
-        gdf = utils.extract_values_from_rasters(coords, rasters)
-        # Save as geopackage
-        gdf.to_file(os.path.join(settings.outpath,
-                    "results.gpkg"), driver="GPKG")
-        # Save the results table to a csv as well
-        gdf.drop("geometry", axis=1).to_csv(
-            os.path.join(settings.outpath, "results.csv"), index=True, mode="w"
-        )
-        utils.msg_success(
-            f"Data points extracted to {settings.outpath}results.gpkg")
-
-    if preview and points_available:
-        utils.plot_rasters(rasters, longs, lats, titles)
-    elif preview and not points_available:
-        utils.plot_rasters(rasters, titles=titles)
-
-    cprint("\n🎉 🎉 🎉 Harvest complete 🎉 🎉 🎉", "magenta", attrs=["bold"])
-
-    if return_df and points_available:
-        return gdf
-    else:
-        return None
+    print("\nHarvest complete")

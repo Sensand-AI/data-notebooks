@@ -6,8 +6,8 @@ import geopandas as gpd
 import numpy as np
 from datetime import datetime, timedelta
 
-from geodata_fetch import getdata_slga,getdata_dem, getdata_radiometric, utils
-from geodata_fetch.utils import  load_settings, reproj_mask, list_tif_files
+from geodata_fetch import getdata_slga,getdata_dem, getdata_radiometric
+from geodata_fetch.utils import  load_settings, reproj_mask, list_tif_files,colour_geotiff_and_save_cog
 
 # Configure logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -26,7 +26,6 @@ def run(path_to_config, input_geom):
     #output_masked_data_dir = os.path.join(settings.outpath, "masked-data")
     data_mask = settings.data_mask
     
-    
     # Count number of sources to download from
     count_sources = len(settings.target_sources)
     list_sources = list(settings.target_sources.keys())
@@ -44,7 +43,6 @@ def run(path_to_config, input_geom):
     if settings.add_buffer is True:
         # Add buffer to the bounding box
         input_geom = input_geom.buffer(0.002, join_style=2, resolution=15)
-        #input_geom = gpd.GeoDataFrame(geometry=[radius])
 
     # Temporal range
     # convert date strings to datetime objects
@@ -83,15 +81,16 @@ def run(path_to_config, input_geom):
                 depth_max=depth_max,
                 get_ci=False, #can this be added to the settings.json instead of being hard-coded here?
             )
+            logger.info(f"SLGA data downloaded successfully: {files_slga}")
         except Exception as e:
             print(e)
-        var_exists = "files_slga" in locals() or "files_slga" in globals()
-        if var_exists:
-            if len(files_slga) != len(slga_layernames):
-                # get filename stems of files_slga
-                slga_layernames = [Path(f).stem for f in files_slga] # check this still works afer adding sub-dirs
-        else:
-            pass
+        # var_exists = "files_slga" in locals() or "files_slga" in globals()
+        # if var_exists:
+        #     if len(files_slga) != len(slga_layernames):
+        #         # get filename stems of files_slga
+        #         slga_layernames = [Path(f).stem for f in files_slga] # check this still works afer adding sub-dirs
+        # else:
+        #     pass
     
     
     if "DEM" in list_sources:
@@ -107,13 +106,13 @@ def run(path_to_config, input_geom):
         except Exception as e:
             print(e)
             # Check if output if False (no data available) and skip if so
-        var_exists = "files_dem" in locals() or "files_dem" in globals()
-        if var_exists:
-            if len(files_dem) != len(dem_layernames):
-                # get filename stems of files_slga
-                dem_layernames = [Path(f).stem for f in files_dem]
-        else:
-            pass
+        # var_exists = "files_dem" in locals() or "files_dem" in globals()
+        # if var_exists:
+        #     if len(files_dem) != len(dem_layernames):
+        #         # get filename stems of files_slga
+        #         dem_layernames = [Path(f).stem for f in files_dem]
+        # else:
+        #     pass
         
         
     if "Radiometric" in list_sources:
@@ -128,11 +127,11 @@ def run(path_to_config, input_geom):
             )
         except Exception as e:
             print(e)
-        var_exists = "files_rm" in locals() or "files_rm" in globals()
-        if var_exists:
-            rm_layernames = [Path(f).stem for f in files_rm]
-        else:
-            pass
+        # var_exists = "files_rm" in locals() or "files_rm" in globals()
+        # if var_exists:
+        #     rm_layernames = [Path(f).stem for f in files_rm]
+        # else:
+        #     pass
 
 #--------------------------------------------------------------------------------------#
     """
