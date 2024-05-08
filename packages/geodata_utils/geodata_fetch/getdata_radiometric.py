@@ -1,13 +1,3 @@
-"""
-Script to download Radiometric data from NCI’s GSKY Data Server (using WCS) for a given
-resolution, and bounding box. Final data is saved as geotiff or NetCDF.
-
-
-LIMITATIONS: for some layers the server readout time can occasionally exceed 30s (longer readout time in request seems to be ignored)
-In case this happens please try later again when the NCI server is less loaded.
-
-This package is modified from the geodata-harvester developed for the Agricultural Research Federation (AgReFed).
-"""
 import os
 import json
 from owslib.wcs import WebCoverageService

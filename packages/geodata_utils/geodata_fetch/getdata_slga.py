@@ -1,42 +1,29 @@
-"""
-Python script to download data from Soil and Landscape Grid of Australia (SLGA).
-
-Core functionality:
-- automatic download SLGA data for given depth range and layer(s) via Web Coverage Service (WCS)
-- clip data to custom bounding box
-- save data as geotiff
-
-The SLGA layers, metadata, licensing and atttribution are described in the config folder in slga_soil_urls.json, and are read into a dictionary in the module function get_slgadict()
-
-"""
 import os
-import sys
 import json
-import importlib.resources
 from owslib.wcs import WebCoverageService
+import importlib.resources
+from datetime import datetime, timezone
+from geodata_fetch import utils
+
 
 def get_slgadict():
-    try:
-        with importlib.resources.open_text('config','slga_soil.json') as f:
-            slga_json = json.load(f)
-        
-        slgadict = {}
-        slgadict["title"] = slga_json["title"]
-        slgadict["description"] = slga_json["description"]
-        slgadict["license"] = slga_json["license"]
-        slgadict["source_url"] = slga_json["source_url"]
-        slgadict["copyright"] = slga_json["copyright"]
-        slgadict["attribution"] = slga_json["attribution"]
-        slgadict["crs"] = slga_json["crs"]
-        slgadict["resolution_arcsec"] = slga_json["resolution_arcsec"]
-        slgadict["depth_min"] = slga_json["depth_min"]
-        slgadict["depth_max"] = slga_json["depth_max"]
-        slgadict["layers_url"] = slga_json["layers_url"]
-        
-        return slgadict
-    except Exception as e:
-        print(f"Error loading slga_soil.json: {e}")
-        return None
+    with importlib.resources.open_text('config','slga_soil.json') as f:
+        slga_json = json.load(f)
+    
+    slgadict = {}
+    slgadict["title"] = slga_json["title"]
+    slgadict["description"] = slga_json["description"]
+    slgadict["license"] = slga_json["license"]
+    slgadict["source_url"] = slga_json["source_url"]
+    slgadict["copyright"] = slga_json["copyright"]
+    slgadict["attribution"] = slga_json["attribution"]
+    slgadict["crs"] = slga_json["crs"]
+    slgadict["resolution_arcsec"] = slga_json["resolution_arcsec"]
+    slgadict["depth_min"] = slga_json["depth_min"]
+    slgadict["depth_max"] = slga_json["depth_max"]
+    slgadict["layers_url"] = slga_json["layers_url"]
+    
+    return slgadict
 
 
 
