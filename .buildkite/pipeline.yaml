@@ -7,15 +7,24 @@ ecr-sensand-plugin: &ecr-sensand
     assume_role:
       role_arn: arn:aws:iam::622020772926:role/BuildkiteEcrPushPullRole
 
-# assume-role-staging-plugin: &assume-role-staging
-#   cultureamp/aws-assume-role#v0.1.0:
-#     role: "arn:aws:iam::005168020145:role/BuildkiteRole"
+assume-role-staging-plugin: &assume-role-staging
+  cultureamp/aws-assume-role#v0.1.0:
+    role: "arn:aws:iam::005168020145:role/BuildkiteRole"
 
-# aws-ssm-notebook-executor-plugin: &aws-ssm-notebook-executor
-#   aws-ssm#v1.0.0:
-#     parameters:
-#       DD_SITE: /notebook-executor/datadog_site
-#       DD_API_KEY: /notebook-executor/datadog_api_key
+# plugins
+docker-compose-deploy-plugin: &docker-compose-deploy
+  docker-compose#v4.15.0:
+    run: deploy
+    config:
+      - .buildkite/docker/docker-compose.deploy.yaml
+    volumes:
+      - "./:/buildkite"
+    env:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
+      - IMAGE_NAME
+      - IMAGE_URL
 
 steps:
   # TODO: lint & test
@@ -27,12 +36,25 @@ steps:
           - docker-compose#v4.14.0:
               build: notebook-executor
               image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
-              image-name: latest #"${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+              image-name: "${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
               cache-from:
+                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}
                 - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
               config:
                 - docker-compose.yml
           - *ecr-sensand
-      # TODO: update lambda
-      # - label: ":aws: Update Notebook Executor Lambda (Staging)"
-      
+        if: "!build.pull_request.draft"
+
+      - wait
+
+      - label: ":aws: Update Notebook Executor Lambda (Staging)"
+        branches: main
+        env:
+          IMAGE_NAME: notebook-executor
+          IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
+        command:
+          - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT} --region us-east-1
+        plugins:
+          - *assume-role-staging
+          - *docker-compose-deploy
+          
