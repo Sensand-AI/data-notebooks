@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def get_slgadict():
     try:
-        with resources.open_text('config','slga_soil.json') as f:
+        with resources.open_text('geodata_utils.config','slga_soil.json') as f:
             slga_json = json.load(f)
         
         slgadict = {}

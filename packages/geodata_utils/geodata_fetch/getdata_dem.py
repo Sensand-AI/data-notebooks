@@ -76,27 +76,23 @@ def getwcs_dem(url, crs, resolution, bbox, property_name, outpath):
     if resolution is None:
         resolution = get_demdict()["resolution_arcsec"]
 
-    os.makedirs(outpath, exist_ok=True)
     # Create WCS object and get data
     try:
         wcs = WebCoverageService(url, version="1.0.0", timeout=300)
         layername = wcs["1"].title
         fname_out = layername.replace(" ", "_") + "_" + property_name + ".tif"
         outfname = os.path.join(outpath, fname_out)
-        if os.path.exists(outfname):
-            utils.msg_warn(f"{fname_out} already exists, skipping download")
-        else:
-            data = wcs.getCoverage(
-                identifier="1",
-                bbox=bbox,
-                format="GeoTIFF",
-                crs=crs,
-                resx=resolution,
-                resy=resolution,
-            )
-            # Save data to file
-            with open(outfname, "wb") as f:
-                f.write(data.read())
+        data = wcs.getCoverage(
+            identifier="1",
+            bbox=bbox,
+            format="GeoTIFF",
+            crs=crs,
+            resx=resolution,
+            resy=resolution,
+        )
+        # Save data to file
+        with open(outfname, "wb") as f:
+            f.write(data.read())
     except Exception as e:
         logger.error(f"Error fetching dem wcs: {e}")
         return False
