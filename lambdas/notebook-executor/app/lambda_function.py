@@ -118,6 +118,8 @@ def lambda_handler(event, _):
         dict: The output of the Lambda function. Must be JSON serializable.
     """
 
+    print("Received event: ", event)
+
     # If invoked with a function url there's a body key
     if 'body' in event:
         event = json.loads(event['body'])
@@ -131,19 +133,19 @@ def lambda_handler(event, _):
             'headers': {
                 'Content-Type': 'application/json'
             },
-            'body': 'Missing "notebook_name" in the event.'
+            'body': json.dumps({'error': 'Missing "notebook_name" in the event.'})
         }
 
     # Load the JSON Schema for the specified notebook
     try:
         schema = load_schema(notebook_name)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         return {
             'statusCode': 404,
             'headers': {
                 'Content-Type': 'application/json'
             },
-            'body': str(e)
+            'body': json.dumps({'error': 'File not found.'})
         }
 
     # Validate the incoming event against the schema
