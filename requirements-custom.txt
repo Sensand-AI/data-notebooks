@@ -1,4 +1,3 @@
 # Local packages
 ./packages/aws_utils
-./packages/gis_utils
-./packages/geodata_utils
+./packages/sensand_gis_utils

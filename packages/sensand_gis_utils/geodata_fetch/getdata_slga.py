@@ -2,10 +2,8 @@ import os
 import sys
 import json
 import logging
-from owslib.wcs import WebCoverageService
 from importlib import resources
-from datetime import datetime, timezone
-from geodata_fetch import utils
+from owslib.wcs import WebCoverageService
 
 # Configure logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -13,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def get_slgadict():
     try:
-        with resources.open_text('config','slga_soil.json') as f:
+        with resources.open_text('data','slga_soil.json') as f:
             slga_json = json.load(f)
         
         slgadict = {}

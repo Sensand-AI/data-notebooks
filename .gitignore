@@ -12,3 +12,4 @@ dash-tutorial.ipynb
 duckdb-data/data-duck/
 .DS_Store
 .s3mock-data/
+build/

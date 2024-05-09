@@ -24,12 +24,12 @@ RUN pip install --upgrade pip
 
 # Install Python packages
 COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/requirements.txt
-RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt
+RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt -t ${LAMBDA_TASK_ROOT}
 
 # Install local packages
 COPY packages/ ${LAMBDA_TASK_ROOT}/packages
-COPY requirements-custom.txt ${LAMBDA_TASK_ROOT}/requirements-custom.txt
-RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt
+COPY requirements-custom.txt ${LAMBDA_TASK_ROOT}/
+RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt -t ${LAMBDA_TASK_ROOT}
 
 COPY notebooks/ ${LAMBDA_TASK_ROOT}/notebooks
 
@@ -37,7 +37,7 @@ COPY notebooks/ ${LAMBDA_TASK_ROOT}/notebooks
 EXPOSE 8888
 
 # Copy script to start Jupyter
-COPY start-jupyter.sh ${LAMBDA_TASK_ROOT}/start-jupyter.sh
+COPY start-jupyter.sh ${LAMBDA_TASK_ROOT}/
 
 # Run the Jupyter server using the start-jupyter.sh script
 ENTRYPOINT ["sh", "start-jupyter.sh"]

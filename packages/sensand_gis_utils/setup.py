@@ -1,12 +1,14 @@
+
 from setuptools import find_packages, setup
 
 VERSION = '0.0.1'
 
 setup(
-    name="geodata_utils", #this should be the name of the PARENT sir, not geodata_fetch
+    name="sensand_gis_utils",
     version=VERSION,
     packages=find_packages(),
     install_requires=[
+        'pystac_client',
         'rasterio',
         'rioxarray',
         'rio-cogeo',
@@ -19,8 +21,6 @@ setup(
         'requests',
         'pyproj'
     ],
-    include_package_data=True,
-    package_data={
-        'geodata_utils': ['config/*.json']
-    }
+	keywords=['gis', 'utils', 'stac'],
+	package_data={'data': ['data/*.json']}
 )
