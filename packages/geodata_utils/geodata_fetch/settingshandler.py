@@ -2,6 +2,8 @@
 """
 Functions for reading and handling the input 'settings.json' file that specifies the data to collect.
 """
+import os
+import sys
 import json
 import datetime
 from types import SimpleNamespace

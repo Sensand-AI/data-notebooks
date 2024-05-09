@@ -1,29 +1,37 @@
 import os
+import sys
 import json
+import logging
 from owslib.wcs import WebCoverageService
-import importlib.resources
+from importlib import resources
 from datetime import datetime, timezone
 from geodata_fetch import utils
 
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_radiometricdict():
-    with importlib.resources.open_text('config','radiometric.json') as f:
-        rm_json = json.load(f)
-    
-    rmdict = {}
-    rmdict["title"] = rm_json["title"]
-    rmdict["description"] = rm_json["description"]
-    rmdict["license"] = rm_json["license"]
-    rmdict["source_url"] = rm_json["source_url"]
-    rmdict["copyright"] = rm_json["copyright"]
-    rmdict["attribution"] = rm_json["attribution"]
-    rmdict["crs"] = rm_json["crs"]
-    rmdict["resolution_arcsec"] = rm_json["resolution_arcsec"]
-    rmdict["layers_url"] = rm_json["layers_url"]
-    rmdict["layer_names"] = rm_json["layer_names"]
+    try:
+        with resources.open_text('config','radiometric.json') as f:
+            rm_json = json.load(f)
+        
+        rmdict = {}
+        rmdict["title"] = rm_json["title"]
+        rmdict["description"] = rm_json["description"]
+        rmdict["license"] = rm_json["license"]
+        rmdict["source_url"] = rm_json["source_url"]
+        rmdict["copyright"] = rm_json["copyright"]
+        rmdict["attribution"] = rm_json["attribution"]
+        rmdict["crs"] = rm_json["crs"]
+        rmdict["resolution_arcsec"] = rm_json["resolution_arcsec"]
+        rmdict["layers_url"] = rm_json["layers_url"]
+        rmdict["layer_names"] = rm_json["layer_names"]
 
-    return rmdict
-
+        return rmdict
+    except Exception as e:
+        logger.error(f"Error loading radiometric.json: {e}")
+        return None
 
 """
 TODO: resolution is set to 1 here. But its 3.6 (100m) in the original data. Remove or find out why its set to 1.
@@ -117,7 +125,7 @@ def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
     date = times[0]
     # Get data
     if os.path.exists(outfname):
-        utils.msg_warn(f"{layername}.tif already exists, skipping download")
+        logger.info(f"{layername}.tif already exists, skipping download")
     else:
         try:
             wcs = WebCoverageService(url, version="1.0.0", timeout=300)
@@ -131,13 +139,13 @@ def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
                 height=nheight,
             )
         except Exception as e:
-            print(e)
+            logger.error(f"Error fetching RadMap wcs: {e}")
             return False
 
         # Save data
         with open(outfname, "wb") as f:
             f.write(data.read())
-        # print(f"Layer {layername} saved in {outfname}")
+        logger.info(f"Layer {layername} saved in {outfname}")
     
     return True
 

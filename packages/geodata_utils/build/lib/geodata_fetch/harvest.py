@@ -7,7 +7,7 @@ import numpy as np
 from datetime import datetime, timedelta
 
 from geodata_fetch import getdata_slga,getdata_dem, getdata_radiometric
-from geodata_fetch.utils import  load_settings, reproj_mask, list_tif_files,colour_geotiff_and_save_cog
+from geodata_fetch.utils import  load_settings, reproj_mask, list_tif_files
 
 # Configure logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -38,30 +38,32 @@ def run(path_to_config, input_geom):
 
     # Stop if bounding box cannot be calculated or was not provided
     if settings.target_bbox is None:
-        raise ValueError("No bounding box provided")
+        logger.error("No bounding box provided")
     
     if settings.add_buffer is True:
         # Add buffer to the bounding box
         input_geom = input_geom.buffer(0.002, join_style=2, resolution=15)
+        logger.info("Adding buffer to AOI")
 
     # Temporal range
     # convert date strings to datetime objects
-    date_diff = (datetime.strptime(settings.date_end, "%Y-%m-%d") 
-        - datetime.strptime(settings.date_start, "%Y-%m-%d")).days
-    if settings.time_intervals > 0:
-        period_days = date_diff / settings.time_intervals
-        if period_days == 0:
-            period_days = 1
-    else:
-        period_days = None
+    
+    # date_diff = (datetime.strptime(settings.date_end, "%Y-%m-%d") 
+    #     - datetime.strptime(settings.date_start, "%Y-%m-%d")).days
+    # if settings.time_intervals > 0:
+    #     period_days = date_diff / settings.time_intervals
+    #     if period_days == 0:
+    #         period_days = 1
+    # else:
+    #     period_days = None
 
     # process each data source
-    logger.info(f"Found the following {count_sources} sources: {list_sources}")
+    logger.info(f"Requested the following {count_sources} sources: {list_sources}")
 
 #-----add getdata functions here---------------------------------------------------------#
 
     if "SLGA" in list_sources:
-        logger.info("Downloading SLGA data.")
+        logger.info("Begin fetching SLGA data.")
         slga_layernames = list(settings.target_sources["SLGA"].keys())
         # get min and max depth for each layername
         depth_min = []
@@ -83,8 +85,9 @@ def run(path_to_config, input_geom):
             )
             logger.info(f"SLGA data downloaded successfully: {files_slga}")
         except Exception as e:
-            print(e)
-        # var_exists = "files_slga" in locals() or "files_slga" in globals()
+            logger.error(f"Error fetching SLGA data: {e}")
+            
+        #var_exists = "files_slga" in locals() or "files_slga" in globals()
         # if var_exists:
         #     if len(files_slga) != len(slga_layernames):
         #         # get filename stems of files_slga
@@ -94,7 +97,7 @@ def run(path_to_config, input_geom):
     
     
     if "DEM" in list_sources:
-        logger.info("Downloading DEM data.")
+        logger.info("Begin fetching DEM data.")
         dem_layernames = settings.target_sources["DEM"]
         try:
             files_dem = getdata_dem.get_dem_layers(
@@ -104,19 +107,19 @@ def run(path_to_config, input_geom):
                 outpath=output_data_dir
             )
         except Exception as e:
-            print(e)
+            logger.error(f"Error fetching DEM data: {e}")
             # Check if output if False (no data available) and skip if so
-        var_exists = "files_dem" in locals() or "files_dem" in globals()
-        if var_exists:
-            if len(files_dem) != len(dem_layernames):
-                # get filename stems of files_slga
-                dem_layernames = [Path(f).stem for f in files_dem]
-        else:
-            pass
+        # var_exists = "files_dem" in locals() or "files_dem" in globals()
+        # if var_exists:
+        #     if len(files_dem) != len(dem_layernames):
+        #         # get filename stems of files_slga
+        #         dem_layernames = [Path(f).stem for f in files_dem]
+        # else:
+        #     pass
         
         
     if "Radiometric" in list_sources:
-        logger.info("Downloading Radiometric data.")
+        logger.info("Begin fetching RadMap data.")
         rm_layernames = settings.target_sources["Radiometric"]
         try:
             files_rm = getdata_radiometric.get_radiometric_layers(
@@ -126,12 +129,12 @@ def run(path_to_config, input_geom):
                 outpath=output_data_dir
             )
         except Exception as e:
-            print(e)
-        var_exists = "files_rm" in locals() or "files_rm" in globals()
-        if var_exists:
-            rm_layernames = [Path(f).stem for f in files_rm]
-        else:
-            pass
+            logger.error(f"Error fetching RadMap data: {e}")
+        # var_exists = "files_rm" in locals() or "files_rm" in globals()
+        # if var_exists:
+        #     rm_layernames = [Path(f).stem for f in files_rm]
+        # else:
+        #     pass
 
 #--------------------------------------------------------------------------------------#
     """
@@ -140,6 +143,7 @@ def run(path_to_config, input_geom):
     """
     
     if data_mask is True:
+        logger.info("Mask is true, applying to geotifs.")
         #os.makedirs(output_data_dir, exist_ok=True)
         
         # make a list of all the tif files in the 'data' package that were harvested from sources
@@ -158,8 +162,8 @@ def run(path_to_config, input_geom):
                     
                     return masked_data
         except Exception as e:
-            print(e)
+            logger.error(f"Error applying mask to layer: {e}")
         else:
             pass
 
-    print("\nHarvest complete")
+    logger.info("Geodata harvester run complete.")

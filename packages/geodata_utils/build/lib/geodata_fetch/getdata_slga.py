@@ -1,43 +1,38 @@
-"""
-Python script to download data from Soil and Landscape Grid of Australia (SLGA).
-
-Core functionality:
-- automatic download SLGA data for given depth range and layer(s) via Web Coverage Service (WCS)
-- clip data to custom bounding box
-- save data as geotiff
-
-The SLGA layers, metadata, licensing and atttribution are described in the config folder in slga_soil_urls.json, and are read into a dictionary in the module function get_slgadict()
-
-"""
 import os
 import sys
 import json
 import logging
-import importlib.resources
 from owslib.wcs import WebCoverageService
+from importlib import resources
+from datetime import datetime, timezone
+from geodata_fetch import utils
 
 # Configure logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def get_slgadict():
-    with importlib.resources.open_text('config','slga_soil.json') as f:
-        slga_json = json.load(f)
-    
-    slgadict = {}
-    slgadict["title"] = slga_json["title"]
-    slgadict["description"] = slga_json["description"]
-    slgadict["license"] = slga_json["license"]
-    slgadict["source_url"] = slga_json["source_url"]
-    slgadict["copyright"] = slga_json["copyright"]
-    slgadict["attribution"] = slga_json["attribution"]
-    slgadict["crs"] = slga_json["crs"]
-    slgadict["resolution_arcsec"] = slga_json["resolution_arcsec"]
-    slgadict["depth_min"] = slga_json["depth_min"]
-    slgadict["depth_max"] = slga_json["depth_max"]
-    slgadict["layers_url"] = slga_json["layers_url"]
-    
-    return slgadict
+    try:
+        with resources.open_text('config','slga_soil.json') as f:
+            slga_json = json.load(f)
+        
+        slgadict = {}
+        slgadict["title"] = slga_json["title"]
+        slgadict["description"] = slga_json["description"]
+        slgadict["license"] = slga_json["license"]
+        slgadict["source_url"] = slga_json["source_url"]
+        slgadict["copyright"] = slga_json["copyright"]
+        slgadict["attribution"] = slga_json["attribution"]
+        slgadict["crs"] = slga_json["crs"]
+        slgadict["resolution_arcsec"] = slga_json["resolution_arcsec"]
+        slgadict["depth_min"] = slga_json["depth_min"]
+        slgadict["depth_max"] = slga_json["depth_max"]
+        slgadict["layers_url"] = slga_json["layers_url"]
+        
+        return slgadict
+    except Exception as e:
+        logger.error(f"Error loading slga_soil.json: {e}")
+        return None
 
 
 
@@ -71,18 +66,16 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
     # Create WCS object
     filename = outfname.split(os.sep)[-1]
     try:
-        with filename as s:
-            wcs = WebCoverageService(url, version="1.0.0", timeout=300)
-            # Get data
-            data = wcs.getCoverage(
-                identifier,
-                format="GEOTIFF",
-                bbox=bbox,
-                crs=crs,
-                resx=resolution,
-                resy=resolution,
-            )
-            s(1)
+        wcs = WebCoverageService(url, version="1.0.0", timeout=300)
+        # Get data
+        data = wcs.getCoverage(
+            identifier,
+            format="GEOTIFF",
+            bbox=bbox,
+            crs=crs,
+            resx=resolution,
+            resy=resolution,
+        )
 
         # Save data
         with open(outfname, "wb") as f:
@@ -90,7 +83,7 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         logger.info(f"Downloaded {filename}")
         return True
     except Exception as e:
-        logger.error(f"Failed to download {filename}: {str(e)}")
+        logger.error(f"Failed to download {filename}: {e}")
         return False
 
 
@@ -135,7 +128,7 @@ def depth2identifier(depth_min, depth_max):
             depths_upper,
         )
     except Exception as e:
-        logging.error(f"Failed to get identifiers: {str(e)}")
+        logger.error(f"Failed to get identifiers: {e}")
         return None, None, None, None, None
 
 
@@ -172,7 +165,7 @@ def identifier2depthbounds(depths):
         assert ncount == len(depths), f"ncount = {ncount}"
         return depth_min, depth_max
     except Exception as e:
-        logging.error(f"Failed to get min and max depth: {str(e)}")
+        logger.error(f"Failed to get min and max depth: {e}")
         return None, None
 
 
@@ -282,9 +275,8 @@ def get_slga_layers(
                     dl = get_wcsmap(
                         layer_url, identifier, crs, bbox, resolution_deg, fname_out)
 
-        print(f"testing fnames_out: {fnames_out}")
         return fnames_out
     except Exception as e:
-        logging.error(f"Failed to get SLGA layers: {str(e)}")
+        logger.error(f"Failed to get SLGA layers: {e}")
         return None
 

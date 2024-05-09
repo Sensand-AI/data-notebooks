@@ -30,15 +30,14 @@ import pandas as pd
 import geopandas as gpd
 import rioxarray as rxr
 import rasterio
+
 from types import SimpleNamespace
 from rasterio.mask import mask
 from rasterio.warp import calculate_default_transform, Resampling
-from rasterio.plot import show
 from rasterio.dtypes import uint8
 from rasterio.enums import Resampling
 from rasterio.io import MemoryFile
 from rasterio.plot import reshape_as_raster
-
 from rio_cogeo.cogeo import cog_translate
 from rio_cogeo.profiles import cog_profiles
 from matplotlib import cm
@@ -115,17 +114,20 @@ def load_settings(input_settings):
         ValueError: If the input_settings is neither a string nor a file-like object.
 
     """
-    if isinstance(input_settings, str):
-        with open(input_settings, "r") as f:
-            settings = json.load(f)
-    else:
-        settings = json.load(input_settings)
+    try:
+        if isinstance(input_settings, str):
+            with open(input_settings, "r") as f:
+                settings = json.load(f)
+        else:
+            settings = json.load(input_settings)
 
-    settings = SimpleNamespace(**settings)
+        settings = SimpleNamespace(**settings)
 
-    settings.date_min = str(settings.date_start)
-    settings.date_max = str(settings.date_end)
-    return settings
+        settings.date_min = str(settings.date_start)
+        settings.date_max = str(settings.date_end)
+        return settings
+    except Exception as e:
+        logger.error(f"Error loading data harvester inputs: {e}")
 
 
 def calc_arc2meter(arcsec, latitude):
@@ -205,7 +207,6 @@ def get_wcs_capabilities(url):
         description_list.append(wcs[key].abstract)
         print(f"bounding box: {wcs[key].boundingboxes}")
         bbox_list.append(wcs[key].boundingboxes)
-        print("")
 
     return keys, title_list, description_list, bbox_list
 
@@ -266,97 +267,100 @@ def reproj_mask(filename, input_filepath, bbox, crscode, output_filepath, resamp
     masked_filepath = filename.replace(".tif", "_masked.tif")
     mask_outpath = os.path.join(output_filepath, masked_filepath)
     
-    input_raster = rxr.open_rasterio(input_full_filepath)
-    
-    #run pixel resampling if flag set to true
-    if resample is True:
-        upscale_factor = 3
-        
-        # Caluculate new height and width using upscale_factor
-        new_width = input_raster.rio.width * upscale_factor
-        new_height = input_raster.rio.height * upscale_factor
-        
-        #upsample raster
-        up_sampled = input_raster.rio.reproject(input_raster.rio.crs, shape=(int(new_height), int(new_width)), resampling=Resampling.nearest)
-        clipped = up_sampled.rio.clip(bbox.geometry.values)
-        clipped.rio.write_nodata(np.nan, inplace=True)
-        #clip first as tif and geom need to be in same proejction, and encode the nodata values as nan
-        reprojected = clipped.rio.reproject(crscode, nodata=np.nan)
-        reprojected.rio.to_raster(mask_outpath, tiled=True)
-    else:
-        clipped = input_raster.rio.clip(bbox.geometry.values)
-        clipped.rio.write_nodata(np.nan, inplace=True)
-        #clip first as tif and geom need to be in same proejction, and encode the nodata values as nan
-        reprojected = clipped.rio.reproject(crscode, nodata=np.nan)
-        reprojected.rio.to_raster(mask_outpath, tiled=True)
-
-    return clipped
-
-
-
-def colour_geotiff_and_save_cog(input_geotiff, colour_map):
-    """
-    Colorizes a GeoTIFF image using a specified color map and saves it as a COG (Cloud-Optimized GeoTIFF).
-
-    Args:
-        input_geotiff (str): The path to the input GeoTIFF file.
-        colour_map (str): The name of the color map to use for colorizing the image.
-
-    Raises:
-        Exception: If unable to convert the colored GeoTIFF to a COG.
-
-    Returns:
-        None
-    """
-    output_colored_tiff_filename = input_geotiff.replace('.tif', '_colored.tif')
-    output_cog_filename = input_geotiff.replace('.tif', '_cog.tif')
-    with rasterio.open(input_geotiff) as src:
-        meta = src.meta.copy()
-        dst_crs = rasterio.crs.CRS.from_epsg(4326) #change so not hardcoded?
-        transform, width, height = calculate_default_transform(
-            src.crs, dst_crs, src.width, src.height, *src.bounds
-        )
-
-        meta.update({
-            'crs': dst_crs,
-            'transform': transform,
-            'width': width,
-            'height': height
-        })
-
-        tif_data = src.read(1, masked=True).astype('float32')
-        tif_formatted = tif_data.filled(np.nan)
-
-        cmap = cm.get_cmap(colour_map)
-        na = tif_formatted[~np.isnan(tif_formatted)]
-
-        min_value = min(na)
-        max_value = max(na)
-
-        norm = Normalize(vmin=min_value, vmax=max_value)
-
-        coloured_data = (cmap(norm(tif_formatted))[:, :, :3] * 255).astype(np.uint8)
-
-        meta.update({"count":3})
-
-
-        with rasterio.open(output_colored_tiff_filename, 'w', **meta) as dst:
-            reshape = reshape_as_raster(coloured_data)
-            dst.write(reshape)
-
     try:
-        dst_profile = cog_profiles.get('deflate')
-        with MemoryFile() as mem_dst:
-            cog_translate(
-                output_colored_tiff_filename,
-                output_cog_filename,
-                config=dst_profile,
-                in_memory=True,
-                dtype="uint8",
-                add_mask=False,
-                nodata=0,
-                dst_kwargs=dst_profile
-            )
-    except Exception:
-        raise Exception('Unable to convert to cog')
+        input_raster = rxr.open_rasterio(input_full_filepath)
+        
+        #run pixel resampling if flag set to true
+        if resample is True:
+            upscale_factor = 3
+            
+            # Caluculate new height and width using upscale_factor
+            new_width = input_raster.rio.width * upscale_factor
+            new_height = input_raster.rio.height * upscale_factor
+            
+            #upsample raster
+            up_sampled = input_raster.rio.reproject(input_raster.rio.crs, shape=(int(new_height), int(new_width)), resampling=Resampling.nearest)
+            clipped = up_sampled.rio.clip(bbox.geometry.values)
+            clipped.rio.write_nodata(np.nan, inplace=True)
+            #clip first as tif and geom need to be in same proejction, and encode the nodata values as nan
+            reprojected = clipped.rio.reproject(crscode, nodata=np.nan)
+            reprojected.rio.to_raster(mask_outpath, tiled=True)
+        else:
+            clipped = input_raster.rio.clip(bbox.geometry.values)
+            clipped.rio.write_nodata(np.nan, inplace=True)
+            #clip first as tif and geom need to be in same proejction, and encode the nodata values as nan
+            reprojected = clipped.rio.reproject(crscode, nodata=np.nan)
+            reprojected.rio.to_raster(mask_outpath, tiled=True)
+
+        return clipped
+    except Exception as e:
+        logger.error(f"Error occurred while reprojecting and masking raster: {e}")
+
+
+
+# def colour_geotiff_and_save_cog(input_geotiff, colour_map):
+#     """
+#     Colorizes a GeoTIFF image using a specified color map and saves it as a COG (Cloud-Optimized GeoTIFF).
+
+#     Args:
+#         input_geotiff (str): The path to the input GeoTIFF file.
+#         colour_map (str): The name of the color map to use for colorizing the image.
+
+#     Raises:
+#         Exception: If unable to convert the colored GeoTIFF to a COG.
+
+#     Returns:
+#         None
+#     """
+#     output_colored_tiff_filename = input_geotiff.replace('.tif', '_colored.tif')
+#     output_cog_filename = input_geotiff.replace('.tif', '_cog.tif')
+#     with rasterio.open(input_geotiff) as src:
+#         meta = src.meta.copy()
+#         dst_crs = rasterio.crs.CRS.from_epsg(4326) #change so not hardcoded?
+#         transform, width, height = calculate_default_transform(
+#             src.crs, dst_crs, src.width, src.height, *src.bounds
+#         )
+
+#         meta.update({
+#             'crs': dst_crs,
+#             'transform': transform,
+#             'width': width,
+#             'height': height
+#         })
+
+#         tif_data = src.read(1, masked=True).astype('float32')
+#         tif_formatted = tif_data.filled(np.nan)
+
+#         cmap = cm.get_cmap(colour_map)
+#         na = tif_formatted[~np.isnan(tif_formatted)]
+
+#         min_value = min(na)
+#         max_value = max(na)
+
+#         norm = Normalize(vmin=min_value, vmax=max_value)
+
+#         coloured_data = (cmap(norm(tif_formatted))[:, :, :3] * 255).astype(np.uint8)
+
+#         meta.update({"count":3})
+
+
+#         with rasterio.open(output_colored_tiff_filename, 'w', **meta) as dst:
+#             reshape = reshape_as_raster(coloured_data)
+#             dst.write(reshape)
+
+#     try:
+#         dst_profile = cog_profiles.get('deflate')
+#         with MemoryFile() as mem_dst:
+#             cog_translate(
+#                 output_colored_tiff_filename,
+#                 output_cog_filename,
+#                 config=dst_profile,
+#                 in_memory=True,
+#                 dtype="uint8",
+#                 add_mask=False,
+#                 nodata=0,
+#                 dst_kwargs=dst_profile
+#             )
+#     except Exception:
+#         raise Exception('Unable to convert to cog')
     

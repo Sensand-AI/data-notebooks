@@ -11,16 +11,22 @@ The DEM layers, metadata, licensing and atttribution are described in the config
 
 """
 import os
+import sys
 import json
-import importlib.resources #to read in slga.json during runtime
+import logging
+from importlib import resources
 from geodata_fetch import utils
 from owslib.wcs import WebCoverageService
 
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_demdict():
     try:
-        with importlib.resources.open_text('config','dem.json') as f:
+        with resources.open_text('config','dem.json') as f:
             dem_json = json.load(f)
+        
         
         demdict = {}
         demdict["title"] = dem_json["title"]
@@ -36,7 +42,7 @@ def get_demdict():
 
         return demdict
     except Exception as e:
-        print(f"Error loading dem.json: {e}")
+        logger.error(f"Error loading dem.json: {e}")
         return None
 
 """
@@ -92,7 +98,7 @@ def getwcs_dem(url, crs, resolution, bbox, property_name, outpath):
             with open(outfname, "wb") as f:
                 f.write(data.read())
     except Exception as e:
-        print(e)
+        logger.error(f"Error fetching dem wcs: {e}")
         return False
     return outfname
 

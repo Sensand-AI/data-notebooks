@@ -11,29 +11,39 @@ The DEM layers, metadata, licensing and atttribution are described in the config
 
 """
 import os
+import sys
 import json
-import importlib.resources #to read in slga.json during runtime
+import logging
+from importlib import resources
 from geodata_fetch import utils
 from owslib.wcs import WebCoverageService
 
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_demdict():
-    with importlib.resources.open_text('config','dem.json') as f:
-        dem_json = json.load(f)
-    
-    demdict = {}
-    demdict["title"] = dem_json["title"]
-    demdict["description"] = dem_json["description"]
-    demdict["license"] = dem_json["license"]
-    demdict["source_url"] = dem_json["source_url"]
-    demdict["copyright"] = dem_json["copyright"]
-    demdict["attribution"] = dem_json["attribution"]
-    demdict["crs"] = dem_json["crs"]
-    demdict["bbox"] = dem_json["bbox"]
-    demdict["resolution_arcsec"] = dem_json["resolution_arcsec"]
-    demdict["layers_url"] = dem_json["layers_url"]
+    try:
+        with resources.open_text('config','dem.json') as f:
+            dem_json = json.load(f)
+        
+        
+        demdict = {}
+        demdict["title"] = dem_json["title"]
+        demdict["description"] = dem_json["description"]
+        demdict["license"] = dem_json["license"]
+        demdict["source_url"] = dem_json["source_url"]
+        demdict["copyright"] = dem_json["copyright"]
+        demdict["attribution"] = dem_json["attribution"]
+        demdict["crs"] = dem_json["crs"]
+        demdict["bbox"] = dem_json["bbox"]
+        demdict["resolution_arcsec"] = dem_json["resolution_arcsec"]
+        demdict["layers_url"] = dem_json["layers_url"]
 
-    return demdict
+        return demdict
+    except Exception as e:
+        logger.error(f"Error loading dem.json: {e}")
+        return None
 
 """
 have removed get_capabilities() from here and put in utils
@@ -88,7 +98,7 @@ def getwcs_dem(url, crs, resolution, bbox, property_name, outpath):
             with open(outfname, "wb") as f:
                 f.write(data.read())
     except Exception as e:
-        print(e)
+        logger.error(f"Error fetching dem wcs: {e}")
         return False
     return outfname
 
