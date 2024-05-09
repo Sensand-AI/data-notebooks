@@ -11,6 +11,10 @@ assume-role-staging-plugin: &assume-role-staging
   cultureamp/aws-assume-role#v0.1.0:
     role: "arn:aws:iam::005168020145:role/BuildkiteRole"
 
+assume-role-production-plugin: &assume-role-production
+  cultureamp/aws-assume-role#v0.1.0:
+    role: "arn:aws:iam::914193799137:role/BuildkiteRole"
+
 # plugins
 docker-compose-deploy-plugin: &docker-compose-deploy
   docker-compose#v4.15.0:
@@ -28,10 +32,12 @@ docker-compose-deploy-plugin: &docker-compose-deploy
 
 steps:
   # TODO: lint & test
-  - group: "Notebook Executor Deploy (Staging)"
+  - group: "Notebook Executor Deploy"
     key: "notebook-executor-deploy"
     steps:
-      - label: ":docker: Notebook Executor Build & Push"
+
+      - label: ":docker: Notebook Executor Build & Push (Platform)"
+        key: "notebook-executor-build-and-push"
         plugins:
           - docker-compose#v4.14.0:
               build: notebook-executor
@@ -43,18 +49,44 @@ steps:
               config:
                 - docker-compose.yml
           - *ecr-sensand
-        if: "!build.pull_request.draft"
+        if: |
+          build.branch == "main" || (build.pull_request.id != null && !build.pull_request.draft)
 
-      - wait
+      - block: "Deploy Staging (Manual)"
+        prompt: "Update Lambda Function in Staging?"
+        key: "deploy-staging-manual"
+        depends_on:
+          - "notebook-executor-build-and-push"
 
       - label: ":aws: Update Notebook Executor Lambda (Staging)"
+        env:
+          IMAGE_NAME: notebook-executor
+          IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
+        command:
+          - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT} --region us-east-1
+        depends_on:
+          - "deploy-staging-manual"
+        plugins:
+          - *assume-role-staging
+          - *docker-compose-deploy
+      
+      - block: "Deploy Production (Manual)"
+        prompt: "Update Lambda Function in Production?"
+        branches: main
+        key: "deploy-production-manual"
+        depends_on:
+          - "notebook-executor-build-and-push"
+
+      - label: ":aws: Update Notebook Executor Lambda (Production)"
         branches: main
         env:
           IMAGE_NAME: notebook-executor
           IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
         command:
           - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT} --region us-east-1
+        depends_on:
+          - "deploy-production-manual"
         plugins:
-          - *assume-role-staging
+          - *assume-role-production
           - *docker-compose-deploy
           
