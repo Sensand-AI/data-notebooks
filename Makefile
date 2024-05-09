@@ -35,11 +35,11 @@ docker-tag:
 
 ## build-notebook-executor: Build the Docker image.
 build-notebook-executor:
-	docker build -t $(IMAGE_NAME) -f ./lambdas/notebook-executor/notebook-executor.Dockerfile . --platform linux/amd64
+	docker build -t $(IMAGE_NAME):latest -f ./lambdas/notebook-executor/notebook-executor.Dockerfile . --platform linux/amd64
 
 ## build-notebook-executor-no-cache: Build the Docker image.
 build-notebook-executor-no-cache:
-	docker build -t $(IMAGE_NAME) -f ./lambdas/notebook-executor/notebook-executor.Dockerfile . --platform linux/amd64 --no-cache
+	docker build -t $(IMAGE_NAME):latest -f ./lambdas/notebook-executor/notebook-executor.Dockerfile . --platform linux/amd64 --no-cache
 
 ## docker-push-notebook-executor: Push the Docker image (Platform)
 docker-push-notebook-executor:
