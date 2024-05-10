@@ -66,7 +66,7 @@ services:
       DD_CAPTURE_LAMBDA_PAYLOAD: true
       DD_LAMBDA_HANDLER: app.lambda_function.lambda_handler
       AWS_LAMBDA_FUNCTION_TIMEOUT: 120
-      # DD_LOCAL_TEST: true
+      DD_LOCAL_TEST: ${DD_LOCAL_TEST}
     labels:
       com.datadoghq.ad.logs: '[{"source": "docker-compose", "service": "notebook-executor"}]'
       com.datadoghq.tags.env: development
