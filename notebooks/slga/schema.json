@@ -19,6 +19,9 @@
         },
         "propertyName": {
           "type": "string"
+        },
+        "colormap": {
+          "type": "string"
         }
       },
       "required": ["geojson", "propertyName"]
