@@ -3,7 +3,6 @@ notebooks/datatest-files
 test-files
 __pycache__
 *.egg-info/
-data/
 evergreen-resources/data/
 dash-tutorial.ipynb
 .venv/
@@ -12,3 +11,5 @@ dash-tutorial.ipynb
 duckdb-data/data-duck/
 .DS_Store
 .s3mock-data/
+build/
+notebooks/sandbox/data

@@ -41,7 +41,6 @@ services:
         AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
         AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
         AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-    # command: "app.lambda_function.lambda_handler"
     ports:
       - "9002:8080"
     volumes:
@@ -58,15 +57,16 @@ services:
       ENV: ${ENVIRONMENT}
       DD_SITE: ${DD_SITE}
       DD_API_KEY: ${DD_API_KEY}
-      DD_TRACE_ENABLED: true
+      DD_TRACE_ENABLED: ${DD_TRACE_ENABLED}
       DD_SERVICE: notebook-executor
       DD_ENV: ${ENVIRONMENT}
       DD_VERSION: 0.0.1
-      DD_APM_ENABLED: true
+      DD_APM_ENABLED: ${DD_APM_ENABLED}
       DD_LOG_LEVEL: ${DD_LOG_LEVEL}
       DD_CAPTURE_LAMBDA_PAYLOAD: true
       DD_LAMBDA_HANDLER: app.lambda_function.lambda_handler
-      AWS_LAMBDA_FUNCTION_TIMEOUT: 180
+      AWS_LAMBDA_FUNCTION_TIMEOUT: 120
+      DD_LOCAL_TEST: ${DD_LOCAL_TEST}
     labels:
       com.datadoghq.ad.logs: '[{"source": "docker-compose", "service": "notebook-executor"}]'
       com.datadoghq.tags.env: development

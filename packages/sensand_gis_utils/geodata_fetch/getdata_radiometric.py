@@ -1,41 +1,37 @@
-"""
-Script to download Radiometric data from NCI’s GSKY Data Server (using WCS) for a given
-resolution, and bounding box. Final data is saved as geotiff or NetCDF.
-
-
-LIMITATIONS: for some layers the server readout time can occasionally exceed 30s (longer readout time in request seems to be ignored)
-In case this happens please try later again when the NCI server is less loaded.
-
-This package is modified from the geodata-harvester developed for the Agricultural Research Federation (AgReFed).
-"""
-
 import os
+import sys
 import json
+import logging
 from owslib.wcs import WebCoverageService
-import importlib.resources #to read in slga.json during runtime
+from importlib import resources
 from datetime import datetime, timezone
 from geodata_fetch import utils
-from geodata_fetch.utils import spin, get_wcs_capabilities
 
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_radiometricdict():
-    with importlib.resources.open_text('config','radiometric.json') as f:
-        rm_json = json.load(f)
-    
-    rmdict = {}
-    rmdict["title"] = rm_json["title"]
-    rmdict["description"] = rm_json["description"]
-    rmdict["license"] = rm_json["license"]
-    rmdict["source_url"] = rm_json["source_url"]
-    rmdict["copyright"] = rm_json["copyright"]
-    rmdict["attribution"] = rm_json["attribution"]
-    rmdict["crs"] = rm_json["crs"]
-    rmdict["resolution_arcsec"] = rm_json["resolution_arcsec"]
-    rmdict["layers_url"] = rm_json["layers_url"]
-    rmdict["layer_names"] = rm_json["layer_names"]
+    try:
+        with resources.open_text('config','radiometric.json') as f:
+            rm_json = json.load(f)
+        
+        rmdict = {}
+        rmdict["title"] = rm_json["title"]
+        rmdict["description"] = rm_json["description"]
+        rmdict["license"] = rm_json["license"]
+        rmdict["source_url"] = rm_json["source_url"]
+        rmdict["copyright"] = rm_json["copyright"]
+        rmdict["attribution"] = rm_json["attribution"]
+        rmdict["crs"] = rm_json["crs"]
+        rmdict["resolution_arcsec"] = rm_json["resolution_arcsec"]
+        rmdict["layers_url"] = rm_json["layers_url"]
+        rmdict["layer_names"] = rm_json["layer_names"]
 
-    return rmdict
-
+        return rmdict
+    except Exception as e:
+        logger.error(f"Error loading radiometric.json: {e}")
+        return None
 
 """
 TODO: resolution is set to 1 here. But its 3.6 (100m) in the original data. Remove or find out why its set to 1.
@@ -77,24 +73,21 @@ def get_radiometric_layers(property_name, layernames, bbox, outpath):
     # Loop over all layers
     fnames_out = []
     for layername in layernames:
-        output_filename = "radiometric_" + layername + "_" + property_name + '.tif'
         outfname = os.path.join(
             outpath, "radiometric_" + layername + "_" + property_name + '.tif')
         ok = get_radiometric_image(
-            outfname=outfname, 
-            layername=layername, 
-            bbox=bbox, 
-            url=url, 
-            resolution=resolution, 
+            outfname=outfname,
+            layername=layername,
+            bbox=bbox,
+            url=url,
+            resolution=resolution,
             crs=crs
         )
         if ok:
             fnames_out.append(outfname)
     return fnames_out
 
-"""
-TODO: a wcs is defined here as well as in get_wcs_capabilities - unpack and understand if this is duplicate code or separate functions.
-"""
+
 
 def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
     """
@@ -132,29 +125,27 @@ def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
     date = times[0]
     # Get data
     if os.path.exists(outfname):
-        utils.msg_warn(f"{layername}.tif already exists, skipping download")
+        logger.info(f"{layername}.tif already exists, skipping download")
     else:
         try:
-            with spin(f"Downloading {layername}") as s:
-                wcs = WebCoverageService(url, version="1.0.0", timeout=300)
-                data = wcs.getCoverage(
-                    identifier=layername,
-                    time=[date],
-                    bbox=bbox,
-                    format="GeoTIFF",
-                    crs=crs,
-                    width=nwidth,
-                    height=nheight,
-                )
-                s(1)
-        except:
-            utils.msg_err("Download failed")
+            wcs = WebCoverageService(url, version="1.0.0", timeout=300)
+            data = wcs.getCoverage(
+                identifier=layername,
+                time=[date],
+                bbox=bbox,
+                format="GeoTIFF",
+                crs=crs,
+                width=nwidth,
+                height=nheight,
+            )
+        except Exception as e:
+            logger.error(f"Error fetching RadMap wcs: {e}")
             return False
 
         # Save data
         with open(outfname, "wb") as f:
             f.write(data.read())
-        # print(f"Layer {layername} saved in {outfname}")
+        logger.info(f"Layer {layername} saved in {outfname}")
     
     return True
 

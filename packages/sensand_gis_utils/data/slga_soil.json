@@ -6,12 +6,6 @@
     "copyright": "(c) 2010-2022 CSIRO Australia, © 2020 TERN (University of Queensland)",
     "attribution": "CSIRO Australia, TERN (University of Queensland), and Geoscience Australia",
     "crs": "EPSG:4326",
-    "bbox": [
-        112.9995833334,
-        -44.0004166670144,
-        153.999583334061,
-        -10.0004166664663
-    ],
     "resolution_arcsec": 3,
     "depth_min": 0,
     "depth_max": 200,
