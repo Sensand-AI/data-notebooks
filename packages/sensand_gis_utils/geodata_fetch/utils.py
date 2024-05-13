@@ -298,69 +298,59 @@ def reproj_mask(filename, input_filepath, bbox, crscode, output_filepath, resamp
 
 
 
-# def colour_geotiff_and_save_cog(input_geotiff, colour_map):
-#     """
-#     Colorizes a GeoTIFF image using a specified color map and saves it as a COG (Cloud-Optimized GeoTIFF).
+def colour_geotiff_and_save_cog(input_geotiff, colour_map):
+    
+    output_colored_tiff_filename = input_geotiff.replace('.tif', '_colored.tif')
+    output_cog_filename = input_geotiff.replace('.tif', '_cog.public.tif')
+    
+    with rasterio.open(input_geotiff) as src:
+        meta = src.meta.copy()
+        dst_crs = rasterio.crs.CRS.from_epsg(4326) #change so not hardcoded?
+        transform, width, height = calculate_default_transform(
+            src.crs, dst_crs, src.width, src.height, *src.bounds
+        )
 
-#     Args:
-#         input_geotiff (str): The path to the input GeoTIFF file.
-#         colour_map (str): The name of the color map to use for colorizing the image.
+        meta.update({
+            'crs': dst_crs,
+            'transform': transform,
+            'width': width,
+            'height': height
+        })
 
-#     Raises:
-#         Exception: If unable to convert the colored GeoTIFF to a COG.
+        tif_data = src.read(1, masked=True).astype('float32') #setting masked=True here tells rasterio to use masking information if present, but we need to add the mask itself first.
+        tif_formatted = tif_data.filled(np.nan)
 
-#     Returns:
-#         None
-#     """
-#     output_colored_tiff_filename = input_geotiff.replace('.tif', '_colored.tif')
-#     output_cog_filename = input_geotiff.replace('.tif', '_cog.tif')
-#     with rasterio.open(input_geotiff) as src:
-#         meta = src.meta.copy()
-#         dst_crs = rasterio.crs.CRS.from_epsg(4326) #change so not hardcoded?
-#         transform, width, height = calculate_default_transform(
-#             src.crs, dst_crs, src.width, src.height, *src.bounds
-#         )
+        cmap = cm.get_cmap(colour_map) #can also use 'terrain' cmap to keep this the same as the preview image from above.
+        na = tif_formatted[~np.isnan(tif_formatted)]
 
-#         meta.update({
-#             'crs': dst_crs,
-#             'transform': transform,
-#             'width': width,
-#             'height': height
-#         })
+        min_value = min(na)
+        max_value = max(na)
 
-#         tif_data = src.read(1, masked=True).astype('float32')
-#         tif_formatted = tif_data.filled(np.nan)
+        norm = Normalize(vmin=min_value, vmax=max_value)
 
-#         cmap = cm.get_cmap(colour_map)
-#         na = tif_formatted[~np.isnan(tif_formatted)]
+        coloured_data = (cmap(norm(tif_formatted))[:, :, :3] * 255).astype(np.uint8)
 
-#         min_value = min(na)
-#         max_value = max(na)
-
-#         norm = Normalize(vmin=min_value, vmax=max_value)
-
-#         coloured_data = (cmap(norm(tif_formatted))[:, :, :3] * 255).astype(np.uint8)
-
-#         meta.update({"count":3})
+        meta.update({"count":3})
 
 
-#         with rasterio.open(output_colored_tiff_filename, 'w', **meta) as dst:
-#             reshape = reshape_as_raster(coloured_data)
-#             dst.write(reshape)
+        with rasterio.open(output_colored_tiff_filename, 'w', **meta) as dst:
+            reshape = reshape_as_raster(coloured_data)
+            dst.write(reshape)
 
-#     try:
-#         dst_profile = cog_profiles.get('deflate')
-#         with MemoryFile() as mem_dst:
-#             cog_translate(
-#                 output_colored_tiff_filename,
-#                 output_cog_filename,
-#                 config=dst_profile,
-#                 in_memory=True,
-#                 dtype="uint8",
-#                 add_mask=False,
-#                 nodata=0,
-#                 dst_kwargs=dst_profile
-#             )
-#     except Exception:
-#         raise Exception('Unable to convert to cog')
+    try:
+        dst_profile = cog_profiles.get('deflate')
+        with MemoryFile() as mem_dst:
+            cog_translate(
+                output_colored_tiff_filename,
+                output_cog_filename,
+                config=dst_profile,
+                in_memory=True,
+                dtype="uint8",
+                add_mask=False,
+                nodata=0,
+                dst_kwargs=dst_profile
+            )
+        
+    except:
+        raise Exception('Unable to convert to cog')
     
