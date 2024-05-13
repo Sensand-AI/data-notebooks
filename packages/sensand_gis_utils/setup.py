@@ -22,5 +22,5 @@ setup(
         'pyproj'
     ],
 	keywords=['gis', 'utils', 'stac'],
-	package_data={'data': ['data/*.json']}
+	package_data={'data': ['*.json']}
 )
