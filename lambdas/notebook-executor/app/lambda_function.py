@@ -45,29 +45,62 @@ def init_aws_utils(prefix):
     return s3_client
 
 @tracer.wrap(name='get_colormap')
-def get_colormap(parameters: dict, interval_count = 21):
+def get_colormap(parameters: dict, custom_levels=None, color_count=21):
     """
-    Returns a dictionary of hexadecimal colors generated from a specified colormap.
+    Generates a dictionary of colors from a specified colormap, accommodating custom levels and a specific count of colors.
+
+    Parameters:
+        parameters (dict): Contains options like 'colormap'.
+        custom_levels (list): List of specific levels to use if level_type is 'discrete'.
+        color_count (int): Total number of colors to generate.
+
+    Returns:
+        dict: Dictionary with levels as keys and color hex codes as values.
     """
 
-    # Creates 21 evenly spaced intervals from 0 to 1
-    intervals = np.linspace(0, 1, interval_count)
+    if custom_levels is None:
+        normalized_intervals = np.linspace(0, 1, color_count)
+        # Map these normalized intervals back to the original scale
+        levels = np.linspace(0, 1, color_count)
+    else:
+        min_level = min(custom_levels)
+        max_level = max(custom_levels)
+        normalized_levels = np.interp(custom_levels, (min_level, max_level), (0, 1))
+        normalized_intervals = []
+        levels = []
+        for i in range(len(normalized_levels) - 1):
+            include_endpoint = (i == len(normalized_levels) - 2)  # Check if it's the last segment
+            # Calculate the number of segments between each pair of levels
+            difference_between_levels = (normalized_levels[i + 1] - normalized_levels[i])
+            number_of_colors = color_count * difference_between_levels
+            # At least one color is assigned to each segment
+            segment_count = max(1, int(np.round(number_of_colors)))
+            # Generate the normalized intervals for this segment
+            segment_intervals = np.linspace(normalized_levels[i], normalized_levels[i+1], segment_count, endpoint=include_endpoint)
+            normalized_intervals.extend(segment_intervals)
+            # Map these normalized intervals back to the original scale
+            levels.extend(np.linspace(custom_levels[i], custom_levels[i+1], segment_count, endpoint=include_endpoint))
+        # Ensure the last point is included
+        normalized_intervals.append(1.0)
+        levels.append(custom_levels[-1])
+
     # Default colormap to viridis if not supplied
     colormap_name = parameters.get('colormap', 'viridis')
 
     # Get the colormap
     cmap = plt.get_cmap(colormap_name)
-
+    
     # Generate colors at specified intervals
-    colors = [cmap(i) for i in intervals]
-
+    colors = [cmap(i) for i in normalized_intervals]
+    
     # Convert RGBA colors to hexadecimal format
     hex_colors = [matplotlib.colors.rgb2hex(color) for color in colors]
 
-    # Rounding the interval keys to two decimal places
-    color_dict = {f"{interval:.2f}": color for interval, color in zip(intervals, hex_colors)}
+    # Align colors with the specified intervals, formatted to two decimal places
+    custom_color_dict = {f"{level:.2f}": color for level, color in zip(levels, hex_colors)}
 
-    return color_dict
+    return custom_color_dict
+  
 
 
 @tracer.wrap(name='generate_deterministic_uuid')
