@@ -7,9 +7,6 @@ import shutil
 import sys
 import uuid
 from typing import Any, Dict
-import matplotlib.pyplot as plt
-import matplotlib
-import numpy as np
 
 import papermill as pm
 from aws_utils import S3Utils
@@ -106,7 +103,7 @@ def delete_directory(directory_path):
     except Exception as e:  # This catches other potential exceptions and logs them.
         print(f"An error occurred: {e}")
 
-@tracer.wrap(name='lambda_handler', service=AWS_LAMBDA_FUNCTION_NAME)
+@tracer.wrap(name='lambda_handler')
 def lambda_handler(event, _):
     """
     Handles a Lambda event.

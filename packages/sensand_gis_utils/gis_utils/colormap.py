@@ -38,19 +38,19 @@ def get_colormap(color_name='viridis', custom_levels=None, color_count=21):
     colors = [cmap(level) for level in normalized_levels]
     hex_colors = [matplotlib.colors.rgb2hex(color) for color in colors]
 
-    # Create dictionary with formatted level keys
-    custom_color_dict = {f"{level:.2f}": color for level, color in zip(levels, hex_colors)}
+    # Create list of levels and colors
+    custom_color_array = [[float(f"{level:.2f}"), color] for level, color in zip(levels, hex_colors)]
 
-    return custom_color_dict
+    return custom_color_array
 
-def display_colormap_as_html(color_dict):
+def display_colormap_as_html(color_array):
     """
     Displays a colormap as HTML content.
     """
     # Create HTML content
     html_content = '<div style="display: flex;">'
-    for key, color in color_dict.items():
-        html_content += f'<div style="background-color: {color}; width: 50px; height: 50px;" title="{key}"></div>'
+    for level, color in color_array:
+        html_content += f'<div style="background-color: {color}; width: 50px; height: 50px;" title="{level}"></div>'
     html_content += '</div>'
 
     # Display the HTML content in the notebook
