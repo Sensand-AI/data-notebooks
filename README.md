@@ -116,3 +116,10 @@ You will get another prompt to select the kernel. Select the kernel listed with 
 ```
 - Send the postman request. It should timeout after 180 second and return a response. In the response there will be a presigned url link.
 - download the tiff from the link and open it in QGIS to test.
+
+
+## Unit testing
+
+Please ensure your custom packages have a `test_[filename].py` which includes unit tests for the functions in the package.
+
+These tests do not run automatically in the buildkite pipeline, but can be run locally using the following command in a terminal: `pytest`
