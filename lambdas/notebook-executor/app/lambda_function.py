@@ -28,7 +28,7 @@ AWS_LAMBDA_FUNCTION_NAME = 'notebook-executor'
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-@tracer.wrap(name='init_aws_utils', service=AWS_LAMBDA_FUNCTION_NAME)
+@tracer.wrap(name='init_aws_utils')
 def init_aws_utils(prefix):
     """
     Initialize the S3 client.
@@ -41,7 +41,7 @@ def init_aws_utils(prefix):
     )
     return s3_client
 
-@tracer.wrap(name='generate_deterministic_uuid', service=AWS_LAMBDA_FUNCTION_NAME)
+@tracer.wrap(name='generate_deterministic_uuid')
 def generate_deterministic_uuid(notebook_name: str, parameters: dict):
     """
     Generates a deterministic UUID using the Lambda function name and AWS 
@@ -67,12 +67,12 @@ def generate_deterministic_uuid(notebook_name: str, parameters: dict):
 
     return str(deterministic_uuid)
 
-@tracer.wrap()
+@tracer.wrap('validate_event')
 def validate_event(event: Dict[str, Any], schema: Dict[str, Any]) -> None:
     """Validates the incoming event against the provided schema."""
     validate(instance=event, schema=schema)
 
-@tracer.wrap(name='load_schema', service=AWS_LAMBDA_FUNCTION_NAME)
+@tracer.wrap(name='load_schema')
 def load_schema(notebook_name: str):
     """Load the JSON Schema for validating the notebook parameters."""
     schema_path = os.path.join('/var/task/notebooks', notebook_name, 'schema.json')
@@ -82,6 +82,7 @@ def load_schema(notebook_name: str):
     else:
         raise FileNotFoundError(f"Schema file for notebook {notebook_name} not found.")
 
+@tracer.wrap(name='delete_directory')
 def delete_directory(directory_path):
     """
     Deletes the specified directory along with all its contents.
@@ -102,7 +103,7 @@ def delete_directory(directory_path):
     except Exception as e:  # This catches other potential exceptions and logs them.
         print(f"An error occurred: {e}")
 
-@tracer.wrap(name='lambda_handler', service=AWS_LAMBDA_FUNCTION_NAME)
+@tracer.wrap(name='lambda_handler')
 def lambda_handler(event, _):
     """
     Handles a Lambda event.
@@ -264,12 +265,6 @@ def lambda_handler(event, _):
                         else:
                             print(f"Failed to upload file {file} to {bucket_name}/{object_key}")
 
-                # Check if all files were uploaded successfully
-                # if len(uploaded_files) == len(output_files):
-                #     # All files uploaded, proceed to generate pre-signed URLs for each file
-                #     presigned_urls = [s3_utils.generate_presigned_url(object_key) for object_key in uploaded_files]
-                #     print("Pre-signed URLs generated successfully.")
-
             except ClientError as e:
                 logger.error(e)
                 return {
@@ -282,7 +277,7 @@ def lambda_handler(event, _):
                     })
                 }
             except FileNotFoundError:
-                logger.error(f"Directory not found: {output_dir}")
+                logger.error("Directory not found: %s", output_dir)
                 return {
                     'statusCode': 404,
                     'headers': {
@@ -317,17 +312,6 @@ def lambda_handler(event, _):
                 }
             }
 
-            # return {
-            #     'statusCode': 200,
-            #     'headers': {
-            #         'Content-Type': 'application/json'
-            #     },
-            #     'body': {
-            #         "message": f"Notebook '{notebook_name}' executed successfully!",
-            #         "output_type": output_type,
-            #         "output_files": [s3_utils.generate_presigned_urls(prefix=notebook_key)]
-            #     }
-            # }
         except (PapermillExecutionError, BotoCoreError) as e:
             # statsd.increment('notebook.execution.error')
             return {
