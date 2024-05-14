@@ -354,3 +354,6 @@ def colour_geotiff_and_save_cog(input_geotiff, colour_map):
     except:
         raise Exception('Unable to convert to cog')
     
+
+def calculate_raster_stats():
+    pass

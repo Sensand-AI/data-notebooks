@@ -2,6 +2,7 @@
 numpy  # Fundamental package for scientific computing with Python
 pandas  # Data analysis and manipulation tool
 xarray # multidimensional data arrays, needed for raster data handling
+dask[dataframe]  # Parallel computing with task scheduling
 
 # AWS SDK for Python
 boto3  # Amazon Web Services (AWS) SDK for Python
