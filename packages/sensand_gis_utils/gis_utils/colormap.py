@@ -1,6 +1,7 @@
 import matplotlib.colors
 import matplotlib.pyplot as plt
 import numpy as np
+from IPython.core.display import HTML, display
 
 def create_levels(custom_levels=None, color_count=21):
     """
@@ -21,12 +22,12 @@ def create_levels(custom_levels=None, color_count=21):
         levels = np.linspace(min_level, max_level, color_count)
     return levels
 
-def get_colormap(parameters: dict, custom_levels=None, color_count=21):
+def get_colormap(color_name='viridis', custom_levels=None, color_count=21):
     """
     Generates a dictionary of colors from a specified colormap, using either a provided custom level range or a default continuous range.
     """
     # Determine the colormap
-    colormap_name = parameters.get('colormap', 'viridis')
+    colormap_name = color_name
     cmap = plt.get_cmap(colormap_name)
 
     # Create levels
@@ -41,3 +42,16 @@ def get_colormap(parameters: dict, custom_levels=None, color_count=21):
     custom_color_dict = {f"{level:.2f}": color for level, color in zip(levels, hex_colors)}
 
     return custom_color_dict
+
+def display_colormap_as_html(color_dict):
+    """
+    Displays a colormap as HTML content.
+    """
+    # Create HTML content
+    html_content = '<div style="display: flex;">'
+    for key, color in color_dict.items():
+        html_content += f'<div style="background-color: {color}; width: 50px; height: 50px;" title="{key}"></div>'
+    html_content += '</div>'
+
+    # Display the HTML content in the notebook
+    display(HTML(html_content))
