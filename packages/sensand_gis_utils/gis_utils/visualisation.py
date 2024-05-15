@@ -102,11 +102,11 @@ def get_geotiff_statistics(input_geotiff):
         masked_data = np.ma.masked_array(data, mask=(mask == 0))
 
         # Get statistics excluding masked pixels
-        min_val = masked_data.min()
-        max_val = masked_data.max()
-        mean_val = masked_data.mean()
-        median_val = np.ma.median(masked_data)
-        std_val = masked_data.std()
+        min_val = float(masked_data.min())
+        max_val = float(masked_data.max())
+        mean_val = float(masked_data.mean())
+        median_val = float(np.ma.median(masked_data))
+        std_val = float(masked_data.std())
 
     return {
         "min": min_val,
