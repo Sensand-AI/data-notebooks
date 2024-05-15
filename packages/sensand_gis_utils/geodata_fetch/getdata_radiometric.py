@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def get_radiometricdict():
     try:
-        with resources.open_text('config','radiometric.json') as f:
+        with resources.open_text('data','radiometric.json') as f:
             rm_json = json.load(f)
         
         rmdict = {}

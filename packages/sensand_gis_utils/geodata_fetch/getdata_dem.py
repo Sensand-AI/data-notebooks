@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 def get_demdict():
     try:
-        with resources.open_text('config','dem.json') as f:
+        with resources.open_text('data','dem.json') as f:
             dem_json = json.load(f)
         
         
