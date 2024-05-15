@@ -77,3 +77,41 @@ def colour_geotiff_and_save_cog(input_geotiff, colour_map):
         
     except:
         raise Exception('Unable to convert to cog')
+    
+
+def get_geotiff_statistics(input_geotiff):
+    """
+    Calculates statistics for a GeoTIFF raster.
+
+    Parameters:
+        input_geotiff (str): The path to the input GeoTIFF file.
+
+    Returns:
+        dict: A dictionary containing the calculated statistics.
+            - min (float): The minimum pixel value.
+            - max (float): The maximum pixel value.
+            - mean (float): The mean pixel value.
+            - median (float): The median pixel value.
+            - std (float): The standard deviation of pixel values.
+    """
+    with rasterio.open(input_geotiff) as src:
+        data = src.read(1)  # Read the first band
+        mask = src.dataset_mask()  # Get the mask of the dataset
+
+        # Apply the mask
+        masked_data = np.ma.masked_array(data, mask=(mask == 0))
+
+        # Get statistics excluding masked pixels
+        min_val = masked_data.min()
+        max_val = masked_data.max()
+        mean_val = masked_data.mean()
+        median_val = np.ma.median(masked_data)
+        std_val = masked_data.std()
+
+    return {
+        "min": min_val,
+        "max": max_val,
+        "mean": mean_val,
+        "median": median_val,
+        "std": std_val,
+    }
