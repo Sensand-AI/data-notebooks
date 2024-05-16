@@ -73,7 +73,7 @@ Updates: None
 
 Resolution: native: 1 arcsec
 
-Source: https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails.html
+Source: https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search#/metadata/72759
 
 License: Creative Commons Attribution 4.0 International (CC BY 4.0)
 
@@ -83,7 +83,7 @@ Layernames:
 
 - 'DEM'
    - Title: DEM SRTM 1 Second Hydro Enforced
-   - Description: The 1 second SRTM derived hydrologically enforced DEM (DEM-H Version 1.0) is a 1 arc second (~30 m) gridded digital elevation model (DEM) that has been hydrologically conditioned and drainage enforced. The DEM-H captures flow paths based on SRTM elevations and mapped stream lines, and supports delineation of catchments and related hydrological attributes.
+   - Description: DEM-H is a hydrologically enforced version of the smoothed DEM-S. The DEM-H captures flow paths based on SRTM elevations and mapped stream lines, and supports delineation of catchments and related hydrological attributes. The dataset was derived from the 1 second smoothed Digital Elevation Model (DEM-S) by enforcing hydrological connectivity with the ANUDEM software, using selected AusHydro V1.6 (February 2010) 1:250,000 scale watercourse lines and lines derived from DEM-S to define the watercourses. The drainage enforcement has produced a consistent representation of hydrological connectivity with some elevation artefacts resulting from the drainage enforcement.
 
 
 ## New and experimental SLGA

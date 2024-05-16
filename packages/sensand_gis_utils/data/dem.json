@@ -1,7 +1,7 @@
 {
     "title": "DEM",
-    "description": "Digital Elevation Model (DEM) of Australia derived from STRM with 1 Second Grid - Hydrologically Enforced.",
-    "source_url": "https://www.clw.csiro.au/aclep/soilandlandscapegrid/ProductDetails.html",
+    "description": "DEM-H is a hydrologically enforced version of the smoothed DEM-S. The DEM-H captures flow paths based on SRTM elevations and mapped stream lines, and supports delineation of catchments and related hydrological attributes. The dataset was derived from the 1 second smoothed Digital Elevation Model (DEM-S) by enforcing hydrological connectivity with the ANUDEM software, using selected AusHydro V1.6 (February 2010) 1:250,000 scale watercourse lines and lines derived from DEM-S to define the watercourses.",
+    "source_url": "https://ecat.ga.gov.au/geonetwork/srv/eng/catalog.search#/metadata/72759",
     "license": "CC BY 4.0",
     "copyright": "© Copyright 2017-2022, Geoscience Australia",
     "attribution": "Commonwealth of Australia (Geoscience Australia) ",
