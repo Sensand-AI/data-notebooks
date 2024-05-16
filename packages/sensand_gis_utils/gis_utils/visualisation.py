@@ -74,6 +74,7 @@ def colour_geotiff_and_save_cog(input_geotiff, colour_map):
                 nodata=0,
                 dst_kwargs=dst_profile
             )
+        return output_cog_filename
         
     except:
         raise Exception('Unable to convert to cog')
@@ -108,10 +109,12 @@ def get_geotiff_statistics(input_geotiff):
         median_val = float(np.ma.median(masked_data))
         std_val = float(masked_data.std())
 
-    return {
+        stats = {
         "min": min_val,
         "max": max_val,
         "mean": mean_val,
         "median": median_val,
         "std": std_val,
     }
+
+    return stats
