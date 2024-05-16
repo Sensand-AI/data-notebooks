@@ -12,7 +12,7 @@ tornado  # Web framework and asynchronous networking library
 requests  # Elegant and simple HTTP library for Python, built for human beings
 
 # Data visualization libraries
-matplotlib  # Comprehensive library for creating static, animated, and interactive visualizations in Python
+matplotlib==3.8.4  # Comprehensive library for creating static, animated, and interactive visualizations in Python
 
 # Geospatial data analysis libraries
 geopandas  # Extends pandas for geospatial data operations
