@@ -1,7 +1,7 @@
-import matplotlib.colors
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from IPython.core.display import HTML, display
+from IPython.core.display import HTML, display_html
 
 def create_levels(custom_levels=None, color_count=21):
     """
@@ -54,4 +54,4 @@ def display_colormap_as_html(color_array):
     html_content += '</div>'
 
     # Display the HTML content in the notebook
-    display(HTML(html_content))
+    display_html(HTML(html_content))
