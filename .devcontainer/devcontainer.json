@@ -41,7 +41,6 @@
 			// Set *default* container specific settings.json values on container create.
 			"settings": {
 				"python.defaultInterpreterPath": "/usr/local/bin/python",
-				"python.dataScience.jupyterServerURI": "http://jupyter:8888/?token=vscode",
 				"python.pythonPath": "/usr/local/bin/python",
 				"python.jupyter.alwaysTrustNotebooks": true,
 				"python.dataScience.useDefaultConfigForJupyter": false,
@@ -57,7 +56,8 @@
 				"humao.rest-client",
 				"RandomFractalsInc.geo-data-viewer",
 				"ms-python.vscode-pylance",
-				"ms-python.pylint"
+				"ms-python.pylint",
+				"GitHub.vscode-pull-request-github"
 			]
 		}
 	}
