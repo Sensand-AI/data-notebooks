@@ -5,7 +5,7 @@
 	"dockerComposeFile": ["../docker-compose.yml"],
 	"service": "devcontainer",
 	"workspaceFolder": "/workspace",
-	"runServices": ["jupyter"],
+	"runServices": ["devcontainer"],
 	"shutdownAction": "stopCompose",
 	"remoteEnv": { 
 		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
@@ -19,6 +19,9 @@
 			"version": "latest",
 			"installDockerBuildx": true,
 			"dockerDashComposeVersion": "v2"
+		},
+		"ghcr.io/devcontainers/features/aws-cli:1": {
+			"version": "latest"
 		}
 	},	
 	"forwardPorts": [8888, 5001, 9090],
@@ -41,7 +44,6 @@
 			// Set *default* container specific settings.json values on container create.
 			"settings": {
 				"python.defaultInterpreterPath": "/usr/local/bin/python",
-				"python.dataScience.jupyterServerURI": "http://jupyter:8888/?token=vscode",
 				"python.pythonPath": "/usr/local/bin/python",
 				"python.jupyter.alwaysTrustNotebooks": true,
 				"python.dataScience.useDefaultConfigForJupyter": false,
@@ -57,7 +59,8 @@
 				"humao.rest-client",
 				"RandomFractalsInc.geo-data-viewer",
 				"ms-python.vscode-pylance",
-				"ms-python.pylint"
+				"ms-python.pylint",
+				"GitHub.vscode-pull-request-github"
 			]
 		}
 	}
