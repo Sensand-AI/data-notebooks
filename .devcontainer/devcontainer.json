@@ -5,7 +5,7 @@
 	"dockerComposeFile": ["../docker-compose.yml"],
 	"service": "devcontainer",
 	"workspaceFolder": "/workspace",
-	"runServices": ["jupyter"],
+	"runServices": ["devcontainer"],
 	"shutdownAction": "stopCompose",
 	"remoteEnv": { 
 		"LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
@@ -19,6 +19,9 @@
 			"version": "latest",
 			"installDockerBuildx": true,
 			"dockerDashComposeVersion": "v2"
+		},
+		"ghcr.io/devcontainers/features/aws-cli:1": {
+			"version": "latest"
 		}
 	},	
 	"forwardPorts": [8888, 5001, 9090],
