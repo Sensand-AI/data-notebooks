@@ -38,7 +38,7 @@ steps:
         key: "run-pytest"
         command: | 
           pip install -r requirements-dev.txt
-          pytest
+          pytest -s
         plugins:
           - docker#v5.9.0:
               image: "python:3.10"
