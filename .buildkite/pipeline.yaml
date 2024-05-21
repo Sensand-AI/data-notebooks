@@ -37,7 +37,7 @@ steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
         command: | 
-          pip install pytest
+          pip install -r requirements-dev.txt
           pytest
         plugins:
           - docker#v5.9.0:
@@ -69,6 +69,8 @@ steps:
         key: "deploy-staging-manual"
         depends_on:
           - "notebook-executor-build-and-push"
+        if: |
+          build.branch == "main" || (build.pull_request.id != null && !build.pull_request.draft)
 
       - label: ":aws: Update Notebook Executor Lambda (Staging)"
         env:
@@ -81,6 +83,8 @@ steps:
         plugins:
           - *assume-role-staging
           - *docker-compose-deploy
+        if: |
+          build.branch == "main" || (build.pull_request.id != null && !build.pull_request.draft)
       
       - block: "Deploy Production (Manual)"
         prompt: "Update Lambda Function in Production?"
