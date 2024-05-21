@@ -43,7 +43,7 @@ steps:
           pytest -s
         plugins:
           - docker#v5.9.0:
-              image: "python:3.10"
+              image: "python:3.10-bullseye"
 
   - wait
 
