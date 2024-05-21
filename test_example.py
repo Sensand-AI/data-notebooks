@@ -7,5 +7,5 @@ def test_example_pass():
 
 def test_example_fail():
     y = 2
-    with pytest.raises(AssertionError):
-        assert y == 1
+    # with pytest.raises(AssertionError):
+    assert y == 1
