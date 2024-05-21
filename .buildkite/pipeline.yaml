@@ -36,8 +36,10 @@ steps:
     steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
-        command: | 
+        command: |
+          pip install -r requirements-jupyter.txt
           pip install -r requirements-dev.txt
+          pip install -r requirements-custom.txt
           pytest -s
         plugins:
           - docker#v5.9.0:
