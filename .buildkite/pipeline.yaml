@@ -31,11 +31,23 @@ docker-compose-deploy-plugin: &docker-compose-deploy
       - IMAGE_URL
 
 steps:
-  # TODO: lint & test
+  - group: "Pytest unit tests [WIP]"
+    key: "pytest-unit-tests"
+    steps:
+      - label: ":pytest: Run pytest"
+        key: "run-pytest"
+        command: | 
+          pip install pytest
+          pytest
+        plugins:
+          - docker#v5.9.0:
+              image: "python:3.10"
+
+  - wait
+
   - group: "Notebook Executor Deploy"
     key: "notebook-executor-deploy"
     steps:
-
       - label: ":docker: Notebook Executor Build & Push (Platform)"
         key: "notebook-executor-build-and-push"
         plugins:
