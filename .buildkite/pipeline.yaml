@@ -31,11 +31,25 @@ docker-compose-deploy-plugin: &docker-compose-deploy
       - IMAGE_URL
 
 steps:
-  # TODO: lint & test
+  - group: "Pytest unit tests [WIP]"
+    key: "pytest-unit-tests"
+    steps:
+      - label: ":pytest: Run pytest"
+        key: "run-pytest"
+        command: |
+          pip install -r requirements-jupyter.txt
+          pip install -r requirements-dev.txt
+          pip install -r requirements-custom.txt
+          pytest -s
+        plugins:
+          - docker#v5.9.0:
+              image: "python:3.10-bullseye"
+
+  - wait
+
   - group: "Notebook Executor Deploy"
     key: "notebook-executor-deploy"
     steps:
-
       - label: ":docker: Notebook Executor Build & Push (Platform)"
         key: "notebook-executor-build-and-push"
         plugins:
@@ -57,6 +71,8 @@ steps:
         key: "deploy-staging-manual"
         depends_on:
           - "notebook-executor-build-and-push"
+        if: |
+          build.branch == "main" || (build.pull_request.id != null && !build.pull_request.draft)
 
       - label: ":aws: Update Notebook Executor Lambda (Staging)"
         env:
@@ -69,6 +85,8 @@ steps:
         plugins:
           - *assume-role-staging
           - *docker-compose-deploy
+        if: |
+          build.branch == "main" || (build.pull_request.id != null && !build.pull_request.draft)
       
       - block: "Deploy Production (Manual)"
         prompt: "Update Lambda Function in Production?"
