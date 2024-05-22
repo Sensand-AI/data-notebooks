@@ -45,10 +45,7 @@ steps:
           - docker#v5.9.0:
               image: "python:3.10-bullseye"
           - cache#v1.0.0:
-              manifest:
-                - requirements-jupyter.txt
-                - requirements-dev.txt 
-                - requirements-custom.txt
+              manifest: requirements-dev.txt
               path: /usr/local/lib/python3.10/site-packages
               restore: file
               save: file
