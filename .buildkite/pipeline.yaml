@@ -36,20 +36,22 @@ steps:
     steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
-        command: |
-          pip install pytest
-          pip show pytest
+        command:
+          - pip install -r requirements-jupyter.txt
+          - pip install -r requirements-dev.txt
+          - pip install -r requirements-custom.txt
+          - pytest -s
         plugins:
           - docker#v5.9.0:
               image: "python:3.10-bullseye"
-          # - cache#v1.0.0:
-          #     manifest:
-          #       - requirements-jupyter.txt
-          #       - requirements-dev.txt 
-          #       - requirements-custom.txt
-          #     path: 
-          #     restore: file
-          #     save: file
+          - cache#v1.0.0:
+              manifest:
+                - requirements-jupyter.txt
+                - requirements-dev.txt 
+                - requirements-custom.txt
+              path: /usr/local/lib/python3.10/site-packages
+              restore: file
+              save: file
 
   - wait
 
