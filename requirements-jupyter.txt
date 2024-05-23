@@ -44,6 +44,11 @@ pytz  # World timezone definitions, modern and historical
 # Visualizations
 plotly	# Interactive, browser-based graphing library for Python
 
+# Weather
+openmeteo-requests # OpenMeteo API client
+requests-cache # Cache requests to OpenMeteo API
+retry-requests # Retry requests to OpenMeteo API
+
 # Development and Workflow tools
 ddtrace # Datadog tracing library
 datadog # Datadog monitoring library
