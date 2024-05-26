@@ -19,8 +19,11 @@ setup(
         'matplotlib',
         'owslib==0.27.2',
         'requests',
-        'pyproj'
+        'pyproj',
+        'retry-requests',
+        'openmeteo-requests',
+        'requests-cache',
     ],
-	keywords=['gis', 'utils', 'stac'],
+	keywords=['gis', 'utils', 'stac', 'meteo', 'colormap'],
 	package_data={'data': ['*.json']}
 )
