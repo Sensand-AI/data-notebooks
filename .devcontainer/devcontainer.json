@@ -61,7 +61,8 @@
 				"ms-python.vscode-pylance",
 				"ms-python.pylint",
 				"GitHub.vscode-pull-request-github",
-				"ms-python.isort"
+				"ms-python.isort",
+				"ms-toolsai.datawrangler"
 			]
 		}
 	}
