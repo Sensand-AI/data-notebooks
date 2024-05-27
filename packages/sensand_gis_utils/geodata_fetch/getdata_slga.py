@@ -221,7 +221,7 @@ def get_slga_layers(
         # Convert resolution from arcsec to degree
         resolution_deg = resolution / 3600.0
 
-        # set target crs based on config json
+        # set source crs based on config json
         crs = slgadict["crs"]
 
         fnames_out = []
