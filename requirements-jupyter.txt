@@ -54,4 +54,4 @@ ddtrace # Datadog tracing library
 datadog # Datadog monitoring library
 datadog-lambda # Datadog monitoring library for AWS Lambda
 
-py-arrow # apache arrow bindings for python
+pyarrow # apache arrow bindings for python
