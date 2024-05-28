@@ -26,7 +26,7 @@ class OpenMeteoAPI:
         session = setup_session()
         self.client = Client(session=session)
 
-    def fetch_weather_data(self, latitude, longitude, start_date, end_date, daily, hourly, historical=False):
+    def fetch_weather_data(self, latitude, longitude, start_date, end_date, daily, hourly, timezone, historical=False):
         """
         Fetch weather data using the Open Meteo API client.
         """
@@ -42,7 +42,8 @@ class OpenMeteoAPI:
             "start_date": start_date,
             "end_date": end_date,
             "hourly": hourly,
-            "daily": daily
+            "daily": daily,
+            "timezone": timezone,
         }
 
         # Make the API request using the configured client
