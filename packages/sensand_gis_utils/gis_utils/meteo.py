@@ -32,7 +32,8 @@ class OpenMeteoAPI:
         """
         # Define API endpoints
         historical_url = "https://archive-api.open-meteo.com/v1/archive"
-        current_url = "https://api.open-meteo.com/v1/bom"
+        #current_url = "https://api.open-meteo.com/v1/bom"
+        current_url = "https://api.open-meteo.com/v1/forecast"
         url = historical_url if historical else current_url
 
         # Define the parameters for the API call
