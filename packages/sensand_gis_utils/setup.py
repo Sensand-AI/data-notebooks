@@ -23,6 +23,7 @@ setup(
         'retry-requests',
         'openmeteo-requests',
         'requests-cache',
+	    'pytz'
     ],
 	keywords=['gis', 'utils', 'stac', 'meteo', 'colormap'],
 	package_data={'data': ['*.json']}

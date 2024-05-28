@@ -1,3 +1,7 @@
+from datetime import datetime
+
+import pandas as pd
+import pytz
 import requests_cache
 from openmeteo_requests import Client
 from retry_requests import retry
@@ -15,6 +19,61 @@ def setup_session():
     )
     return retry_strategy
 
+def convert_epoch_to_timezone(data, column_names, timezone='Australia/Sydney'):
+    """
+    Convert epoch times in specified columns of a DataFrame to datetime objects localized to UTC,
+    then converted to a specified timezone.
+
+    Args:
+    data (pd.DataFrame): DataFrame containing columns with epoch times.
+    column_names (list of str): List of column names containing epoch times to be converted.
+    timezone (str): String representing the target timezone (default is 'Australia/Sydney').
+
+    Returns:
+    pd.DataFrame: DataFrame with specified columns converted to the specified timezone.
+    """
+    # Define the timezone objects
+    utc_timezone = pytz.timezone('UTC')
+    target_timezone = pytz.timezone(timezone)
+
+    for column in column_names:
+        # Convert epoch times to naive UTC datetime
+        data[column] = pd.to_datetime(data[column], unit='s', utc=False)
+
+        # Localize the naive datetime to UTC
+        data[column] = data[column].dt.tz_localize(utc_timezone)
+
+        # Convert from UTC to the target timezone
+        data[column] = data[column].dt.tz_convert(target_timezone)
+
+    return data
+
+def calculate_days_between(date_str1: str, date_str2: str, format = "%Y-%m-%d") -> int:
+    """
+    Calculate the number of days between two dates given as strings.
+
+    Parameters:
+    - date_str1 (str): The first date string.
+    - date_str2 (str): The second date string.
+
+    Returns:
+    - int: The difference in days between the two dates.
+    
+    Example:
+    ```python
+    days_difference = calculate_days_between('2024-05-01', '2024-04-25')
+    print(f"The difference in days is: {days_difference}")
+        
+    """
+    # convert the date strings into datetime objects
+    date_format = format  # allow for custom date formats because merica
+    datetime1 = datetime.strptime(date_str1, date_format)
+    datetime2 = datetime.strptime(date_str2, date_format)
+    
+    # calculate the difference in days
+    delta = datetime1 - datetime2
+    return abs(delta.days)  # use abs to ensure a non-negative results
+
 class OpenMeteoAPI:
     """
     A client for the Open Meteo API.    
@@ -26,7 +85,18 @@ class OpenMeteoAPI:
         session = setup_session()
         self.client = Client(session=session)
 
-    def fetch_weather_data(self, latitude, longitude, start_date, end_date, daily, hourly, timezone, historical=False):
+    def fetch_weather_data(
+        self,
+        latitude,
+        longitude,
+        start_date,
+        end_date,
+        daily,
+        timezone,
+        hourly=None,
+        historical=False,
+        **kwargs
+    ):
         """
         Fetch weather data using the Open Meteo API client.
         """
@@ -45,6 +115,7 @@ class OpenMeteoAPI:
             "hourly": hourly,
             "daily": daily,
             "timezone": timezone,
+            **kwargs
         }
 
         # Make the API request using the configured client
