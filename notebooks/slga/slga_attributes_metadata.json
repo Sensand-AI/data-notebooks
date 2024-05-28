@@ -1,0 +1,60 @@
+{
+  "slga_layers": {
+    "Organic_Carbon": {
+      "layer_name": "Organic_Carbon",
+      "title": "Organic Carbon",
+      "unit": "%"
+      },
+    "Bulk_Density": {
+      "layer_name": "Bulk_Density",
+      "title": "Bulk Density (whole earth)",
+      "unit": "g/cm3"
+      },
+    "Clay": {
+      "layer_name": "Clay",
+      "title": "Clay",
+      "unit": "%"
+       },
+    "Sand": {
+      "layer_name": "Sand",
+      "title": "Sand",
+      "unit": "%"
+      },
+    "Silt": {
+      "layer_name": "Silt",
+      "title": "Silt",
+      "unit": "%"
+       },
+    "pH_CaCl2": {
+      "layer_name": "pH_CaCl2",
+      "title": "pH (CaCl2)",
+      "unit": "pH"
+       },
+    "Available_Water_Capacity": {
+      "layer_name": "Available_Water_Capacity",
+      "title": "Available water capacity",
+      "unit": "%"
+       },
+    "Total_Nitrogen": {
+      "layer_name": "Total_Nitrogen",
+      "title": "Total nitrogen",
+      "unit": "%"
+      },
+    "Total_Phosphorus": {
+      "layer_name": "Total_Phosphorus",
+      "title": "Total phosphorus",
+      "unit": "%"
+       },
+    "Effective_Cation_Exchange_Capacity": {
+      "layer_name": "Effective_Cation_Exchange_Capacity",
+      "title": "Effective cation exchange capacity",
+      "unit": "meg/100g"
+       },
+    "Depth_of_Regolith": {
+      "layer_name": "Depth_of_Regolith",
+      "title": "Depth of regolith",
+      "unit": "m"
+       }
+  },
+  "layer_depth":["0-5cm", "5-15cm", "15-30cm", "30-60cm", "60-100cm"]
+}

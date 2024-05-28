@@ -22,6 +22,12 @@
         },
         "colormap": {
           "type": "string"
+        },
+        "slga_layer": {
+          "type": "string"
+        },
+        "slga_layer_depth": {
+          "type": "string"
         }
       },
       "required": ["geojson", "propertyName"]
