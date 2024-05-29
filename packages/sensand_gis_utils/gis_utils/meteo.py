@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime
 
 import pandas as pd
@@ -19,7 +20,7 @@ def setup_session():
     )
     return retry_strategy
 
-def convert_epoch_to_timezone(data, column_names, timezone='Australia/Sydney'):
+def convert_epoch_to_timezone(data, column_names, timezone=None):
     """
     Convert epoch times in specified columns of a DataFrame to datetime objects localized to UTC,
     then converted to a specified timezone.
@@ -27,26 +28,34 @@ def convert_epoch_to_timezone(data, column_names, timezone='Australia/Sydney'):
     Args:
     data (pd.DataFrame): DataFrame containing columns with epoch times.
     column_names (list of str): List of column names containing epoch times to be converted.
-    timezone (str): String representing the target timezone (default is 'Australia/Sydney').
+    timezone (str): String representing the target timezone.
 
     Returns:
     pd.DataFrame: DataFrame with specified columns converted to the specified timezone.
     """
-    # Define the timezone objects
-    utc_timezone = pytz.timezone('UTC')
-    target_timezone = pytz.timezone(timezone)
 
     for column in column_names:
         # Convert epoch times to naive UTC datetime
-        data[column] = pd.to_datetime(data[column], unit='s', utc=False)
+        data[column] = pd.to_datetime(data[column], unit='s', utc=True)
 
-        # Localize the naive datetime to UTC
-        data[column] = data[column].dt.tz_localize(utc_timezone)
+        if timezone:
+            target_timezone = pytz.timezone(timezone)
+            utc_timezone = pytz.timezone('UTC')
+            # # Localize the naive datetime to UTC
+            # data[column] = data[column].dt.tz_localize(utc_timezone)
 
-        # Convert from UTC to the target timezone
-        data[column] = data[column].dt.tz_convert(target_timezone)
+            # # Convert from UTC to the target timezone
+            data[column] = data[column].tz_convert(target_timezone)
 
     return data
+
+def map_months_to_numbers(months):
+    """
+    Map month names to their corresponding calendar numbers using the calendar module.
+    """
+    # Using calendar.month_abbr which is case-sensitive, ensure input is properly formatted
+    month_to_number = {calendar.month_name[i].lower(): i for i in range(1, 13)}
+    return {month.lower(): month_to_number[month.lower()] for month in months}
 
 def calculate_days_between(date_str1: str, date_str2: str, format = "%Y-%m-%d") -> int:
     """
@@ -93,19 +102,13 @@ class OpenMeteoAPI:
         end_date,
         daily,
         timezone,
+        url,
         hourly=None,
-        historical=False,
         **kwargs
     ):
         """
         Fetch weather data using the Open Meteo API client.
         """
-        # Define API endpoints
-        historical_url = "https://archive-api.open-meteo.com/v1/archive"
-        #current_url = "https://api.open-meteo.com/v1/bom"
-        current_url = "https://api.open-meteo.com/v1/forecast"
-        url = historical_url if historical else current_url
-
         # Define the parameters for the API call
         params = {
             "latitude": latitude,

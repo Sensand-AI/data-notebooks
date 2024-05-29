@@ -108,15 +108,25 @@ class S3Utils:
             print(f"An error occurred: {e}")
             raise e
 
-    def upload_folder(self, folder_path, bucket=None, prefix=None):
+    def upload_folder(self, folder_path, ignored_extensions, bucket=None, prefix=None):
         """
         Uploads the contents of a folder to S3, preserving the directory structure.
         """
         if ignored_extensions is None:
             ignored_extensions = []  # Default to an empty list if none provided
 
+        # Convert ignored_extensions to lowercase for case insensitive comparison
+        ignored_extensions = [ext.lower() for ext in ignored_extensions]
+        # Add specific filenames to ignore
+        ignored_filenames = {".ds_store"}
+
         for root, dirs, files in os.walk(folder_path):
             for filename in files:
+                # Skip specific filenames
+                if filename.lower() in ignored_filenames:
+                    logger.info(f"Skipping upload of {filename} as it is an ignored file.")
+                    continue  # Skip the upload of ignored files
+
                 # Extract the file extension and convert to lowercase
                 extension = os.path.splitext(filename)[1].lower()
                 if extension in ignored_extensions:
