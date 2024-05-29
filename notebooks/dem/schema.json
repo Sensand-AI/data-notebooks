@@ -19,6 +19,12 @@
         },
         "propertyName": {
           "type": "string"
+        },
+        "si_unit": {
+          "type": "string"
+        },
+        "si_unit_short": {
+          "type": "string"
         }
       },
       "required": ["geojson", "propertyName"]

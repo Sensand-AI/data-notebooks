@@ -30,7 +30,7 @@
           "type": "string"
         }
       },
-      "required": ["geojson", "propertyName"]
+      "required": ["geojson", "propertyName", "slga_layer"]
     }
   },
   "required": ["notebook_name", "parameters", "output_type"]
