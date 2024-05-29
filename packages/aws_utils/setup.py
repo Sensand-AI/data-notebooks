@@ -7,7 +7,7 @@ setup(
     version=VERSION,
     packages=find_packages(),
     install_requires=[
-        'boto3'
+        'boto3==1.34.107'
     ],
 	keywords=['aws', 'utils'],
 )
