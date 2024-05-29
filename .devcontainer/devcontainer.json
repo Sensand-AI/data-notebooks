@@ -62,7 +62,8 @@
 				"ms-python.pylint",
 				"GitHub.vscode-pull-request-github",
 				"ms-python.isort",
-				"ms-toolsai.datawrangler"
+				"ms-toolsai.datawrangler",
+				"ms-python.black-formatter"
 			]
 		}
 	}

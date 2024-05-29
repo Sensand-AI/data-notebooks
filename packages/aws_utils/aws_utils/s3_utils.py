@@ -88,7 +88,7 @@ class S3Utils:
             # Use the provided file_name or fallback to the name from the file_path
             if not file_name:
                 file_name = os.path.basename(file_path)
-                logger.info("uploading file_name: %s and file_path: %x", file_name, file_path)
+                logger.info("uploading file_name: %s and file_path: %s", file_name, file_path)
 
             full_key = f"{prefix}/{file_name}" if prefix else file_name
 
@@ -124,13 +124,11 @@ class S3Utils:
             for filename in files:
                 # Skip specific filenames
                 if filename.lower() in ignored_filenames:
-                    logger.info(f"Skipping upload of {filename} as it is an ignored file.")
                     continue  # Skip the upload of ignored files
 
                 # Extract the file extension and convert to lowercase
                 extension = os.path.splitext(filename)[1].lower()
                 if extension in ignored_extensions:
-                    logger.info(f"Skipping upload of {filename} due to ignored extension {extension}.")
                     continue  # Skip the upload of files with ignored extensions
 
                 file_path = os.path.join(root, filename)
@@ -141,7 +139,7 @@ class S3Utils:
                 try:
                     # Upload the file
                     self.upload_file(file_path=file_path, bucket=bucket, prefix='', file_name=s3_key)
-                    logger.info(f"Successfully uploaded {s3_key} to S3 bucket {bucket}.")
+                    logger.info("Successfully uploaded %s to S3 bucket %s.", s3_key, bucket)
                 except ClientError as e:
                     logger.error(f"Failed to upload {s3_key} to S3 bucket {bucket}. AWS ClientError: {e}")
                     continue  # Optionally continue to try uploading the next files
