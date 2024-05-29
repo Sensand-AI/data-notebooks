@@ -44,7 +44,14 @@ pytz==2024.1  # World timezone definitions, modern and historical
 # Visualizations
 plotly==5.22.0	# Interactive, browser-based graphing library for Python
 
+# Weather
+openmeteo-requests # OpenMeteo API client
+requests-cache # Cache requests to OpenMeteo API
+retry-requests # Retry requests to OpenMeteo API
+
 # Development and Workflow tools
 ddtrace==2.8.4 # Datadog tracing library
 datadog==0.49.1 # Datadog monitoring library
 datadog_lambda==5.94.0 # Datadog monitoring library for AWS Lambda
+
+pyarrow # apache arrow bindings for python

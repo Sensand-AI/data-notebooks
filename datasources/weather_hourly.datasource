@@ -1,0 +1,20 @@
+DESCRIPTION >
+    Generated from notebook_outputs/Woodleigh A (PS517495M)/2023 January/weather_test_2023-01-01_2023-01-31_hourly_weather.csv
+
+SCHEMA >
+    `date` DateTime,
+    `temperature_2m` Float32,
+    `relative_humidity_2m` Float32,
+    `dew_point_2m` Float32,
+    `precipitation` Float32,
+    `weather_code` Float32,
+    `cloud_cover` Float32,
+    `et0_fao_evapotranspiration` Float32,
+    `wind_speed_10m` Float32,
+    `wind_speed_40m` Nullable(String),
+    `longitude` Float32,
+    `latitude` Float32,
+    `boundary_id` String,
+    `boundary_name` String,
+    `workspace_id` String,
+    `property_id` String

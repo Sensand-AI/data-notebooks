@@ -13,3 +13,5 @@ duckdb-data/data-duck/
 .s3mock-data/
 build/
 notebooks/sandbox/data
+notebook_outputs/
+.cache.sqlite

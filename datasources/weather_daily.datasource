@@ -1,0 +1,27 @@
+DESCRIPTION >
+    Generated from notebook_outputs/Woodleigh A (PS517495M)/2023 January/weather_test_2023-01-01_2023-01-31_daily_weather.csv
+
+SCHEMA >
+    `date` DateTime,
+    `weather_code` Float32,
+    `temperature_2m_max` Float32,
+    `temperature_2m_min` Float32,
+    `apparent_temperature_max` Float32,
+    `apparent_temperature_min` Float32,
+    `sunrise` Int16,
+    `sunset` Int16,
+    `daylight_duration` Float32,
+    `sunshine_duration` Float32,
+    `uv_index_max` Nullable(String),
+    `uv_index_clear_sky_max` Nullable(String),
+    `precipitation_sum` Float32,
+    `precipitation_hours` Float32,
+    `wind_direction_10m_dominant` Float32,
+    `shortwave_radiation_sum` Float32,
+    `et0_fao_evapotranspiration` Float32,
+    `longitude` Float32,
+    `latitude` Float32,
+    `boundary_id` String,
+    `boundary_name` String,
+    `workspace_id` String,
+    `property_id` String

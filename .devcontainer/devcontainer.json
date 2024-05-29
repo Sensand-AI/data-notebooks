@@ -60,7 +60,8 @@
 				"RandomFractalsInc.geo-data-viewer",
 				"ms-python.vscode-pylance",
 				"ms-python.pylint",
-				"GitHub.vscode-pull-request-github"
+				"GitHub.vscode-pull-request-github",
+				"ms-python.isort"
 			]
 		}
 	}
