@@ -18,7 +18,7 @@ ENV \
 COPY --from=public.ecr.aws/datadog/lambda-extension:latest /opt/extensions/ /opt/extensions
 
 # Install some system dependencies
-RUN yum install -y gcc gcc-c++ unzip jq && \
+RUN yum install -y gcc gcc-c++ unzip && \
     yum clean all && \
     rm -rf /var/cache/yum /var/lib/yum/history
 
