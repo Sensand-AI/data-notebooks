@@ -3,7 +3,7 @@ import logging
 # Initialize the logger for this module
 logger = logging.getLogger(__name__)
 
-def validateIsTiff(file_path):
+def validate_is_tiff(file_path):
 		"""
 		Validate if the file is a tiff file
 		This is because blockbase wants a specific `.tiff` file in many cases
