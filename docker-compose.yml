@@ -16,18 +16,6 @@ services:
     volumes:
       - .:/workspace
 
-  jupyter:
-    platform: linux/amd64
-    build:
-      context: .
-      dockerfile: jupyter.Dockerfile
-    volumes:
-      - ./notebooks:/var/task/notebooks
-      - ./packages:/var/task/packages
-      - ./start-juptyer.sh:/var/task/start-juptyer.sh
-    ports:
-      - "8888:8888"
-
   s3mock:
     image: adobe/s3mock
     environment:

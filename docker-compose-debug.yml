@@ -19,3 +19,15 @@ services:
       - /proc/:/host/proc/:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /opt/datadog-agent/run:/opt/datadog-agent/run:rw
+
+  jupyter:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: jupyter.Dockerfile
+    volumes:
+      - ./notebooks:/var/task/notebooks
+      - ./packages:/var/task/packages
+      - ./start-juptyer.sh:/var/task/start-juptyer.sh
+    ports:
+      - "8888:8888"
