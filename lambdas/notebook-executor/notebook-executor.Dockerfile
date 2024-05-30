@@ -18,7 +18,7 @@ ENV \
 COPY --from=public.ecr.aws/datadog/lambda-extension:latest /opt/extensions/ /opt/extensions
 
 # Install some system dependencies
-RUN yum install -y gcc gcc-c++ unzip jq && \
+RUN yum install -y gcc gcc-c++ unzip && \
     yum clean all && \
     rm -rf /var/cache/yum /var/lib/yum/history
 
@@ -38,13 +38,11 @@ ENV \
 RUN pip install jupyter nbconvert ipykernel
 
 # Copy requirements and install Python dependencies
-COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/
-RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-jupyter.txt -t ${LAMBDA_TASK_ROOT}
-
-# Install local Python packages
+COPY requirements-jupyter.txt requirements-custom.txt ${LAMBDA_TASK_ROOT}/
+# Packages are internal so we need this early
 COPY packages/ ${LAMBDA_TASK_ROOT}/packages
-COPY requirements-custom.txt ${LAMBDA_TASK_ROOT}/
-RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt -t ${LAMBDA_TASK_ROOT}
+RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-jupyter.txt -t ${LAMBDA_TASK_ROOT} && \
+    pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt -t ${LAMBDA_TASK_ROOT}
 
 # Copy your Lambda function code and notebooks into the container
 COPY lambdas/notebook-executor/app/ ${LAMBDA_TASK_ROOT}/app

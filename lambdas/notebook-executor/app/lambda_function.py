@@ -12,10 +12,10 @@ import papermill as pm
 from aws_utils import S3Utils
 from botocore.exceptions import BotoCoreError, ClientError
 from ddtrace import tracer
+from gis_utils.logger import setup_logging
 from gis_utils.stac import read_metadata_sidecar
 from jsonschema import ValidationError, validate
 from papermill.exceptions import PapermillExecutionError
-from pprint import pprint
 
 # from datadog_lambda.metric import lambda_metric
 
@@ -24,11 +24,15 @@ aws_s3_notebook_output = os.getenv('AWS_S3_BUCKET_NOTEBOOK_OUTPUT')
 aws_default_region = os.getenv('AWS_DEFAULT_REGION')
 AWS_LAMBDA_FUNCTION_NAME = 'notebook-executor'
 
-# Configure logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+# Set up logging
+setup_logging()
+
 logger = logging.getLogger(__name__)
 
-@tracer.wrap(name='init_aws_utils')
+# Only target the production notebooks directory
+notebook_directory = '/var/task/notebooks/production'
+
+@tracer.wrap()
 def init_aws_utils(prefix):
     """
     Initialize the S3 client.
@@ -41,7 +45,7 @@ def init_aws_utils(prefix):
     )
     return s3_client
 
-@tracer.wrap(name='generate_deterministic_uuid')
+@tracer.wrap()
 def generate_deterministic_uuid(notebook_name: str, parameters: dict):
     """
     Generates a deterministic UUID using the Lambda function name and AWS 
@@ -67,22 +71,22 @@ def generate_deterministic_uuid(notebook_name: str, parameters: dict):
 
     return str(deterministic_uuid)
 
-@tracer.wrap('validate_event')
+@tracer.wrap()
 def validate_event(event: Dict[str, Any], schema: Dict[str, Any]) -> None:
     """Validates the incoming event against the provided schema."""
     validate(instance=event, schema=schema)
 
-@tracer.wrap(name='load_schema')
+@tracer.wrap()
 def load_schema(notebook_name: str):
     """Load the JSON Schema for validating the notebook parameters."""
-    schema_path = os.path.join('/var/task/notebooks', notebook_name, 'schema.json')
+    schema_path = os.path.join(notebook_directory, notebook_name, 'schema.json')
     if os.path.exists(schema_path):
         with open(schema_path, 'r', encoding='utf-8') as schema_file:
             return json.load(schema_file)
     else:
         raise FileNotFoundError(f"Schema file for notebook {notebook_name} not found.")
 
-@tracer.wrap(name='delete_directory')
+@tracer.wrap()
 def delete_directory(directory_path):
     """
     Deletes the specified directory along with all its contents.
@@ -95,15 +99,15 @@ def delete_directory(directory_path):
     """
     try:
         shutil.rmtree(directory_path)
-        print(f"Successfully deleted the directory: {directory_path}")
+        logger.info("Directory: deleted", extra={'directory': directory_path})
     except FileNotFoundError:
-        print(f"The directory {directory_path} does not exist.")
+        logger.error("Directory: does not exist", extra={'directory': directory_path})
     except PermissionError:
-        print(f"Permission denied: unable to delete some or all of the contents of {directory_path}")
-    except Exception as e:  # This catches other potential exceptions and logs them.
-        print(f"An error occurred: {e}")
+        logger.error("Directory: permission denied", extra={'directory': directory_path})
+    except Exception as e: # This catches other potential exceptions and logs them.
+        logger.error("Directory: failed to delete", e, exc_info=True, extra={'directory': directory_path})
 
-@tracer.wrap(name='lambda_handler')
+@tracer.wrap()
 def lambda_handler(event, _):
     """
     Handles a Lambda event.
@@ -119,7 +123,7 @@ def lambda_handler(event, _):
         dict: The output of the Lambda function. Must be JSON serializable.
     """
 
-    print("Received event: ", event)
+    logger.info("Payload: received", extra={'event': event})
 
     # If invoked with a function url there's a body key
     if 'body' in event:
@@ -168,26 +172,30 @@ def lambda_handler(event, _):
     # It will also be used as a means of tracking executions when we eventually
     # handle retries and error handling via a persistent store
     notebook_key = generate_deterministic_uuid(notebook_name, parameters)
-    print(f"Generated notebook key: {notebook_key}")
     parameters['notebook_key'] = notebook_key
     save_output = event.get('save_output', True)
 
     # Generate a datetime stamp
-    datetime_stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    current_date = datetime.datetime.now()
+    datetime_stamp = current_date.strftime("%Y-%m-%d_%H-%M-%S")
+    date_stamp = current_date.strftime("%Y-%m-%d")
     # Create the S3 key for the output notebook based on name and datetime stamp
     notebook_basename = os.path.splitext(notebook_name)[0]  # Get the base name without extension
     s3_output_key = f'executed_{notebook_basename}_{datetime_stamp}.ipynb'
     # Initialize the S3. Don't need to pass credentials if the Lambda has the right IAM role
-    s3_utils = init_aws_utils(prefix=notebook_key)
-    # s3_client = boto3.client('s3')
-    print(f"Output will be saved to bucket: {aws_s3_notebook_output}")
-    print(f"Output will be saved to region: {aws_default_region}")
+    # concatenate the notebook name with the notebook key as a prefix and with datetime stamp
+    s3_prefix = f"{notebook_name}/{date_stamp}/{notebook_key}"
+    s3_utils = init_aws_utils(prefix=s3_prefix)
+    logger.info(
+        "S3 client initialized", 
+        extra={'bucket': aws_s3_notebook_output, 'prefix': s3_prefix, 'region': aws_default_region}
+    )
 
     # Define the source and output notebook paths
     # We store our notebooks in the lambda as `notebooks/notebook_name/notebook_name.ipynb`
     notebook_file = notebook_name + '.ipynb'
-    input_path = os.path.join('/var/task/notebooks', notebook_name, notebook_file)
-    output_path = f'/tmp/{s3_output_key}.ipynb'
+    input_path = os.path.join(notebook_directory, notebook_name, notebook_file)
+    output_path = f'/tmp/{s3_output_key}'
     # Create the output directory if it doesn't exist. 
     # This is where the notebook generated artifacts will be stored
     output_dir = f"/tmp/{notebook_key}"
@@ -215,8 +223,7 @@ def lambda_handler(event, _):
                 stdout_file=sys.stdout,
                 stderr_file=sys.stderr,
             )
-
-            print(f"Notebook '{notebook_name}' executed successfully!")
+            logger.info("Notebook Execution: successful", extra={'notebook_name': notebook_name})
 
             # Read in the generated artifact from the notebook execution.
             # This is a number of files stored in the /tmp/notebook_key directory
@@ -230,13 +237,18 @@ def lambda_handler(event, _):
                 for file in output_files:
                     file_path = os.path.join(output_dir, file)
                     object_key = f"{notebook_key}/{file}"  # S3 object key with prefix
-                    print(f"Uploading file {file} to {bucket_name}/{object_key}")
+                    logger.info("File upload: Uploading file", extra={'file': file, 'prefix': f'{bucket_name}/{object_key}'})
                     # sidecar files don't need to be returned as presigned URLs
                     if file.endswith(".meta.json"):
-                        print(f"File path: {file_path}")
                         upload_success = s3_utils.upload_file(file_path=file_path)
                         if not upload_success:
-                            print(f"Failed to upload metadata file {file} to {bucket_name}/{object_key}")
+                            logger.warning(
+                                "File upload: Failed to upload metadata file",
+                                extra={
+                                    'file': file,
+                                    'prefix': f'{bucket_name}/{object_key}'
+                                }
+                            )
                     else:
                         # Read metadata from the sidecar file, if it exists
                         metadata = read_metadata_sidecar(file_path)
@@ -246,15 +258,15 @@ def lambda_handler(event, _):
                         upload_success = s3_utils.upload_file(file_path=file_path, metadata=file_metadata)
 
                         if upload_success:
-                            print(f"File {file} uploaded successfully to {bucket_name}/{object_key}")
+                            logger.info("File upload: successful", extra={'file': file})
 
                             # Does the file contain a `.public` before the extension?
                             # If so, we want to generate a pre-signed URL for it
                             if ".public" in file:
-                                print(f"Generating pre-signed URL for {file}")
+                                logger.info("File upload: Generating pre-signed URL", extra={'file': file})
                                 # Generate a pre-signed URL for the uploaded file
                                 presigned_url = s3_utils.generate_presigned_url(object_key)
-                                print(f"Pre-signed URL generated: {presigned_url}")
+                                logger.info("File upload: Pre-signed URL generated", extra={'presigned_url': presigned_url})
 
                                 uploaded_files.append({
                                     'file_name': file,
@@ -263,10 +275,13 @@ def lambda_handler(event, _):
                                 })
 
                         else:
-                            print(f"Failed to upload file {file} to {bucket_name}/{object_key}")
+                            logger.error(
+                                'File upload: failed',
+                                extra={'file': file, 'prefix': f'{bucket_name}/{object_key}'}
+                            )
 
             except ClientError as e:
-                logger.error(e)
+                logger.error(e, exc_info=True)
                 return {
                     'statusCode': 500,
                     'headers': {

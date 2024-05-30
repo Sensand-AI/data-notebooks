@@ -74,7 +74,7 @@ def get_radiometric_layers(property_name, layernames, bbox, outpath):
     fnames_out = []
     for layername in layernames:
         outfname = os.path.join(
-            outpath, "radiometric_" + layername + "_" + property_name + '.tif')
+            outpath, "radiometric_" + layername + "_" + property_name + '.tiff')
         ok = get_radiometric_image(
             outfname=outfname,
             layername=layername,
@@ -125,7 +125,7 @@ def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
     date = times[0]
     # Get data
     if os.path.exists(outfname):
-        logger.info(f"{layername}.tif already exists, skipping download")
+        logger.info(f"{layername}.tiff already exists, skipping download")
     else:
         try:
             wcs = WebCoverageService(url, version="1.0.0", timeout=300)

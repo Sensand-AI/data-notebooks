@@ -59,8 +59,11 @@
 				"humao.rest-client",
 				"RandomFractalsInc.geo-data-viewer",
 				"ms-python.vscode-pylance",
-				"ms-python.pylint",
-				"GitHub.vscode-pull-request-github"
+				"GitHub.vscode-pull-request-github",
+				"ms-python.isort",
+				"ms-toolsai.datawrangler",
+				"ms-python.black-formatter",
+				"charliermarsh.ruff"
 			]
 		}
 	}

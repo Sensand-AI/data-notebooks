@@ -80,7 +80,7 @@ def getwcs_dem(url, crs, resolution, bbox, property_name, outpath):
     try:
         wcs = WebCoverageService(url, version="1.0.0", timeout=300)
         layername = wcs["1"].title
-        fname_out = layername.replace(" ", "_") + "_" + property_name + ".tif"
+        fname_out = layername.replace(" ", "_") + "_" + property_name + ".tiff"
         outfname = os.path.join(outpath, fname_out)
         data = wcs.getCoverage(
             identifier="1",
