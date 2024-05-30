@@ -1,13 +1,14 @@
+import logging
 import os
 import sys
-import logging
+from datetime import datetime, timedelta
 from pathlib import Path
+
 import geopandas as gpd
 import numpy as np
-from datetime import datetime, timedelta
 
-from geodata_fetch import getdata_slga,getdata_dem, getdata_radiometric
-from geodata_fetch.utils import  load_settings, reproj_mask
+from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
+from geodata_fetch.utils import load_settings, reproj_mask
 
 # Configure logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -60,10 +61,10 @@ def run(path_to_config, input_geom):
     # process each data source
     logger.info(f"Requested the following {count_sources} sources: {list_sources}")
 
-#-----add getdata functions here---------------------------------------------------------#
+    #-----add getdata functions here---------------------------------------------------------#
 
     if "SLGA" in list_sources:
-        logger.info("Begin fetching SLGA data.")
+        logger.info("Harvester: Begin fetching SLGA data.")
         slga_layernames = list(settings.target_sources["SLGA"].keys())
         # get min and max depth for each layername
         depth_min = []
@@ -83,9 +84,9 @@ def run(path_to_config, input_geom):
                 depth_max=depth_max,
                 get_ci=False, #can this be added to the settings.json instead of being hard-coded here?
             )
-            logger.info(f"SLGA data downloaded successfully: {files_slga}")
+            logger.info("Harvester: SLGA data downloaded successfully", extra={"files": files_slga})
         except Exception as e:
-            logger.error(f"Error fetching SLGA data: {e}")
+            logger.error('Harvester: Error fetching SLGA data', e, exc_info=True)
             
         #var_exists = "files_slga" in locals() or "files_slga" in globals()
         # if var_exists:
@@ -107,7 +108,7 @@ def run(path_to_config, input_geom):
                 outpath=output_data_dir
             )
         except Exception as e:
-            logger.error(f"Error fetching DEM data: {e}")
+            logger.error('Harvester: Error fetching DEM data', e, exc_info=True)
             # Check if output if False (no data available) and skip if so
         # var_exists = "files_dem" in locals() or "files_dem" in globals()
         # if var_exists:
@@ -136,7 +137,7 @@ def run(path_to_config, input_geom):
         # else:
         #     pass
 
-#-----apply masking to files if flag true---------------------------------------------------------#
+    #-----apply masking to files if flag true---------------------------------------------------------#
     
     if data_mask is True:
         logger.info("Mask is true, applying to geotifs.")
