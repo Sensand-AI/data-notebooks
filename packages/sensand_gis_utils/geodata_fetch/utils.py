@@ -67,7 +67,7 @@ class Profile:
         Example:
 
             profile = SomeProfile()
-            with rasterio.open('foo.tif', 'w', **profile()) as dst:
+            with rasterio.open('foo.tiff', 'w', **profile()) as dst:
                 # Write data ...
 
         """
@@ -97,7 +97,7 @@ class DefaultGTiffProfile(Profile):
 default_gtiff_profile = DefaultGTiffProfile()
 
 def list_tif_files(path):
-    return [f for f in os.listdir(path) if f.endswith('.tif')]
+    return [f for f in os.listdir(path) if f.endswith('.tiff')]
 
 
 def load_settings(input_settings):
@@ -264,7 +264,7 @@ def reproj_mask(filename, input_filepath, bbox, crscode, output_filepath, resamp
 
     """
     input_full_filepath = os.path.join(input_filepath, filename)
-    masked_filepath = filename.replace(".tif", "_masked.tif")
+    masked_filepath = filename.replace(".tiff", "_masked.tiff")
     mask_outpath = os.path.join(output_filepath, masked_filepath)
     
     try:
@@ -300,8 +300,8 @@ def reproj_mask(filename, input_filepath, bbox, crscode, output_filepath, resamp
 
 def colour_geotiff_and_save_cog(input_geotiff, colour_map):
     
-    output_colored_tiff_filename = input_geotiff.replace('.tif', '_colored.tif')
-    output_cog_filename = input_geotiff.replace('.tif', '_cog.public.tif')
+    output_colored_tiff_filename = input_geotiff.replace('.tiff', '_colored.tiff')
+    output_cog_filename = input_geotiff.replace('.tiff', '_cog.public.tiff')
     
     with rasterio.open(input_geotiff) as src:
         meta = src.meta.copy()
