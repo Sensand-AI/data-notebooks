@@ -54,4 +54,4 @@ ddtrace==2.8.4 # Datadog tracing library
 datadog==0.49.1 # Datadog monitoring library
 datadog_lambda==5.94.0 # Datadog monitoring library for AWS Lambda
 
-pyarrow # apache arrow bindings for python
+pyarrow==16.1.0 # apache arrow bindings for python
