@@ -18,8 +18,6 @@ setup(
         'numpy==1.26.4',
         'matplotlib==3.8.4',
         'owslib==0.27.2',
-        'requests',
-        'pyproj',
         'retry-requests',
         'openmeteo-requests',
         'requests-cache',
