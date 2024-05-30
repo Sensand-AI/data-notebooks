@@ -31,7 +31,7 @@ docker-compose-deploy-plugin: &docker-compose-deploy
       - IMAGE_URL
 
 steps:
-  - group: "Pytest unit tests [WIP]"
+  - group: "Pytest Unit Tests"
     key: "pytest-unit-tests"
     steps:
       - label: ":pytest: Run pytest"
