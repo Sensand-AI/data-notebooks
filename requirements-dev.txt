@@ -1,4 +1,4 @@
-awslambdaric	# AWS Lambda Python runtime interface client (RIC) for Python
-nbdev # Git friendly notebook development
-pytest # Testing framework
+awslambdaric==2.0.11	# AWS Lambda Python runtime interface client (RIC) for Python
+pylint==3.2.0	# Python code static checker
+pytest==8.2.0 # Testing framework
 ruff # Python code formatter

@@ -24,8 +24,8 @@ def get_coords_from_geodataframe(gdf):
 
 def colour_geotiff_and_save_cog(input_geotiff, colour_map):
     
-    output_colored_tiff_filename = input_geotiff.replace('.tif', '_colored.tif')
-    output_cog_filename = input_geotiff.replace('.tif', '_cog.public.tif')
+    output_colored_tiff_filename = input_geotiff.replace('.tiff', '_colored.tiff')
+    output_cog_filename = input_geotiff.replace('.tiff', '_cog.public.tiff')
     
     with rasterio.open(input_geotiff) as src:
         meta = src.meta.copy()

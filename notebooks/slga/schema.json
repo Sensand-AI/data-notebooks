@@ -22,9 +22,15 @@
         },
         "colormap": {
           "type": "string"
+        },
+        "slga_layer": {
+          "type": "string"
+        },
+        "slga_layer_depth": {
+          "type": "string"
         }
       },
-      "required": ["geojson", "propertyName"]
+      "required": ["geojson", "propertyName", "slga_layer"]
     }
   },
   "required": ["notebook_name", "parameters", "output_type"]
