@@ -31,15 +31,15 @@ docker-compose-deploy-plugin: &docker-compose-deploy
       - IMAGE_URL
 
 steps:
-  - group: "Pytest unit tests [WIP]"
+  - group: "Pytest unit tests"
     key: "pytest-unit-tests"
     steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
         command: |
           pip install -r requirements-jupyter.txt
-          pip install -r requirements-dev.txt
           pip install -r requirements-custom.txt
+          pip install pytest
           pytest -s
         plugins:
           - docker#v5.9.0:
