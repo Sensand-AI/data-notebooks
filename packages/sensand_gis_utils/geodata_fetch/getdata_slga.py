@@ -240,7 +240,7 @@ def get_slga_layers(
                 # Get layer name
                 layer_depth_name = f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
                 # Layer fname
-                fname_out = os.path.join(outpath, layer_depth_name + "_" + property_name + ".tif")
+                fname_out = os.path.join(outpath, layer_depth_name + "_" + property_name + ".tiff")
                 # download data
                 dl = get_wcsmap(layer_url, identifier, crs,
                                 bbox, resolution_deg, fname_out)
@@ -255,7 +255,7 @@ def get_slga_layers(
                     )
                     # Layer fname
                     fname_out = os.path.join(
-                        outpath, layer_depth_name + "_" + property_name + "_5percentile.tif")
+                        outpath, layer_depth_name + "_" + property_name + "_5percentile.tiff")
                     # download data
                     get_wcsmap(layer_url, identifier, crs,
                                 bbox, resolution_deg, fname_out)
@@ -267,7 +267,7 @@ def get_slga_layers(
                     )
                     # Layer fname
                     fname_out = os.path.join(
-                        outpath, layer_depth_name + "_" + property_name + "_95percentile.tif"
+                        outpath, layer_depth_name + "_" + property_name + "_95percentile.tiff"
                     )
                     # download data
                     dl = get_wcsmap(

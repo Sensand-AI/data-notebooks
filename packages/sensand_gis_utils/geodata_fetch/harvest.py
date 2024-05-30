@@ -142,7 +142,7 @@ def run(path_to_config, input_geom):
         logger.info("Mask is true, applying to geotifs.")
         
         # make a list of all the tif files in the 'data' package that were harvested from sources
-        tif_files = [f for f in os.listdir(output_data_dir) if f.endswith('.tif') and not f.endswith(("_masked.tif", "_colored.tif", "_cog.tif", "_cog.public.tif"))]
+        tif_files = [f for f in os.listdir(output_data_dir) if f.endswith('.tiff') and not f.endswith(("_masked.tiff", "_colored.tiff", "_cog.tiff", "_cog.public.tiff"))]
     
         logger.info(f"files to mask: {tif_files}")
         for tif in tif_files:
