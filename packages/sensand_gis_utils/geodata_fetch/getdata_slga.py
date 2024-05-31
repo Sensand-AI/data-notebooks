@@ -31,15 +31,8 @@ def get_slgadict():
         
         return slgadict
     except Exception as e:
-        logger.error(f"Error loading slga_soil.json: {e}")
+        logger.error("Error loading slga_soil.json", e, exc_info=True)
         return None
-
-
-
-"""
-get_capabilities() has been moved to utils as it was duplicated across multiple dataset modules.
-"""
-
 
 def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
     """
@@ -80,10 +73,10 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         # Save data
         with open(outfname, "wb") as f:
             f.write(data.read())
-        logger.info(f"Downloaded {filename}")
+        logger.info("Downloaded geotiff", extra={"filename": filename}),
         return True
     except Exception as e:
-        logger.error(f"Failed to download {filename}: {e}")
+        logger.error("Failed to download geotiff", e, exc_info=True, extra={"identifier": identifier})
         return False
 
 
@@ -128,7 +121,7 @@ def depth2identifier(depth_min, depth_max):
             depths_upper,
         )
     except Exception as e:
-        logger.error(f"Failed to get identifiers: {e}")
+        logger.error("Failed to get identifiers", e, exc_info=True, extra={"depth_min": depth_min, "depth_max": depth_max})
         return None, None, None, None, None
 
 
@@ -165,7 +158,7 @@ def identifier2depthbounds(depths):
         assert ncount == len(depths), f"ncount = {ncount}"
         return depth_min, depth_max
     except Exception as e:
-        logger.error(f"Failed to get min and max depth: {e}")
+        logger.error("Failed to get min and max depth", e, exc_info=True, extra={"depths": depths})
         return None, None
 
 
@@ -231,21 +224,29 @@ def get_slga_layers(
             # Get layer url
             layer_url = layers_url[layername]
             # Get depth identifiers for layers
-            (identifiers,
-            identifiers_ci_5pc,
-            identifiers_ci_95pc,
-            depth_lower,
-            depth_upper,
+            (
+                identifiers,
+                identifiers_ci_5pc,
+                identifiers_ci_95pc,
+                depth_lower,
+                depth_upper,
             ) = depth2identifier(depth_min[idx], depth_max[idx])
             for i in range(len(identifiers)):
                 identifier = identifiers[i]
                 # Get layer name
                 layer_depth_name = f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
                 # Layer fname
-                fname_out = os.path.join(outpath, layer_depth_name + "_" + property_name + ".tiff")
+
+                fname_out = os.path.join(outpath, f'{layer_depth_name}_{property_name}.tiff')
                 # download data
-                dl = get_wcsmap(layer_url, identifier, crs,
-                                bbox, resolution_deg, fname_out)
+                dl = get_wcsmap(
+                    layer_url, 
+                    identifier, 
+                    crs,
+                    bbox,
+                    resolution_deg,
+                    fname_out
+                )
                 fnames_out.append(fname_out)
             if get_ci:
                 for i in range(len(identifiers)):
@@ -256,11 +257,16 @@ def get_slga_layers(
                         f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
                     )
                     # Layer fname
-                    fname_out = os.path.join(
-                        outpath, layer_depth_name + "_" + property_name + "_5percentile.tiff")
+                    fname_out = os.path.join(outpath, f'{layer_depth_name}_{property_name}_5percentile.tiff')
                     # download data
-                    get_wcsmap(layer_url, identifier, crs,
-                                bbox, resolution_deg, fname_out)
+                    get_wcsmap(
+                        layer_url,
+                        identifier,
+                        crs,
+                        bbox,
+                        resolution_deg,
+                        fname_out
+                    )
                     # 95th percentile
                     identifier = identifiers_ci_95pc[i]
                     # Get layer name
@@ -268,15 +274,14 @@ def get_slga_layers(
                         f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
                     )
                     # Layer fname
-                    fname_out = os.path.join(
-                        outpath, layer_depth_name + "_" + property_name + "_95percentile.tiff"
-                    )
+                    fname_out = os.path.join(outpath, f'{layer_depth_name}_{property_name}_95percentile.tiff')
                     # download data
                     dl = get_wcsmap(
-                        layer_url, identifier, crs, bbox, resolution_deg, fname_out)
+                        layer_url, identifier, crs, bbox, resolution_deg, fname_out
+                    )
 
         return fnames_out
     except Exception as e:
-        logger.error(f"Failed to get SLGA layers: {e}")
+        logger.error("Failed to get SLGA layers", e, exc_info=True, extra={"layernames": layernames})
         return None
 
