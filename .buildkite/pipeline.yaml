@@ -40,6 +40,7 @@ steps:
         plugins:
           - docker#v5.9.0:
               image: "622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest"
+              entrypoint: ["/bin/sh", "-c"]
           - *ecr-sensand
 
   - wait
