@@ -1,12 +1,14 @@
-import os
-import sys
 import json
 import logging
+import os
+import sys
 from importlib import resources
+
+from gis_utils.logger import setup_logging
 from owslib.wcs import WebCoverageService
 
 # Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 def get_slgadict():
