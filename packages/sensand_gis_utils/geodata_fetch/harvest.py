@@ -6,12 +6,13 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
-from gis_utils.logger import setup_logging
-
 from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
 from geodata_fetch.utils import load_settings, reproj_mask
+from gis_utils.logger import setup_logging
+
+
 setup_logging()
-logger = logging.getLogger('DataHarvester')
+logger = logging.getLogger(__name__)
 
 def run(path_to_config, input_geom):
     logger.info("Starting the data harvester")

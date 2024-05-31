@@ -7,7 +7,7 @@ from gis_utils.logger import setup_logging
 from owslib.wcs import WebCoverageService
 
 setup_logging()
-logger = logging.getLogger('GetDataSLGA')
+logger = logging.getLogger(__name__)
 
 def get_slgadict():
     try:
