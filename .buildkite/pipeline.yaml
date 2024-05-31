@@ -39,7 +39,7 @@ steps:
         command: "pip install pytest && pytest -s"
         plugins:
           - docker#v5.9.0:
-              image: "notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest"
+              image: "622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest"
           - *ecr-sensand
 
   - wait
