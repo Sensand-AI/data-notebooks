@@ -6,13 +6,12 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
+from gis_utils.logger import setup_logging
 
 from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
 from geodata_fetch.utils import load_settings, reproj_mask
-
-# Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
+setup_logging()
+logger = logging.getLogger('DataHarvester')
 
 def run(path_to_config, input_geom):
     logger.info("Starting the data harvester")
@@ -64,7 +63,7 @@ def run(path_to_config, input_geom):
     #-----add getdata functions here---------------------------------------------------------#
 
     if "SLGA" in list_sources:
-        logger.info("Harvester: Begin fetching SLGA data.")
+        logger.info("Begin fetching SLGA data")
         slga_layernames = list(settings.target_sources["SLGA"].keys())
         # get min and max depth for each layername
         depth_min = []
@@ -84,9 +83,9 @@ def run(path_to_config, input_geom):
                 depth_max=depth_max,
                 get_ci=False, #can this be added to the settings.json instead of being hard-coded here?
             )
-            logger.info("Harvester: SLGA data downloaded successfully", extra={"files": files_slga})
+            logger.info("SLGA data downloaded successfully", extra={"files": files_slga})
         except Exception as e:
-            logger.error('Harvester: Error fetching SLGA data', e, exc_info=True)
+            logger.error('Error fetching SLGA data', e, exc_info=True)
             
         #var_exists = "files_slga" in locals() or "files_slga" in globals()
         # if var_exists:
@@ -108,7 +107,7 @@ def run(path_to_config, input_geom):
                 outpath=output_data_dir
             )
         except Exception as e:
-            logger.error('Harvester: Error fetching DEM data', e, exc_info=True)
+            logger.error('Error fetching DEM data', e, exc_info=True)
             # Check if output if False (no data available) and skip if so
         # var_exists = "files_dem" in locals() or "files_dem" in globals()
         # if var_exists:

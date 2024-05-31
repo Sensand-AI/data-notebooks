@@ -27,7 +27,7 @@ AWS_LAMBDA_FUNCTION_NAME = 'notebook-executor'
 # Set up logging
 setup_logging()
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('PapermillExecutor')
 
 # Only target the production notebooks directory
 notebook_directory = '/var/task/notebooks/production'
