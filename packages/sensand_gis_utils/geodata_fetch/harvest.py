@@ -6,10 +6,10 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
-from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
-from geodata_fetch.utils import load_settings, reproj_mask
 from gis_utils.logger import setup_logging
 
+from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
+from geodata_fetch.utils import load_settings, reproj_mask
 
 setup_logging()
 logger = logging.getLogger(__name__)

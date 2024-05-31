@@ -1,11 +1,13 @@
 import json
 import logging
 import os
+import sys
 from importlib import resources
 
 from gis_utils.logger import setup_logging
 from owslib.wcs import WebCoverageService
 
+# Configure logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
