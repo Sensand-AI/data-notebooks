@@ -8,6 +8,7 @@ import sys
 import uuid
 from typing import Any, Dict
 
+import datadoglog
 import papermill as pm
 from aws_utils import S3Utils
 from botocore.exceptions import BotoCoreError, ClientError
@@ -24,10 +25,9 @@ aws_s3_notebook_output = os.getenv('AWS_S3_BUCKET_NOTEBOOK_OUTPUT')
 aws_default_region = os.getenv('AWS_DEFAULT_REGION')
 AWS_LAMBDA_FUNCTION_NAME = 'notebook-executor'
 
-# Set up logging
-setup_logging()
-
-logger = logging.getLogger(__name__)
+datadoglog.init_logging()
+logger = logging.getLogger("NotebookExecutor")
+logger.setLevel(logging.INFO)
 
 # Only target the production notebooks directory
 notebook_directory = '/var/task/notebooks/production'
