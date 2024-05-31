@@ -36,9 +36,7 @@ steps:
     steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
-        command: |
-          pip install pytest
-          pytest -s
+        command: "pip install pytest && pytest -s"
         plugins:
           - docker#v5.9.0:
               image: "notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest"
