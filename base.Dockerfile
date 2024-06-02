@@ -22,5 +22,3 @@ ENV \
 # Install core packages
 COPY requirements-core.txt ${LAMBDA_TASK_ROOT}/
 RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-core.txt -t ${LAMBDA_TASK_ROOT}
-
-CMD ["sleep", "infinity"]
