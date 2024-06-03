@@ -4,8 +4,8 @@ import os
 import sys
 from importlib import resources
 
+from owslib.coverage.wcsBase import ServiceException
 from owslib.wcs import WebCoverageService
-
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +73,9 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
             f.write(data.read())
         logger.info("Downloaded geotiff", extra={"filename": filename}),
         return True
+    except ServiceException as e:
+        logger.error("WCS server returned exception ", e, exc_info=True, extra={"identifier": identifier})
+        return False
     except Exception as e:
         logger.error("Failed to download geotiff", e, exc_info=True, extra={"identifier": identifier})
         return False
