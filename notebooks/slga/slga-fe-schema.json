@@ -1,0 +1,59 @@
+{
+    "jsonSchema": {
+      "properties": {
+        "boundary": {
+          "title": "Boundary",
+          "type": "string"
+        },
+        "colormap": {
+          "enum": [
+            "viridis", "cividis", "magma", "spectral"
+          ],
+          "title": "Colormap",
+          "type": "string",
+          "default": "viridis"
+        },
+        "overlayType": {
+          "enum": [
+            "SLGA"
+          ],
+          "title": "Overlay type",
+          "type": "string",
+          "default": "SLGA"
+        },
+        "slga_layer": {
+            "enum": [
+              "Organic_Carbon","Bulk_Density", "pH_CaCl2", "Available_Water_Capacity", "Total_Nitrogen", "Total_Phosphorus", "Effective_Cation_Exchange_Capacity", "Depth_of_Regolith", "Clay", "Silt", "Sand"
+            ],
+            "title": "SLGA Attribute",
+            "type": "string",
+            "default": "Organic_Carbon"
+          },
+          "slga_layer_depth": {
+            "enum": [
+              "0-5cm"
+            ],
+            "title": "Depth",
+            "type": "string",
+            "default": "0-5cm"
+          }
+      },
+      "required": [
+        "overlayType"
+      ],
+      "type": "object"
+    },
+    "uiSchema": {
+      "boundary": {
+        "ui:field": "boundary-select"
+      },
+      "ui:order": [
+        "overlayType",
+        "colormap",
+        "boundary"
+      ],
+      "ui:submitButtonOptions": {
+        "submitText": "Submit Request"
+      }
+    }
+  }
