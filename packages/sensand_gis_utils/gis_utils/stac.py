@@ -1,14 +1,14 @@
+import json
 import logging
 import os
 import sys
-import json
-import numpy as np #added to use nan for masking.
+
+import numpy as np  # added to use nan for masking.
 import pystac_client
 import rasterio
+import rasterio.mask  # added for masking/cliping rasters
 from rasterio.windows import from_bounds
-import rasterio.mask #added for masking/cliping rasters
 
-# Configure logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -220,7 +220,7 @@ def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, 
             logger.info("Output mask file size: %d bytes", output_file_size)
         return data, metadata, src
     except Exception as e:
-        logger.error("Failed to process DEM asset: %s", e, exc_info=True)
+        logger.error("Failed to process DEM asset", e, exc_info=True)
         raise
 
 def save_metadata_sidecar(file_path, metadata):
@@ -245,7 +245,7 @@ def save_metadata_sidecar(file_path, metadata):
             json.dump(metadata, sidecar_file)
         logger.info("Metadata saved to %s", sidecar_filename)
     except Exception as e:
-        logger.error("Failed to save metadata sidecar file: %s", e, exc_info=True)
+        logger.error("Failed to save metadata sidecar file", e, exc_info=True, extra={"sidecar_filename": sidecar_filename})
 
 def read_metadata_sidecar(file_path):
     """
@@ -269,5 +269,5 @@ def read_metadata_sidecar(file_path):
             metadata = json.load(sidecar_file)
         return metadata
     except FileNotFoundError:
-        logger.warning(f"Sidecar file {sidecar_filename} not found.")
+        logger.error("Sidecar file not found", extra={"sidecar_filename": sidecar_filename})
         return {}

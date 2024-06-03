@@ -12,22 +12,16 @@ import papermill as pm
 from aws_utils import S3Utils
 from botocore.exceptions import BotoCoreError, ClientError
 from ddtrace import tracer
-from gis_utils.logger import setup_logging
+from gis_utils.logger import configure_logger
 from gis_utils.stac import read_metadata_sidecar
 from jsonschema import ValidationError, validate
 from papermill.exceptions import PapermillExecutionError
 
-# from datadog_lambda.metric import lambda_metric
-
-# initialize(statsd_host=os.environ.get('DATADOG_HOST'))
 aws_s3_notebook_output = os.getenv('AWS_S3_BUCKET_NOTEBOOK_OUTPUT')
 aws_default_region = os.getenv('AWS_DEFAULT_REGION')
 AWS_LAMBDA_FUNCTION_NAME = 'notebook-executor'
 
-# Set up logging
-setup_logging()
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("NotebookExecutor")
 
 # Only target the production notebooks directory
 notebook_directory = '/var/task/notebooks/production'
@@ -108,6 +102,7 @@ def delete_directory(directory_path):
         logger.error("Directory: failed to delete", e, exc_info=True, extra={'directory': directory_path})
 
 @tracer.wrap()
+@configure_logger(level=logging.INFO)
 def lambda_handler(event, _):
     """
     Handles a Lambda event.
@@ -123,7 +118,7 @@ def lambda_handler(event, _):
         dict: The output of the Lambda function. Must be JSON serializable.
     """
 
-    logger.info("Payload: received", extra={'event': event})
+    logger.info("Payload: received", extra=dict(data={'event': event}))
 
     # If invoked with a function url there's a body key
     if 'body' in event:

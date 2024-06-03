@@ -50,13 +50,29 @@ steps:
   - group: "Notebook Executor Deploy"
     key: "notebook-executor-deploy"
     steps:
-      - label: ":docker: Notebook Executor Build & Push (Platform)"
+      - label: ":docker: Notebook Executor Build & Push"
         key: "notebook-executor-build-and-push"
         plugins:
           - docker-compose#v4.14.0:
               build: notebook-executor
               image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
               image-name: "${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+              cache-from:
+                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}
+                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
+              config:
+                - docker-compose.yml
+          - *ecr-sensand
+        if: |
+          build.branch == "main" || (build.pull_request.id != null && !build.pull_request.draft)
+
+      - label: ":docker: Notebook Executor Build & Push (latest)"
+        key: "notebook-executor-build-and-push-latest"
+        plugins:
+          - docker-compose#v4.14.0:
+              build: notebook-executor
+              image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
+              image-name: latest
               cache-from:
                 - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}
                 - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
