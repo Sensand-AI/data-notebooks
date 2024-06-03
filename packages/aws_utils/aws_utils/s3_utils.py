@@ -6,9 +6,6 @@ import sys
 import boto3
 from botocore.exceptions import ClientError
 
-# Configure logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 def use_default_bucket(func):
     """A decorator to set the default bucket for S3 operations."""
@@ -88,7 +85,7 @@ class S3Utils:
             # Use the provided file_name or fallback to the name from the file_path
             if not file_name:
                 file_name = os.path.basename(file_path)
-                logger.info("uploading file_name: %s and file_path: %s", file_name, file_path)
+                print(f"uploading file_name: {file_name} and file_path: {file_path}")
 
             full_key = f"{prefix}/{file_name}" if prefix else file_name
 
@@ -101,7 +98,7 @@ class S3Utils:
                     Metadata=metadata if metadata else {}
                 )
 
-            logger.info("File %s uploaded successfully.", file_name)
+            print(f"File {file_name} uploaded successfully.")
             return True
 
         except ClientError as e:
@@ -139,12 +136,12 @@ class S3Utils:
                 try:
                     # Upload the file
                     self.upload_file(file_path=file_path, bucket=bucket, prefix='', file_name=s3_key)
-                    logger.info("Successfully uploaded %s to S3 bucket %s.", s3_key, bucket)
+                    print(f"Successfully uploaded {s3_key} to S3 bucket {bucket}")
                 except ClientError as e:
-                    logger.error(f"Failed to upload {s3_key} to S3 bucket {bucket}. AWS ClientError: {e}")
+                    print(f"Failed to upload {s3_key} to S3 bucket {bucket}. AWS ClientError: {e}")
                     continue  # Optionally continue to try uploading the next files
                 except Exception as e:
-                    logger.error(f"An unexpected error occurred while uploading {s3_key}: {e}")
+                    print(f"An unexpected error occurred while uploading {s3_key}: {e}")
                     continue  # Optionally continue to try uploading the next files
 
 
