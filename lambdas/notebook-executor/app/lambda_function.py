@@ -228,7 +228,7 @@ def lambda_handler(event, _):
                     if file.endswith(".meta.json"):
                         upload_success = s3_utils.upload_file(file_path=file_path)
                         if not upload_success:
-                            logger.warning(
+                            logger.error(
                                 "File upload: Failed to upload metadata file",
                                 extra=dict(data={
                                     'file': file,
@@ -249,7 +249,7 @@ def lambda_handler(event, _):
                             if ".public" in file:
                                 # Generate a pre-signed URL for the uploaded file
                                 presigned_url = s3_utils.generate_presigned_url(object_key)
-                                logger.info("File upload: Pre-signed URL generated", extra=dict(data={'presigned_url': presigned_url}))
+                                logger.info("File upload: Pre-signed URL generated")
 
                                 uploaded_files.append({
                                     'file_name': file,
@@ -259,7 +259,7 @@ def lambda_handler(event, _):
 
                         else:
                             logger.error(
-                                'File upload: failed',
+                                'File upload failed',
                                 extra=dict(data={'file': file, 'prefix': f'{bucket_name}/{object_key}'})
                             )
 
@@ -311,7 +311,7 @@ def lambda_handler(event, _):
             }
 
         except (PapermillExecutionError, BotoCoreError) as e:
-            logger.info("Payload: Response", extra=dict(data={'status': 'error', 'error': str(e), 'notebook_name': notebook_name}))
+            logger.error("Payload: Response", extra=dict(data={'status': 'error', 'error': str(e), 'notebook_name': notebook_name}))
             return {
                 'statusCode': 500,
                 'headers': {

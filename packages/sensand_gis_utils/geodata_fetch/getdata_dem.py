@@ -20,9 +20,7 @@ from owslib.wcs import WebCoverageService
 
 from geodata_fetch import utils
 
-# Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 def get_demdict():
     try:
@@ -96,7 +94,7 @@ def getwcs_dem(url, crs, resolution, bbox, property_name, outpath):
         with open(outfname, "wb") as f:
             f.write(data.read())
     except Exception as e:
-        logger.error(f"Error fetching dem wcs: {e}")
+        logger.error("Error fetching dem wcs", extra=dict(data={"error": str(e)}))
         return False
     return outfname
 
