@@ -93,13 +93,13 @@ def delete_directory(directory_path):
     """
     try:
         shutil.rmtree(directory_path)
-        logger.info("Directory: deleted", extra={'directory': directory_path})
+        logger.info("Directory: deleted", extra=dict(data={'directory': directory_path}))
     except FileNotFoundError:
-        logger.error("Directory: does not exist", extra={'directory': directory_path})
+        logger.error("Directory: does not exist", extra=dict(data={'directory': directory_path}))
     except PermissionError:
-        logger.error("Directory: permission denied", extra={'directory': directory_path})
+        logger.error("Directory: permission denied", extra=dict(data={'directory': directory_path}))
     except Exception as e: # This catches other potential exceptions and logs them.
-        logger.error("Directory: failed to delete", e, exc_info=True, extra={'directory': directory_path})
+        logger.error("Directory: failed to delete", extra=dict(data={'directory': directory_path}))
 
 @tracer.wrap()
 @configure_logger(level=logging.INFO)
@@ -181,10 +181,6 @@ def lambda_handler(event, _):
     # concatenate the notebook name with the notebook key as a prefix and with datetime stamp
     s3_prefix = f"{notebook_name}/{date_stamp}/{notebook_key}"
     s3_utils = init_aws_utils(prefix=s3_prefix)
-    logger.info(
-        "S3 client initialized", 
-        extra={'bucket': aws_s3_notebook_output, 'prefix': s3_prefix, 'region': aws_default_region}
-    )
 
     # Define the source and output notebook paths
     # We store our notebooks in the lambda as `notebooks/notebook_name/notebook_name.ipynb`
@@ -198,10 +194,6 @@ def lambda_handler(event, _):
 
     # Check if the notebook exists
     if not os.path.exists(input_path):
-        # lambda_metric(
-        #     metric_name='notebook.execution.notebook_not_found',
-        #     value=1
-        # )
         return {
             'statusCode': 404,
             'body': f'Notebook "{notebook_name}" not found.'
@@ -218,7 +210,7 @@ def lambda_handler(event, _):
                 stdout_file=sys.stdout,
                 stderr_file=sys.stderr,
             )
-            logger.info("Notebook Execution: successful", extra={'notebook_name': notebook_name})
+            logger.info("Payload: Executed", extra=dict(data={'status': 'success', 'notebook_name': notebook_name}))
 
             # Read in the generated artifact from the notebook execution.
             # This is a number of files stored in the /tmp/notebook_key directory
@@ -232,17 +224,16 @@ def lambda_handler(event, _):
                 for file in output_files:
                     file_path = os.path.join(output_dir, file)
                     object_key = f"{notebook_key}/{file}"  # S3 object key with prefix
-                    logger.info("File upload: Uploading file", extra={'file': file, 'prefix': f'{bucket_name}/{object_key}'})
                     # sidecar files don't need to be returned as presigned URLs
                     if file.endswith(".meta.json"):
                         upload_success = s3_utils.upload_file(file_path=file_path)
                         if not upload_success:
                             logger.warning(
                                 "File upload: Failed to upload metadata file",
-                                extra={
+                                extra=dict(data={
                                     'file': file,
                                     'prefix': f'{bucket_name}/{object_key}'
-                                }
+                                })
                             )
                     else:
                         # Read metadata from the sidecar file, if it exists
@@ -253,15 +244,13 @@ def lambda_handler(event, _):
                         upload_success = s3_utils.upload_file(file_path=file_path, metadata=file_metadata)
 
                         if upload_success:
-                            logger.info("File upload: successful", extra={'file': file})
-
                             # Does the file contain a `.public` before the extension?
                             # If so, we want to generate a pre-signed URL for it
                             if ".public" in file:
-                                logger.info("File upload: Generating pre-signed URL", extra={'file': file})
+                                logger.info("File upload: Generating pre-signed URL", extra=dict(data={'file': file}))
                                 # Generate a pre-signed URL for the uploaded file
                                 presigned_url = s3_utils.generate_presigned_url(object_key)
-                                logger.info("File upload: Pre-signed URL generated", extra={'presigned_url': presigned_url})
+                                logger.info("File upload: Pre-signed URL generated", extra=dict(data={'presigned_url': presigned_url}))
 
                                 uploaded_files.append({
                                     'file_name': file,
@@ -272,11 +261,11 @@ def lambda_handler(event, _):
                         else:
                             logger.error(
                                 'File upload: failed',
-                                extra={'file': file, 'prefix': f'{bucket_name}/{object_key}'}
+                                extra=dict(data={'file': file, 'prefix': f'{bucket_name}/{object_key}'})
                             )
 
             except ClientError as e:
-                logger.error(e, exc_info=True)
+                logger.error("Payload: Executed", extra=dict(data={'status': 'error', 'notebook_name': notebook_name, 'error': str(e)}))
                 return {
                     'statusCode': 500,
                     'headers': {
@@ -309,8 +298,7 @@ def lambda_handler(event, _):
                     file_path=output_path,
                 )
 
-            # statsd.increment('notebook.execution.success')
-
+            logger.info("Payload: Response", extra=dict(data={'status': 'success', 'output_files': uploaded_files}))
             return {
                 'statusCode': 200,
                 'headers': {
@@ -323,7 +311,7 @@ def lambda_handler(event, _):
             }
 
         except (PapermillExecutionError, BotoCoreError) as e:
-            # statsd.increment('notebook.execution.error')
+            logger.info("Payload: Response", extra=dict(data={'status': 'error', 'error': str(e), 'notebook_name': notebook_name}))
             return {
                 'statusCode': 500,
                 'headers': {
