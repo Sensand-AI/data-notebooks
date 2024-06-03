@@ -8,7 +8,6 @@ import sys
 import uuid
 from typing import Any, Dict
 
-import datadoglog
 import papermill as pm
 from aws_utils import S3Utils
 from botocore.exceptions import BotoCoreError, ClientError
