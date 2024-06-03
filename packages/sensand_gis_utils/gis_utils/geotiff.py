@@ -10,8 +10,7 @@ from rasterio.io import DatasetReader
 from rasterio.plot import reshape_as_raster
 from rasterio.warp import calculate_default_transform
 
-# Initialize the logger for this module
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 def apply_color_map(tif_data: np.ndarray, color_map: str, meta: Dict[str, Any]) -> Tuple[np.ndarray, Dict[str, Any]]:

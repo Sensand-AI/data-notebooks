@@ -7,7 +7,7 @@ from importlib import resources
 from owslib.coverage.wcsBase import ServiceException
 from owslib.wcs import WebCoverageService
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 def get_slgadict():
     try:

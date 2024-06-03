@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import sys
 
@@ -8,6 +9,7 @@ import rasterio
 import rasterio.mask  # added for masking/cliping rasters
 from rasterio.windows import from_bounds
 
+logger = logging.getLogger()
 
 def initialize_stac_client(stac_url):
     """
@@ -249,7 +251,7 @@ def read_metadata_sidecar(file_path):
     - dict: The metadata read from the sidecar file. Returns an empty dict if sidecar file is not found or if the input is already a sidecar file.
     """
     if file_path.endswith(".meta.json"):
-        print("Attempting to read a sidecar file for a sidecar file. Skipping.")
+        logger.info("Attempting to read a sidecar file for a sidecar file. Skipping.")
         return {}
 
     sidecar_filename = f"{file_path}.meta.json"
@@ -258,5 +260,5 @@ def read_metadata_sidecar(file_path):
             metadata = json.load(sidecar_file)
         return metadata
     except FileNotFoundError:
-        print(f"Sidecar file not found: {sidecar_filename}")
+        logger.warning("Sidecar file not found", extra=dict(data={"sidecar_filename": sidecar_filename}))
         return {}
