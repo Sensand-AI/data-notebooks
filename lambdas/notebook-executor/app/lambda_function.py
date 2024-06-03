@@ -264,6 +264,8 @@ def lambda_handler(event, _):
                                 'File upload: failed',
                                 extra=dict(data={'file': file, 'prefix': f'{bucket_name}/{object_key}'})
                             )
+                            
+                logger.info("Payload: Response", extra=dict(data={'status': 'success', 'output_files': uploaded_files}))
 
             except ClientError as e:
                 logger.error("Payload: Executed", extra=dict(data={'status': 'error', 'notebook_name': notebook_name, 'error': str(e)}))
@@ -299,7 +301,6 @@ def lambda_handler(event, _):
                     file_path=output_path,
                 )
 
-            logger.info("Payload: Response", extra=dict(data={'status': 'success', 'output_files': uploaded_files}))
             return {
                 'statusCode': 200,
                 'headers': {
