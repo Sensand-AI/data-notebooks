@@ -36,15 +36,23 @@ steps:
     steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
-        command: |
-          - pip install -r requirements-jupyter.txt
-          - pip install -r requirements-custom.txt
-          - pip install pytest
+        commmand:
           - pytest -s
         plugins:
-          - docker#v5.9.0:
-              image: "622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest"
-          - *ecr-sensand
+          - docker-compose#v4.15.0:
+              run: pytest
+              config: .buildkite/docker/docker-compose.pytest.yaml
+
+
+      #   command: |
+      #     - pip install -r requirements-jupyter.txt
+      #     - pip install -r requirements-custom.txt
+      #     - pip install pytest
+      #     - pytest -s
+      #   plugins:
+      #     - docker#v5.9.0:
+      #         image: "622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest"
+      #     - *ecr-sensand
 
   - wait
 
