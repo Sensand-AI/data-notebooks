@@ -54,4 +54,6 @@ ENV DD_LAMBDA_HANDLER="app.lambda_function.lambda_handler"
 # Some datadog specific environment variables
 ENV DD_SERVICE="notebook-executor"
 
+ENV DD_SERVERLESS_FLUSH_STRATEGY="end"
+
 CMD ["datadog_lambda.handler.handler"]

@@ -1,20 +1,19 @@
+import json
 import logging
 import os
 import sys
-import json
-import numpy as np 
+
+import numpy as np
 import rasterio
-from rasterio.io import MemoryFile
-from rasterio.warp import calculate_default_transform #reproject, Resampling
-from rasterio.plot import reshape_as_raster
-from rio_cogeo.cogeo import cog_translate
-from rio_cogeo.profiles import cog_profiles
 from matplotlib import cm
 from matplotlib.colors import Normalize
+from rasterio.io import MemoryFile
+from rasterio.plot import reshape_as_raster
+from rasterio.warp import calculate_default_transform  # reproject, Resampling
+from rio_cogeo.cogeo import cog_translate
+from rio_cogeo.profiles import cog_profiles
 
-# Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 def get_coords_from_geodataframe(gdf):
