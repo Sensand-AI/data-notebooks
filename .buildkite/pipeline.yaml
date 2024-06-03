@@ -37,13 +37,13 @@ steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
         command: |
-          pip install -r requirements-jupyter.txt
-          pip install -r requirements-custom.txt
-          pip install pytest
-          pytest -s
+          - pip install -r requirements-jupyter.txt
+          - pip install -r requirements-custom.txt
+          - pip install pytest
+          - pytest -s
         plugins:
           - docker#v5.9.0:
-              image: "python:3.10-bullseye"
+              image: "622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest"
 
   - wait
 
