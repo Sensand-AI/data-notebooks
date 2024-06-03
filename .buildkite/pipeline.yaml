@@ -42,6 +42,7 @@ steps:
           - docker-compose#v4.15.0:
               run: pytest
               config: .buildkite/docker/docker-compose.pytest.yaml
+          - *ecr-sensand
 
 
       #   command: |
