@@ -1,4 +1,3 @@
-import logging
 import os
 import sys
 from datetime import datetime, timedelta
@@ -6,15 +5,13 @@ from pathlib import Path
 
 import geopandas as gpd
 import numpy as np
-from gis_utils.logger import setup_logging
 
 from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
 from geodata_fetch.utils import load_settings, reproj_mask
-setup_logging()
-logger = logging.getLogger('DataHarvester')
+
 
 def run(path_to_config, input_geom):
-    logger.info("Starting the data harvester")
+    print(f"Input geometry: {input_geom}")
 
     settings = load_settings(path_to_config)
     target_crs = settings.target_crs
@@ -38,12 +35,12 @@ def run(path_to_config, input_geom):
 
     # Stop if bounding box cannot be calculated or was not provided
     if settings.target_bbox is None:
-        logger.error("No bounding box provided")
+        print("No bounding box provided")
     
     if settings.add_buffer is True:
         # Add buffer to the bounding box
         input_geom = input_geom.buffer(0.002, join_style=2, resolution=15)
-        logger.info("Adding buffer to AOI")
+        print(f"Buffered geometry: {input_geom}")
 
     # Temporal range
     # convert date strings to datetime objects
@@ -58,12 +55,12 @@ def run(path_to_config, input_geom):
     #     period_days = None
 
     # process each data source
-    logger.info(f"Requested the following {count_sources} sources: {list_sources}")
+    print(f"Requested the following {count_sources} sources: {list_sources}")
 
     #-----add getdata functions here---------------------------------------------------------#
 
     if "SLGA" in list_sources:
-        logger.info("Begin fetching SLGA data")
+        print("Fetching SLGA data")
         slga_layernames = list(settings.target_sources["SLGA"].keys())
         # get min and max depth for each layername
         depth_min = []
@@ -83,9 +80,9 @@ def run(path_to_config, input_geom):
                 depth_max=depth_max,
                 get_ci=False, #can this be added to the settings.json instead of being hard-coded here?
             )
-            logger.info("SLGA data downloaded successfully", extra={"files": files_slga})
+            print(f"SLGA data downloaded successfully: {files_slga}")
         except Exception as e:
-            logger.error('Error fetching SLGA data', e, exc_info=True)
+            print(f"Error fetching SLGA data: {e}")
             
         #var_exists = "files_slga" in locals() or "files_slga" in globals()
         # if var_exists:
@@ -97,7 +94,7 @@ def run(path_to_config, input_geom):
     
     
     if "DEM" in list_sources:
-        logger.info("Begin fetching DEM data.")
+        print("Fetching DEM data")
         dem_layernames = settings.target_sources["DEM"]
         try:
             files_dem = getdata_dem.get_dem_layers(
@@ -107,7 +104,7 @@ def run(path_to_config, input_geom):
                 outpath=output_data_dir
             )
         except Exception as e:
-            logger.error('Error fetching DEM data', e, exc_info=True)
+            print(f"Error fetching DEM data: {e}")
             # Check if output if False (no data available) and skip if so
         # var_exists = "files_dem" in locals() or "files_dem" in globals()
         # if var_exists:
@@ -119,7 +116,7 @@ def run(path_to_config, input_geom):
         
         
     if "Radiometric" in list_sources:
-        logger.info("Begin fetching RadMap data.")
+        print("Fetching RadMap data")
         rm_layernames = settings.target_sources["Radiometric"]
         try:
             files_rm = getdata_radiometric.get_radiometric_layers(
@@ -129,7 +126,7 @@ def run(path_to_config, input_geom):
                 outpath=output_data_dir
             )
         except Exception as e:
-            logger.error(f"Error fetching RadMap data: {e}")
+            print(f"Error fetching RadMap data: {e}")
         # var_exists = "files_rm" in locals() or "files_rm" in globals()
         # if var_exists:
         #     rm_layernames = [Path(f).stem for f in files_rm]
@@ -139,12 +136,12 @@ def run(path_to_config, input_geom):
     #-----apply masking to files if flag true---------------------------------------------------------#
     
     if data_mask is True:
-        logger.info("Mask is true, applying to geotifs.")
+        print(f"Masking data in {output_data_dir}")
         
         # make a list of all the tif files in the 'data' package that were harvested from sources
         tif_files = [f for f in os.listdir(output_data_dir) if f.endswith('.tiff') and not f.endswith(("_masked.tiff", "_colored.tiff", "_cog.tiff", "_cog.public.tiff"))]
     
-        logger.info(f"files to mask: {tif_files}")
+        print(f"files to mask: {tif_files}")
         for tif in tif_files:
             # Clips a raster to the area of a shape, and reprojects.
             masked_data = reproj_mask(

@@ -1,15 +1,15 @@
-import os
-import sys
 import json
 import logging
-from owslib.wcs import WebCoverageService
-from importlib import resources
+import os
+import sys
 from datetime import datetime, timezone
+from importlib import resources
+
+from owslib.wcs import WebCoverageService
+
 from geodata_fetch import utils
 
-# Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 def get_radiometricdict():
     try:
@@ -30,7 +30,7 @@ def get_radiometricdict():
 
         return rmdict
     except Exception as e:
-        logger.error(f"Error loading radiometric.json: {e}")
+        logger.error("Error loading radiometric.json", extra=dict({'error': str(e)}))
         return None
 
 """

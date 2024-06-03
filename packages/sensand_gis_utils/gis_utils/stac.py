@@ -1,16 +1,15 @@
+import json
 import logging
 import os
 import sys
-import json
-import numpy as np #added to use nan for masking.
+
+import numpy as np  # added to use nan for masking.
 import pystac_client
 import rasterio
+import rasterio.mask  # added for masking/cliping rasters
 from rasterio.windows import from_bounds
-import rasterio.mask #added for masking/cliping rasters
 
-# Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 def initialize_stac_client(stac_url):
     """
@@ -23,12 +22,12 @@ def initialize_stac_client(stac_url):
     - A pystac_client.Client object
     """
     try:
-        logger.info(f"Initializing STAC client for URL: {stac_url}")
+        print(f"Initializing STAC client for URL: {stac_url}")
         client = pystac_client.Client.open(stac_url)
-        logger.info("STAC client initialized successfully")
+        print("STAC client initialized successfully")
         return client
     except Exception:
-        logger.error(f"Failed to initialize STAC client for URL: {stac_url}", exc_info=True)
+        print("Failed to initialize STAC client")
         raise
 
 
@@ -58,10 +57,10 @@ def query_stac_api(client, bbox, collections, start_date=None, end_date=None, li
         
         search = client.search(**search_params)
         items = list(search.items())
-        logger.info(f"Found {len(items)} items")
+        print(f"Found {len(items)} items")
         return items
     except Exception:
-        logger.error("Failed to query STAC API", exc_info=True)
+        print("Failed to query STAC API")
         raise
 
 def inspect_stac_item(item):
@@ -124,7 +123,7 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
     - None
     """
     try:
-        logger.info("Opening DEM asset from: %s", dem_asset.href)
+        print(f"Opening DEM asset from: {dem_asset.href}")
         data, metadata = None, {}
 
         with rasterio.open(dem_asset.href) as src:
@@ -138,30 +137,27 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
                 'width': window.width,
                 'transform': rasterio.windows.transform(window, src.transform)
             })
-            
-            print(metadata)
-            
 
             # Ensure the directory exists
             output_directory = os.path.dirname(output_tiff_filename)
             # Create the directory if it does not exist
             os.makedirs(output_directory, exist_ok=True)
 
-            logger.info("Writing to file:  %s", output_tiff_filename)
+            print(f"Writing to file: {output_tiff_filename}")
             with rasterio.open(output_tiff_filename, 'w', **metadata) as dst:
                 dst.write(data)
-                logger.info("Written data to %s", output_tiff_filename)
+                print(f"Written data to {output_tiff_filename}")
 
             # Calculate the size of the data in bytes
             data_size_bytes = data.nbytes
-            logger.info("Read data size: %d bytes", data_size_bytes)
+            print(f"Read data size: {data_size_bytes} bytes")
 
             # Optionally, log the size of the written file
             output_file_size = os.path.getsize(output_tiff_filename)
-            logger.info("Output file size: %d bytes", output_file_size)
+            print(f"Output file size: {output_file_size} bytes")
         return data, metadata, src
     except Exception as e:
-        logger.error("Failed to process DEM asset: %s", e, exc_info=True)
+        print(f"Failed to process DEM asset: {e}")
         raise
     
 def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, masked=True):
@@ -180,7 +176,7 @@ def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, 
     - None
     """
     try:
-        logger.info("Opening DEM asset from: %s", dem_asset.href)
+        print(f"Opening DEM asset from: {dem_asset.href}")
         data, metadata = None, {}
 
         with rasterio.open(dem_asset.href) as src:
@@ -205,22 +201,17 @@ def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, 
             # Create the directory if it does not exist
             os.makedirs(output_directory, exist_ok=True)
 
-            logger.info("Writing to mask file:  %s", output_tiff_filename)
+            print(f"Writing to file: {output_tiff_filename}")
             with rasterio.open(output_tiff_filename, 'w', **metadata) as dst:
                 dst.write(data)
-                logger.info("Written masked data to %s", output_tiff_filename)
-
-            # Calculate the size of the data in bytes
-            # turned these off temporarily as nodata mask is messing with it.
-            #data_size_bytes = data.nbytes
-            #logger.info("Read data size: %d bytes", data_size_bytes)
+                print(f"Written masked data to {output_tiff_filename}")
 
             # Optionally, log the size of the written file
             output_file_size = os.path.getsize(output_tiff_filename)
-            logger.info("Output mask file size: %d bytes", output_file_size)
+            print(f"Output mask file size: {output_file_size} bytes")
         return data, metadata, src
     except Exception as e:
-        logger.error("Failed to process DEM asset: %s", e, exc_info=True)
+        print(f"Failed to process DEM asset: {e}")
         raise
 
 def save_metadata_sidecar(file_path, metadata):
@@ -243,9 +234,9 @@ def save_metadata_sidecar(file_path, metadata):
     try:
         with open(sidecar_filename, 'w', encoding='utf-8') as sidecar_file:
             json.dump(metadata, sidecar_file)
-        logger.info("Metadata saved to %s", sidecar_filename)
+        print(f"Metadata saved to {sidecar_filename}")
     except Exception as e:
-        logger.error("Failed to save metadata sidecar file: %s", e, exc_info=True)
+        print(f"Failed to save metadata sidecar file: {e}")
 
 def read_metadata_sidecar(file_path):
     """
@@ -260,7 +251,7 @@ def read_metadata_sidecar(file_path):
     - dict: The metadata read from the sidecar file. Returns an empty dict if sidecar file is not found or if the input is already a sidecar file.
     """
     if file_path.endswith(".meta.json"):
-        logger.warning("Attempting to read a sidecar file for a sidecar file. Skipping.")
+        logger.info("Attempting to read a sidecar file for a sidecar file. Skipping.")
         return {}
 
     sidecar_filename = f"{file_path}.meta.json"
@@ -269,5 +260,5 @@ def read_metadata_sidecar(file_path):
             metadata = json.load(sidecar_file)
         return metadata
     except FileNotFoundError:
-        logger.warning(f"Sidecar file {sidecar_filename} not found.")
+        logger.warning("Sidecar file not found", extra=dict(data={"sidecar_filename": sidecar_filename}))
         return {}

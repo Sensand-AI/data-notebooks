@@ -1,13 +1,13 @@
 import json
 import logging
 import os
+import sys
 from importlib import resources
 
-from gis_utils.logger import setup_logging
+from owslib.coverage.wcsBase import ServiceException
 from owslib.wcs import WebCoverageService
 
-setup_logging()
-logger = logging.getLogger('GetDataSLGA')
+logger = logging.getLogger()
 
 def get_slgadict():
     try:
@@ -71,10 +71,12 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         # Save data
         with open(outfname, "wb") as f:
             f.write(data.read())
-        logger.info("Downloaded geotiff", extra={"filename": filename}),
         return True
+    except ServiceException as e:
+        logger.error("WCS server returned exception ", extra=dict(data={"identifier": identifier, 'error': str(e)}))
+        return False
     except Exception as e:
-        logger.error("Failed to download geotiff", e, exc_info=True, extra={"identifier": identifier})
+        logger.error("Failed to download geotiff", extra=dict(data={"identifier": identifier, 'error' : str(e)}))
         return False
 
 

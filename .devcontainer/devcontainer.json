@@ -22,7 +22,8 @@
 		},
 		"ghcr.io/devcontainers/features/aws-cli:1": {
 			"version": "latest"
-		}
+		},
+		"ghcr.io/devcontainers-contrib/features/ruff:1": {},
 	},	
 	"forwardPorts": [8888, 5001, 9090],
 	"portsAttributes": {
@@ -48,7 +49,17 @@
 				"python.jupyter.alwaysTrustNotebooks": true,
 				"python.dataScience.useDefaultConfigForJupyter": false,
 				"python.dataScience.searchForJupyter": false,
-				"python.dataScience.allowUnauthorizedRemoteConnection": true
+				"python.dataScience.allowUnauthorizedRemoteConnection": true,
+				"ruff.nativeServer": true,
+				"ruff.enable": true,
+				"[python]": {
+					"editor.formatOnSave": true,
+					"editor.defaultFormatter": "charliermarsh.ruff",
+					"editor.codeActionsOnSave": {
+						"source.fixAll": "explicit",
+						"source.organizeImports": "explicit"
+					}
+				}
 			},
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
@@ -63,7 +74,8 @@
 				"ms-python.isort",
 				"ms-toolsai.datawrangler",
 				"ms-python.black-formatter",
-				"charliermarsh.ruff"
+				"charliermarsh.ruff",
+				"eamodio.gitlens"
 			]
 		}
 	}

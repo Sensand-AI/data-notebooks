@@ -10,17 +10,17 @@ Core functionality:
 The DEM layers, metadata, licensing and atttribution are described in the config folder in ga_dem_urls.json, and are read into a dictionary in the module function get_demdict()
 
 """
-import os
-import sys
 import json
 import logging
+import os
+import sys
 from importlib import resources
-from geodata_fetch import utils
+
 from owslib.wcs import WebCoverageService
 
-# Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
+from geodata_fetch import utils
+
+logger = logging.getLogger()
 
 def get_demdict():
     try:
@@ -42,7 +42,7 @@ def get_demdict():
 
         return demdict
     except Exception as e:
-        logger.error(f"Error loading dem.json: {e}")
+        print(f"Error loading dem.json: {e}")
         return None
 
 """
@@ -94,7 +94,7 @@ def getwcs_dem(url, crs, resolution, bbox, property_name, outpath):
         with open(outfname, "wb") as f:
             f.write(data.read())
     except Exception as e:
-        logger.error(f"Error fetching dem wcs: {e}")
+        logger.error("Error fetching dem wcs", extra=dict(data={"error": str(e)}))
         return False
     return outfname
 

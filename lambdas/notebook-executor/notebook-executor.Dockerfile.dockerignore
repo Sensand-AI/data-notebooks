@@ -1,0 +1,3 @@
+# exclude test files from image
+packages/**/test_*
+packages/**/__pycache__

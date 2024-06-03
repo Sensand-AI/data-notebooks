@@ -4,9 +4,7 @@ from typing import Any, Dict
 
 import geopandas as gpd
 
-# Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 def get_bbox_from_geodf(geojson_data: Dict[str, Any]):
 		"""
@@ -26,5 +24,5 @@ def get_bbox_from_geodf(geojson_data: Dict[str, Any]):
 			bbox = list(gdf.total_bounds)
 			return bbox
 		except Exception as e:
-				logger.error("Failed to extract bounding box from GeoJSON data", exc_info=True)
+				logger.error("Failed to extract bounding box from GeoJSON data")
 				raise ValueError(f"Error processing GeoJSON data: {e}")

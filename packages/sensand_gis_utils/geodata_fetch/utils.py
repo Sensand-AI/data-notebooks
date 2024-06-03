@@ -21,33 +21,30 @@ colour_geotiff_and_save_cog: Colorizes a GeoTIFF image using a specified color m
 
 """
 
-import os
-import sys
 import json
 import logging
+import os
+import sys
+from types import SimpleNamespace
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
-import rioxarray as rxr
 import rasterio
-
-from types import SimpleNamespace
-from rasterio.mask import mask
-from rasterio.warp import calculate_default_transform, Resampling
-from rasterio.dtypes import uint8
-from rasterio.enums import Resampling
-from rasterio.io import MemoryFile
-from rasterio.plot import reshape_as_raster
-from rio_cogeo.cogeo import cog_translate
-from rio_cogeo.profiles import cog_profiles
+import rioxarray as rxr
 from matplotlib import cm
 from matplotlib.colors import Normalize
 from owslib.wcs import WebCoverageService
+from rasterio.dtypes import uint8
+from rasterio.enums import Resampling
+from rasterio.io import MemoryFile
+from rasterio.mask import mask
+from rasterio.plot import reshape_as_raster
+from rasterio.warp import Resampling, calculate_default_transform
+from rio_cogeo.cogeo import cog_translate
+from rio_cogeo.profiles import cog_profiles
 
-
-# Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 ## ------ Setup rasterio profiles ------ ##
