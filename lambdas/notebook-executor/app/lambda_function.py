@@ -99,7 +99,7 @@ def delete_directory(directory_path):
     except PermissionError:
         logger.error("Directory: permission denied", extra=dict(data={'directory': directory_path}))
     except Exception as e: # This catches other potential exceptions and logs them.
-        logger.error("Directory: failed to delete", extra=dict(data={'directory': directory_path}))
+        logger.error("Directory: failed to delete", extra=dict(data={'directory': directory_path, 'error': str(e)}))
 
 @tracer.wrap()
 @configure_logger(level=logging.INFO)
@@ -207,6 +207,7 @@ def lambda_handler(event, _):
                 output_path=output_path,
                 parameters=parameters,
                 log_output=True,
+                progress_bar=False,
                 stdout_file=sys.stdout,
                 stderr_file=sys.stderr,
             )
