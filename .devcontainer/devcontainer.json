@@ -63,7 +63,8 @@
 				"ms-python.isort",
 				"ms-toolsai.datawrangler",
 				"ms-python.black-formatter",
-				"charliermarsh.ruff"
+				"charliermarsh.ruff",
+				"eamodio.gitlens"
 			]
 		}
 	}
