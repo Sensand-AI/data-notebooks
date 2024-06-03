@@ -93,7 +93,6 @@ def delete_directory(directory_path):
     """
     try:
         shutil.rmtree(directory_path)
-        logger.info("Directory: deleted", extra=dict(data={'directory': directory_path}))
     except FileNotFoundError:
         logger.error("Directory: does not exist", extra=dict(data={'directory': directory_path}))
     except PermissionError:
@@ -248,7 +247,6 @@ def lambda_handler(event, _):
                             # Does the file contain a `.public` before the extension?
                             # If so, we want to generate a pre-signed URL for it
                             if ".public" in file:
-                                logger.info("File upload: Generating pre-signed URL", extra=dict(data={'file': file}))
                                 # Generate a pre-signed URL for the uploaded file
                                 presigned_url = s3_utils.generate_presigned_url(object_key)
                                 logger.info("File upload: Pre-signed URL generated", extra=dict(data={'presigned_url': presigned_url}))
@@ -264,7 +262,7 @@ def lambda_handler(event, _):
                                 'File upload: failed',
                                 extra=dict(data={'file': file, 'prefix': f'{bucket_name}/{object_key}'})
                             )
-                            
+
                 logger.info("Payload: Response", extra=dict(data={'status': 'success', 'output_files': uploaded_files}))
 
             except ClientError as e:

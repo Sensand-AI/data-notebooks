@@ -10,13 +10,15 @@ Core functionality:
 The DEM layers, metadata, licensing and atttribution are described in the config folder in ga_dem_urls.json, and are read into a dictionary in the module function get_demdict()
 
 """
-import os
-import sys
 import json
 import logging
+import os
+import sys
 from importlib import resources
-from geodata_fetch import utils
+
 from owslib.wcs import WebCoverageService
+
+from geodata_fetch import utils
 
 # Configure logging
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
@@ -42,7 +44,7 @@ def get_demdict():
 
         return demdict
     except Exception as e:
-        logger.error(f"Error loading dem.json: {e}")
+        print(f"Error loading dem.json: {e}")
         return None
 
 """
