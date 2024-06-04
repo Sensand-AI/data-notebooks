@@ -37,6 +37,8 @@ steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
         command:
+          - echo $PYTHONPATH
+          - echo $PATH
           - pytest ./packages -s
         plugins:
           - docker-compose#v4.15.0:
