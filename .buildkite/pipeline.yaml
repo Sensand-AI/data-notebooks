@@ -44,6 +44,7 @@ steps:
         plugins:
           - docker#v5.9.0:
               image: "python:3.10-bullseye"
+        if: build.message !~ /skippy/
 
   - wait
 
