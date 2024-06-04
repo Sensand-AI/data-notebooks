@@ -1,4 +1,5 @@
 """Module to execute a Jupyter notebook with parameters as a Lambda function."""
+
 import datetime
 import json
 import logging
@@ -17,14 +18,15 @@ from gis_utils.stac import read_metadata_sidecar
 from jsonschema import ValidationError, validate
 from papermill.exceptions import PapermillExecutionError
 
-aws_s3_notebook_output = os.getenv('AWS_S3_BUCKET_NOTEBOOK_OUTPUT')
-aws_default_region = os.getenv('AWS_DEFAULT_REGION')
-AWS_LAMBDA_FUNCTION_NAME = 'notebook-executor'
+aws_s3_notebook_output = os.getenv("AWS_S3_BUCKET_NOTEBOOK_OUTPUT")
+aws_default_region = os.getenv("AWS_DEFAULT_REGION")
+AWS_LAMBDA_FUNCTION_NAME = "notebook-executor"
 
 logger = logging.getLogger("NotebookExecutor")
 
 # Only target the production notebooks directory
-notebook_directory = '/var/task/notebooks/production'
+notebook_directory = "/var/task/notebooks/production"
+
 
 @tracer.wrap()
 def init_aws_utils(prefix):
@@ -33,26 +35,24 @@ def init_aws_utils(prefix):
     By default, the S3Utils class will use the AWS credentials from the environment
     """
     s3_client = S3Utils(
-        region_name=aws_default_region,
-        s3_bucket=aws_s3_notebook_output,
-        prefix=prefix
+        region_name=aws_default_region, s3_bucket=aws_s3_notebook_output, prefix=prefix
     )
     return s3_client
+
 
 @tracer.wrap()
 def generate_deterministic_uuid(notebook_name: str, parameters: dict):
     """
-    Generates a deterministic UUID using the Lambda function name and AWS 
+    Generates a deterministic UUID using the Lambda function name and AWS
     region as part of the namespace, and the notebook name and parameters as the name.
     """
     # Use AWS Lambda function name and AWS region as part of the namespace
     namespace_uuid = uuid.uuid5(
-        uuid.NAMESPACE_DNS,
-        f"{AWS_LAMBDA_FUNCTION_NAME}-{aws_default_region}"
+        uuid.NAMESPACE_DNS, f"{AWS_LAMBDA_FUNCTION_NAME}-{aws_default_region}"
     )
 
     # Remove parameters that are not deterministic
-    parameters_to_unset = ['geojson']
+    parameters_to_unset = ["geojson"]
     settable_parameters = []
     for param in parameters_to_unset:
         if param not in parameters:
@@ -65,20 +65,20 @@ def generate_deterministic_uuid(notebook_name: str, parameters: dict):
 
     return str(deterministic_uuid)
 
+
 @tracer.wrap()
 def validate_event(event: Dict[str, Any], schema: Dict[str, Any]) -> None:
     """Validates the incoming event against the provided schema."""
     validate(instance=event, schema=schema)
 
+
 @tracer.wrap()
 def load_schema(notebook_name: str):
     """Load the JSON Schema for validating the notebook parameters."""
-    schema_path = os.path.join(notebook_directory, notebook_name, 'schema.json')
-    if os.path.exists(schema_path):
-        with open(schema_path, 'r', encoding='utf-8') as schema_file:
-            return json.load(schema_file)
-    else:
-        raise FileNotFoundError(f"Schema file for notebook {notebook_name} not found.")
+    schema_path = os.path.join(notebook_directory, notebook_name, "schema.json")
+    with open(schema_path, "r", encoding="utf-8") as schema_file:
+        return json.load(schema_file)
+
 
 @tracer.wrap()
 def delete_directory(directory_path):
@@ -94,11 +94,20 @@ def delete_directory(directory_path):
     try:
         shutil.rmtree(directory_path)
     except FileNotFoundError:
-        logger.error("Directory: does not exist", extra=dict(data={'directory': directory_path}))
+        logger.error(
+            "Directory: does not exist", extra=dict(data={"directory": directory_path})
+        )
     except PermissionError:
-        logger.error("Directory: permission denied", extra=dict(data={'directory': directory_path}))
-    except Exception as e: # This catches other potential exceptions and logs them.
-        logger.error("Directory: failed to delete", extra=dict(data={'directory': directory_path, 'error': str(e)}))
+        logger.error(
+            "Directory: permission denied",
+            extra=dict(data={"directory": directory_path}),
+        )
+    except Exception as e:  # This catches other potential exceptions and logs them.
+        logger.error(
+            "Directory: failed to delete",
+            extra=dict(data={"directory": directory_path, "error": str(e)}),
+        )
+
 
 @tracer.wrap()
 @configure_logger(level=logging.INFO)
@@ -117,22 +126,20 @@ def lambda_handler(event, _):
         dict: The output of the Lambda function. Must be JSON serializable.
     """
 
-    logger.info("Payload: received", extra=dict(data={'event': event}))
+    logger.info("Payload: received", extra=dict(data={"event": event}))
 
     # If invoked with a function url there's a body key
-    if 'body' in event:
-        event = json.loads(event['body'])
+    if "body" in event:
+        event = json.loads(event["body"])
 
     # Extract notebook name and parameters from the event
-    notebook_name = event.get('notebook_name')
+    notebook_name = event.get("notebook_name")
 
     if not notebook_name:
         return {
-            'statusCode': 400,
-            'headers': {
-                'Content-Type': 'application/json'
-            },
-            'body': json.dumps({'error': 'Missing "notebook_name" in the event.'})
+            "statusCode": 400,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"error": 'Missing "notebook_name" in the event.'}),
         }
 
     # Load the JSON Schema for the specified notebook
@@ -140,11 +147,9 @@ def lambda_handler(event, _):
         schema = load_schema(notebook_name)
     except FileNotFoundError:
         return {
-            'statusCode': 404,
-            'headers': {
-                'Content-Type': 'application/json'
-            },
-            'body': json.dumps({'error': 'File not found.'})
+            "statusCode": 404,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"error": "File not found."}),
         }
 
     # Validate the incoming event against the schema
@@ -152,30 +157,30 @@ def lambda_handler(event, _):
         validate_event(event, schema)
     except ValidationError as e:
         return {
-            'statusCode': 400, 
-            'headers': {
-                'Content-Type': 'application/json'
-            },
-            'body': json.dumps({'error': e.message})
+            "statusCode": 400,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"error": e.message}),
         }
 
-    parameters = event.get('parameters', {})
+    parameters = event.get("parameters", {})
     # Append a deterministic UUID to the parameters as a notebook_key
     # This will be used to identify the executed notebook in the S3 bucket
     # and later to retrieve the output
     # It will also be used as a means of tracking executions when we eventually
     # handle retries and error handling via a persistent store
     notebook_key = generate_deterministic_uuid(notebook_name, parameters)
-    parameters['notebook_key'] = notebook_key
-    save_output = event.get('save_output', True)
+    parameters["notebook_key"] = notebook_key
+    save_output = event.get("save_output", True)
 
     # Generate a datetime stamp
     current_date = datetime.datetime.now()
     datetime_stamp = current_date.strftime("%Y-%m-%d_%H-%M-%S")
     date_stamp = current_date.strftime("%Y-%m-%d")
     # Create the S3 key for the output notebook based on name and datetime stamp
-    notebook_basename = os.path.splitext(notebook_name)[0]  # Get the base name without extension
-    s3_output_key = f'executed_{notebook_basename}_{datetime_stamp}.ipynb'
+    notebook_basename = os.path.splitext(notebook_name)[
+        0
+    ]  # Get the base name without extension
+    s3_output_key = f"executed_{notebook_basename}_{datetime_stamp}.ipynb"
     # Initialize the S3. Don't need to pass credentials if the Lambda has the right IAM role
     # concatenate the notebook name with the notebook key as a prefix and with datetime stamp
     s3_prefix = f"{notebook_name}/{date_stamp}/{notebook_key}"
@@ -183,20 +188,17 @@ def lambda_handler(event, _):
 
     # Define the source and output notebook paths
     # We store our notebooks in the lambda as `notebooks/notebook_name/notebook_name.ipynb`
-    notebook_file = notebook_name + '.ipynb'
+    notebook_file = notebook_name + ".ipynb"
     input_path = os.path.join(notebook_directory, notebook_name, notebook_file)
-    output_path = f'/tmp/{s3_output_key}'
-    # Create the output directory if it doesn't exist. 
+    output_path = f"/tmp/{s3_output_key}"
+    # Create the output directory if it doesn't exist.
     # This is where the notebook generated artifacts will be stored
     output_dir = f"/tmp/{notebook_key}"
     os.makedirs(output_dir, exist_ok=True)
 
     # Check if the notebook exists
     if not os.path.exists(input_path):
-        return {
-            'statusCode': 404,
-            'body': f'Notebook "{notebook_name}" not found.'
-        }
+        return {"statusCode": 404, "body": f'Notebook "{notebook_name}" not found.'}
 
     # Execute the notebook with parameters
     with tracer.trace("execute_notebook", resource=notebook_name):
@@ -210,7 +212,10 @@ def lambda_handler(event, _):
                 stdout_file=sys.stdout,
                 stderr_file=sys.stderr,
             )
-            logger.info("Payload: Executed", extra=dict(data={'status': 'success', 'notebook_name': notebook_name}))
+            logger.info(
+                "Payload: Executed",
+                extra=dict(data={"status": "success", "notebook_name": notebook_name}),
+            )
 
             # Read in the generated artifact from the notebook execution.
             # This is a number of files stored in the /tmp/notebook_key directory
@@ -230,62 +235,81 @@ def lambda_handler(event, _):
                         if not upload_success:
                             logger.error(
                                 "File upload: Failed to upload metadata file",
-                                extra=dict(data={
-                                    'file': file
-                                })
+                                extra=dict(data={"file": file}),
                             )
                     else:
                         # Read metadata from the sidecar file, if it exists
                         metadata = read_metadata_sidecar(file_path)
                         # Remove the `data` property from the metadata
                         # This is because `data` may contain far too much information to store as S3 metadata
-                        file_metadata = metadata['properties'] if metadata else {}
-                        upload_success = s3_utils.upload_file(file_path=file_path, metadata=file_metadata)
+                        file_metadata = metadata["properties"] if metadata else {}
+                        upload_success = s3_utils.upload_file(
+                            file_path=file_path, metadata=file_metadata
+                        )
 
                         if upload_success:
                             # Does the file contain a `.public` before the extension?
                             # If so, we want to generate a pre-signed URL for it
                             if ".public" in file:
                                 # Generate a pre-signed URL for the uploaded file
-                                logger.info("Generating pre-signed URL", extra=dict(data={'object_key': object_key}))
-                                presigned_url = s3_utils.generate_presigned_url(object_key)
-                                logger.info("File upload: Pre-signed URL generated")
+                                logger.info(
+                                    "Generating pre-signed URL",
+                                    extra=dict(data={"object_key": object_key}),
+                                )
+                                presigned_url = s3_utils.generate_presigned_url(
+                                    object_key
+                                )
 
-                                uploaded_files.append({
-                                    'file_name': file,
-                                    'presigned_url': presigned_url,
-                                    'metadata': metadata
-                                })
+                                uploaded_files.append(
+                                    {
+                                        "file_name": file,
+                                        "presigned_url": presigned_url,
+                                        "metadata": metadata,
+                                    }
+                                )
 
                         else:
                             logger.error(
-                                'File upload failed',
-                                extra=dict(data={'file': file, 'prefix': f'{bucket_name}/{object_key}'})
+                                "File upload failed",
+                                extra=dict(
+                                    data={
+                                        "file": file,
+                                        "prefix": f"{bucket_name}/{object_key}",
+                                    }
+                                ),
                             )
 
-                logger.info("Payload: Response", extra=dict(data={'status': 'success', 'output_files': uploaded_files}))
+                logger.info(
+                    "Payload: Response",
+                    extra=dict(
+                        data={"status": "success", "output_files": uploaded_files}
+                    ),
+                )
 
             except ClientError as e:
-                logger.error("Payload: Executed", extra=dict(data={'status': 'error', 'notebook_name': notebook_name, 'error': str(e)}))
+                logger.error(
+                    "Payload: Executed",
+                    extra=dict(
+                        data={
+                            "status": "error",
+                            "notebook_name": notebook_name,
+                            "error": str(e),
+                        }
+                    ),
+                )
                 return {
-                    'statusCode': 500,
-                    'headers': {
-                        'Content-Type': 'application/json'
-                    },
-                    'body': json.dumps({
-                        'message': f"Error uploading file: {e}"
-                    })
+                    "statusCode": 500,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({"message": f"Error uploading file: {e}"}),
                 }
             except FileNotFoundError:
                 logger.error("Directory not found: %s", output_dir)
                 return {
-                    'statusCode': 404,
-                    'headers': {
-                        'Content-Type': 'application/json'
-                    },
-                    'body': json.dumps({
-                        'message': f"Directory not found: {output_dir}"
-                    })
+                    "statusCode": 404,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps(
+                        {"message": f"Directory not found: {output_dir}"}
+                    ),
                 }
 
             # Delete the temporary directory
@@ -300,24 +324,29 @@ def lambda_handler(event, _):
                 )
 
             return {
-                'statusCode': 200,
-                'headers': {
-                    'Content-Type': 'application/json'
+                "statusCode": 200,
+                "headers": {"Content-Type": "application/json"},
+                "body": {
+                    "message": f"Notebook '{notebook_name}' executed successfully!",
+                    "output_files": uploaded_files,
                 },
-                'body': {
-                    'message': f"Notebook '{notebook_name}' executed successfully!",
-                    "output_files": uploaded_files
-                }
             }
 
         except (PapermillExecutionError, BotoCoreError) as e:
-            logger.error("Payload: Response", extra=dict(data={'status': 'error', 'error': str(e), 'notebook_name': notebook_name}))
+            logger.error(
+                "Payload: Response",
+                extra=dict(
+                    data={
+                        "status": "error",
+                        "error": str(e),
+                        "notebook_name": notebook_name,
+                    }
+                ),
+            )
             return {
-                'statusCode': 500,
-                'headers': {
-                    'Content-Type': 'application/json'
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": {
+                    "message": f'Error executing notebook "{notebook_name}": {str(e)}'
                 },
-                'body': {
-                    'message': f'Error executing notebook "{notebook_name}": {str(e)}'
-                }
             }
