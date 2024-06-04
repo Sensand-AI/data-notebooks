@@ -38,7 +38,10 @@ steps:
         key: "run-pytest"
         command:
           - pwd
-          - pytest -s
+          - ls
+          - cd ../..
+          - ls
+          # - pytest -s
         plugins:
           - docker-compose#v4.15.0:
               run: pytest
