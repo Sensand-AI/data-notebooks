@@ -7,7 +7,7 @@ FROM 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest
 # COPY requirements-custom.txt ${LAMBDA_TASK_ROOT}/
 # RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt -t ${LAMBDA_TASK_ROOT}
 
-# RUN pip install pytest
+RUN pip install pytest
 
 ENTRYPOINT []
 
