@@ -37,11 +37,12 @@ steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
         command:
+          - pwd
           - pytest -s
         plugins:
           - docker-compose#v4.15.0:
               run: pytest
-              config: .buildkite/docker/docker-compose.pytest.yaml
+              config: docker-compose.pytest.yaml
           - *ecr-sensand
 
 
