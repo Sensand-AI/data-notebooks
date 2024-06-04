@@ -223,7 +223,7 @@ def lambda_handler(event, _):
                 uploaded_files = []  # Keep track of successfully uploaded files
                 for file in output_files:
                     file_path = os.path.join(output_dir, file)
-                    object_key = f"{notebook_key}/{file}"  # S3 object key with prefix
+                    object_key = f"{s3_prefix}/{file}"  # S3 object key with prefix
                     # sidecar files don't need to be returned as presigned URLs
                     if file.endswith(".meta.json"):
                         upload_success = s3_utils.upload_file(file_path=file_path)
@@ -231,8 +231,7 @@ def lambda_handler(event, _):
                             logger.error(
                                 "File upload: Failed to upload metadata file",
                                 extra=dict(data={
-                                    'file': file,
-                                    'prefix': f'{bucket_name}/{object_key}'
+                                    'file': file
                                 })
                             )
                     else:
@@ -248,6 +247,7 @@ def lambda_handler(event, _):
                             # If so, we want to generate a pre-signed URL for it
                             if ".public" in file:
                                 # Generate a pre-signed URL for the uploaded file
+                                logger.info("Generating pre-signed URL", extra=dict(data={'object_key': object_key}))
                                 presigned_url = s3_utils.generate_presigned_url(object_key)
                                 logger.info("File upload: Pre-signed URL generated")
 
