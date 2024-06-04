@@ -37,11 +37,8 @@ steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
         command:
-          - pwd
-          - ls
-          - cd ../..
-          - ls
-          # - pytest -s
+          - cd packages
+          - pytest -s
         plugins:
           - docker-compose#v4.15.0:
               run: pytest
