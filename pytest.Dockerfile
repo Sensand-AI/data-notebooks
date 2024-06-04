@@ -7,7 +7,9 @@ COPY packages/ ${LAMBDA_TASK_ROOT}/packages
 COPY requirements-custom.txt ${LAMBDA_TASK_ROOT}/
 RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt -t ${LAMBDA_TASK_ROOT}
 
-RUN pip install pytest
+RUN pip install pytest -t ${LAMBDA_TASK_ROOT}
+
+ENV PYTHONPATH=${LAMBDA_TASK_ROOT}
 
 ENTRYPOINT []
 
