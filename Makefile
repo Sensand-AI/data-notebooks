@@ -48,6 +48,18 @@ docker-push-notebook-executor:
 ## docker-push: Push the Docker image (Platform)
 docker-push: docker-tag docker-push-notebook-executor
 
+## build-base-container: Build the base container.
+build-base-container:
+	docker build -t gis-base:latest -f ./base.Dockerfile . --platform linux/amd64
+
+## run-base-container: Run the base container and open a shell.
+run-base-container:
+	docker run --name localbasecontainer --entrypoint "/bin/sh" -it gis-base:latest -c "sleep infinity"
+
+## exec-base-container: Run the base container and open a shell.
+exec-base-container:
+	docker exec -it localbasecontainer /bin/sh
+
 ## lambda-update: Update the lambda function with the latest image.
 lambda-update:
 	aws-vault exec $(AWS_STAGING_PROFILE) -- aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $(IMAGE_URL)/$(IMAGE_NAME):latest --region us-east-1
