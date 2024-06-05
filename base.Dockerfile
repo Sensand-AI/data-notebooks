@@ -19,9 +19,16 @@ ENV \
   GEOS_CONFIG=/opt/bin/geos-config \
   PATH=/opt/bin:$PATH
 
+# Install pipenv
+RUN pip install pipenv
+
 # Install core packages
-COPY requirements-core.txt ${LAMBDA_TASK_ROOT}/
-RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-core.txt -t ${LAMBDA_TASK_ROOT}
+COPY Pipfile Pipfile.lock ${LAMBDA_TASK_ROOT}/
+RUN cd ${LAMBDA_TASK_ROOT} && \
+    pipenv install --deploy --ignore-pipfile
+
+# Run infinity loop to keep the container running
+CMD ["bash", "-c", "sleep infinity"]
 
 # docker build -f base.Dockerfile -t 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest . --platform linux/amd64
 # docker run --name cmd-binbash-test -d 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest

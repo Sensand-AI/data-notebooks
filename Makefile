@@ -72,6 +72,18 @@ tag-base-container:
 push-base-container:
 	docker push $(IMAGE_URL)/$(BASE_IMAGE_NAME):latest
 
+## build-pytest-container: Build the pytest container.
+build-pytest-container:
+	docker build -t pytest:latest -f ./pytest.Dockerfile . --platform linux/amd64
+
+## run-pytest-container: Run the pytest container and open a shell.
+run-pytest-container:
+	docker run --name pytest-container --entrypoint "/bin/sh" -it pytest:latest -c "sleep infinity"
+
+## exec-pytest-container: Run the pytest container and open a shell.
+exec-pytest-container:
+	docker exec -it pytest-container /bin/sh
+
 ## lambda-update: Update the lambda function with the latest image.
 lambda-update:
 	aws-vault exec $(AWS_STAGING_PROFILE) -- aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $(IMAGE_URL)/$(IMAGE_NAME):latest --region us-east-1
