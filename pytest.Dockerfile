@@ -14,3 +14,4 @@ ENV PATH=${LAMBDA_TASK_ROOT}:${PATH}
 ENTRYPOINT []
 
 CMD [ "ls" ]
+# CMD [ "pytest", "./packages", "-s" ]
