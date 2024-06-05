@@ -5,6 +5,10 @@ IMAGE_URL=622020772926.dkr.ecr.us-east-1.amazonaws.com
 AWS_STAGING_PROFILE=senstag
 AWS_PLATFORM_PROFILE=senplat
 
+BASE_IMAGE_NAME=gis-base
+BASE_CONTAINER_NAME=local-base-container
+
+
 # Default make command
 all: help
 
@@ -54,11 +58,19 @@ build-base-container:
 
 ## run-base-container: Run the base container and open a shell.
 run-base-container:
-	docker run --name localbasecontainer --entrypoint "/bin/sh" -it gis-base:latest -c "sleep infinity"
+	docker run --name $(BASE_CONTAINER_NAME) --entrypoint "/bin/sh" -it gis-base:latest -c "sleep infinity"
 
 ## exec-base-container: Run the base container and open a shell.
 exec-base-container:
-	docker exec -it localbasecontainer /bin/sh
+	docker exec -it $(BASE_CONTAINER_NAME) /bin/sh
+
+## tag-base-container: Tag the base container.
+tag-base-container:
+	docker tag $(BASE_IMAGE_NAME):latest $(IMAGE_URL)/$(BASE_IMAGE_NAME):latest
+
+## push-base-container: Push the base container.
+push-base-container:
+	docker push $(IMAGE_URL)/$(BASE_IMAGE_NAME):latest
 
 ## lambda-update: Update the lambda function with the latest image.
 lambda-update:
