@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt -t
 
 RUN pip install pytest -t ${LAMBDA_TASK_ROOT}
 
-ENV PYTHONPATH=${LAMBDA_TASK_ROOT}
+ENV PATH=${LAMBDA_TASK_ROOT}:${PATH}
 
 ENTRYPOINT []
 
