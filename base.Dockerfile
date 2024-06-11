@@ -27,8 +27,3 @@ RUN pip install -r requirements-core.txt
 
 # Run infinity loop to keep the container running
 CMD ["bash", "-c", "sleep infinity"]
-
-# docker build -f base.Dockerfile -t 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest . --platform linux/amd64
-# docker run --name cmd-binbash-test -d 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest
-# docker tag gis-base:latest 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest
-# docker push 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest
