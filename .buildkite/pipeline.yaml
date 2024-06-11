@@ -37,15 +37,12 @@ steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
         command:
-          # - echo ${LAMBDA_TASK_ROOT}
-          # - export PYTHONPATH=
           - pytest ./packages -s
         plugins:
           - docker-compose#v4.15.0:
               run: pytest
               config: docker-compose.pytest.yaml
           - *ecr-sensand
-
 
       #   command: |
       #     - pip install -r requirements-jupyter.txt

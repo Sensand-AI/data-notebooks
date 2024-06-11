@@ -19,13 +19,11 @@ ENV \
   GEOS_CONFIG=/opt/bin/geos-config \
   PATH=/opt/bin:$PATH
 
-# Install pipenv
-RUN pip install pipenv
+WORKDIR ${LAMBDA_TASK_ROOT}
 
 # Install core packages
-COPY Pipfile Pipfile.lock ${LAMBDA_TASK_ROOT}/
-RUN cd ${LAMBDA_TASK_ROOT} && \
-    pipenv install --deploy --ignore-pipfile
+COPY requirements-core.txt ${LAMBDA_TASK_ROOT}/
+RUN pip install -r requirements-core.txt
 
 # Run infinity loop to keep the container running
 CMD ["bash", "-c", "sleep infinity"]
