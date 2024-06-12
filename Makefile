@@ -5,6 +5,10 @@ IMAGE_URL=622020772926.dkr.ecr.us-east-1.amazonaws.com
 AWS_STAGING_PROFILE=senstag
 AWS_PLATFORM_PROFILE=senplat
 
+BASE_IMAGE_NAME=gis-base
+BASE_CONTAINER_NAME=local-base-container
+
+
 # Default make command
 all: help
 
@@ -47,6 +51,38 @@ docker-push-notebook-executor:
 
 ## docker-push: Push the Docker image (Platform)
 docker-push: docker-tag docker-push-notebook-executor
+
+## build-base-container: Build the base container.
+build-base-container:
+	docker build -t gis-base:latest -f ./base.Dockerfile . --platform linux/amd64
+
+## run-base-container: Run the base container and open a shell.
+run-base-container:
+	docker run --name $(BASE_CONTAINER_NAME) --entrypoint "/bin/sh" -it gis-base:latest -c "sleep infinity"
+
+## exec-base-container: Run the base container and open a shell.
+exec-base-container:
+	docker exec -it $(BASE_CONTAINER_NAME) /bin/sh
+
+## tag-base-container: Tag the base container.
+tag-base-container:
+	docker tag $(BASE_IMAGE_NAME):latest $(IMAGE_URL)/$(BASE_IMAGE_NAME):latest
+
+## push-base-container: Push the base container.
+push-base-container:
+	docker push $(IMAGE_URL)/$(BASE_IMAGE_NAME):latest
+
+## build-pytest-container: Build the pytest container.
+build-pytest-container:
+	docker build -t pytest:latest -f ./pytest.Dockerfile . --platform linux/amd64
+
+## run-pytest-container: Run the pytest container and open a shell.
+run-pytest-container:
+	docker run --name pytest-container --entrypoint "/bin/sh" -it pytest:latest -c "sleep infinity"
+
+## exec-pytest-container: Run the pytest container and open a shell.
+exec-pytest-container:
+	docker exec -it pytest-container /bin/sh
 
 ## lambda-update: Update the lambda function with the latest image.
 lambda-update:
