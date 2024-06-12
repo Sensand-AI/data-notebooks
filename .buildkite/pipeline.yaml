@@ -37,6 +37,7 @@ steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
         command:
+          - pip install -r requirements-core.txt
           - pip install -r requirements-jupyter.txt
           - pip install -r requirements-custom.txt
           - pip install pytest
