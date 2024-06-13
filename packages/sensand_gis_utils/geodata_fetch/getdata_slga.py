@@ -76,7 +76,7 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         with open(outfname, "wb") as f:
             f.write(data.read())
             print(f"WCS data downloaded and saved as {filename}")
-        return True
+        return True #where is this being invoked? Can i terminate the whole harvest if this returns false?
     except ServiceException as e:
         logger.error(
             f"WCS server returned exception while trying to download {filename}: {e} "
