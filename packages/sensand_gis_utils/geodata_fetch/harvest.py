@@ -20,6 +20,7 @@ The `run` function performs the following steps:
 
 import os
 from pathlib import Path
+import logging
 
 import numpy as np
 
@@ -27,6 +28,7 @@ from shapely.geometry import Point
 from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
 from geodata_fetch.utils import load_settings, reproj_mask
 
+logger = logging.getLogger()
 class DataHarvester:
     def __init__(self, path_to_config, input_geom):
         self.settings = load_settings(path_to_config)
@@ -145,31 +147,3 @@ class DataHarvester:
                     resample=self.resample,
                 )
                 return masked_data
-
-
-
-        # if data_mask is True:
-        #     print(f"Masking data in {output_data_dir}")
-
-        #     # make a list of all the tif files in the 'data' package that were harvested from sources
-        #     tif_files = [
-        #         f
-        #         for f in os.listdir(output_data_dir)
-        #         if f.endswith(".tiff")
-        #         and not f.endswith(
-        #             ("_masked.tiff", "_colored.tiff", "_cog.tiff", "_cog.public.tiff")
-        #         )
-        #     ]
-
-        #     print(f"files to mask: {tif_files}")
-        #     for tif in tif_files:
-        #         # Clips a raster to the area of a shape, and reprojects.
-        #         masked_data = reproj_mask(
-        #             filename=tif,
-        #             input_filepath=output_data_dir,
-        #             bbox=input_geom,
-        #             crscode=target_crs,
-        #             output_filepath=output_data_dir,
-        #             resample=resample,
-        #         )
-        #         return masked_data  # may need to edit, as it returns first one and breaks loop.
