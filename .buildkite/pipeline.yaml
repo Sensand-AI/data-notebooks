@@ -36,23 +36,12 @@ steps:
     steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
-        # command:
-        #   - pytest ./packages -s
         plugins:
           - docker-compose#v4.15.0:
               run: pytest
               config: docker-compose.pytest.yaml
           - *ecr-sensand
-        # command:
-        #   - pip install -r requirements-core.txt
-        #   - pip install -r requirements-jupyter.txt
-        #   - pip install -r requirements-custom.txt
-        #   - pip install pytest
-        #   - pytest ./packages -s
-        # plugins:
-        #   - docker#v5.9.0:
-        #       image: "python:3.10-bullseye"
-        # if: build.message !~ /skippy/
+        if: build.message !~ /skippy/
 
   - wait
 

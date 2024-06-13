@@ -22,7 +22,7 @@ ENV \
 WORKDIR ${LAMBDA_TASK_ROOT}
 
 # Install core packages
-COPY requirements-core.txt ${LAMBDA_TASK_ROOT}/
+COPY requirements-core.txt ./
 RUN pip install -r requirements-core.txt
 
 # Run infinity loop to keep the container running
