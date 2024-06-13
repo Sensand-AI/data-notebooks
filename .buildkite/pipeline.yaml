@@ -121,4 +121,22 @@ steps:
         plugins:
           - *assume-role-production
           - *docker-compose-deploy
-          
+
+  - group: "GIS Base Image Deploy"
+    key: "gis-base-image-deploy"
+    steps:
+      - label: ":docker: GIS Base Build & Push"
+        key: "gis-base-build-and-push"
+        plugins:
+          - docker-compose#v4.14.0:
+              build: gis-base
+              image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base
+              image-name: latest
+              cache-from:
+                - gis-base:622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest
+              config:
+                - docker-compose.base.yaml
+          - *ecr-sensand
+        # if: |
+        #   build.branch == "main" || (build.pull_request.id != null && !build.pull_request.draft)
+        
