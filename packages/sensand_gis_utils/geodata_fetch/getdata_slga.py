@@ -81,7 +81,8 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         logger.error(
             f"WCS server returned exception while trying to download {filename}: {e} "
         )
-        raise e
+        #raise
+        return False
     except HTTPError as e:
         # Check the status code of the HTTPError
         if e.response.status_code == 502:
@@ -94,10 +95,11 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
             logger.error(
                 f"HTTPError {e.response.status_code}: {e.response.reason} when accessing {url}"
             )
-        raise e  # Re-raise the exception after logging
+        #raise  # Re-raise the exception after logging
+        return False
     except Exception as e:
         logger.error(f"Failed to download {filename}: {e}")
-        raise e
+        raise
 
 
 def depth2identifier(depth_min, depth_max):
