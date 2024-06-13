@@ -2,12 +2,10 @@
 """
 Functions for reading and handling the input 'settings.json' file that specifies the data to collect.
 """
-import os
-import sys
-import json
+
 import datetime
+import json
 from types import SimpleNamespace
-from IPython.display import JSON
 
 
 def DateEncoder(obj):
@@ -21,7 +19,7 @@ def DateEncoder(obj):
         str: The encoded datetime string in the format '%Y-%m-%d'.
     """
     if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.strftime('%Y-%m-%d')
+        return obj.strftime("%Y-%m-%d")
 
 
 def display_settings(fname_settings):
@@ -45,7 +43,7 @@ def main(fname_settings, to_namespace=True):
 
     Args:
         fname_settings (str): The path to the JSON file containing the settings.
-        to_namespace (bool, optional): Whether to convert the settings dictionary to a namespace. 
+        to_namespace (bool, optional): Whether to convert the settings dictionary to a namespace.
             Defaults to True.
 
     Returns:
@@ -58,7 +56,7 @@ def main(fname_settings, to_namespace=True):
     """
     with open(fname_settings, "r") as f:
         settings = json.load(f)
-    
+
     if to_namespace:
         settings = SimpleNamespace(**settings)
 
