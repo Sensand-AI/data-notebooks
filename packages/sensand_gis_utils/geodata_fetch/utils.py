@@ -251,8 +251,8 @@ def reproj_mask(
     filename, input_filepath, bbox, crscode, output_filepath, resample=False
 ):
     """
-    Reprojects and masks a raster file based on the given parameters.
-    TODO: check if NoData handling is correct, If NaN used as NoDta but raster is not compatible type, will throw an error.
+    Reprojects and converts a raster file from uint16 to float32, then masks it based on the given parameters,
+    ensuring that NoData values are handled correctly throughout the process.
 
     Args:
         filename (str): The name of the input raster file.
@@ -271,35 +271,43 @@ def reproj_mask(
     mask_outpath = os.path.join(output_filepath, masked_filepath)
 
     try:
-        input_raster = rxr.open_rasterio(input_full_filepath).astype('float32')
+        input_raster = rxr.open_rasterio(input_full_filepath)
 
-        # run pixel resampling if flag set to true
-        if resample is True:
+        # Convert raster to float32 and handle NoData correctly
+        if input_raster.dtype == "uint16":
+            # Assume the original NoData value is known, set it as such or detect it
+            original_nodata = input_raster.rio.nodata
+            input_raster = input_raster.astype("float32")
+            # Replace original NoData with NaN in float32
+            if original_nodata is not None:
+                input_raster = input_raster.where(
+                    input_raster != original_nodata, np.nan
+                )
+
+        # Update NoData value for float32 in the metadata
+        input_raster.rio.write_nodata(np.nan, inplace=True)
+
+        # Run pixel resampling if the flag is set to true
+        if resample:
             upscale_factor = 3
-
-            # Caluculate new height and width using upscale_factor
             new_width = input_raster.rio.width * upscale_factor
             new_height = input_raster.rio.height * upscale_factor
-
-            # upsample raster
             input_raster = input_raster.rio.reproject(
                 input_raster.rio.crs,
                 shape=(int(new_height), int(new_width)),
                 resampling=Resampling.nearest,
             )
-            clipped = input_raster.rio.clip(bbox.geometry.values)
 
-        else:
-            clipped = input_raster.rio.clip(bbox.geometry.values)
+        # Clip the raster using the geometry, ensuring to invert the mask
+        clipped = input_raster.rio.clip(bbox.geometry, crs=input_raster.rio.crs)
 
-        clipped.rio.write_nodata(np.nan, inplace=True)
-        # clip first as tif and geom need to be in same proejction, and encode the nodata values as nan
-        reprojected = clipped.rio.reproject(crscode, nodata=np.nan)
-        reprojected.rio.to_raster(mask_outpath, tiled=True, dtype='float32')
+        # Reproject the clipped raster and save
+        reprojected = clipped.rio.reproject(crscode)
+        reprojected.rio.to_raster(mask_outpath, tiled=True, dtype="float32")
 
-        return reprojected #was clipped
+        return reprojected
     except Exception as e:
-        logger.error(f"Error occurred while reprojecting and masking raster: {e}")
+        print(f"Error occurred while reprojecting and masking raster: {e}")
 
 
 def colour_geotiff_and_save_cog(input_geotiff, colour_map):

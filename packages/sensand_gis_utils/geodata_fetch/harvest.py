@@ -1,24 +1,29 @@
 """
-This is the 'main' section of the geodata fetcher.
-All of the other modules are accessed here, and it is the function that is run when the user invokes harvest.run()
-That means this is the only module that the user directly imports to their python script.
+This script contains the `DataHarvester` class and the `run` method.
 
-The `run` function in this module takes two parameters: `path_to_config` and `input_geom`.
-- `path_to_config` is the path to the configuration file that contains the settings for data fetching.
-- `input_geom` is the input geometry that defines the area of interest.
+The `DataHarvester` class is responsible for fetching geospatial data based on the provided configuration file and input geometry. It has the following attributes:
+- `settings`: Stores the loaded settings from the configuration file.
+- `input_geom`: Stores the input geometry that defines the area of interest.
+- `target_sources`: Stores the target sources specified in the settings.
+- `target_bbox`: Stores the target bounding box specified in the settings.
+- `property_name`: Stores the property name specified in the settings.
+- `output_data_dir`: Stores the output data directory specified in the settings.
+- `target_crs`: Stores the target CRS specified in the settings.
+- `resample`: Stores the resample method specified in the settings.
+- `add_buffer`: Stores the add_buffer flag specified in the settings.
+- `data_mask`: Stores the data mask flag specified in the settings.
+- `fetched_files`: Stores the list of fetched files.
 
-The `run` function performs the following steps:
-1. Loads the settings from the configuration file.
-2. Retrieves the target CRS, add_buffer flag, resample method, property name, output data directory, and data mask flag from the settings.
-3. Determines the number of sources to download from and lists the source names.
-4. Sets the coordinates based on the latitude and longitude given in the input file.
-5. If the add_buffer flag is True, it adds a buffer to the input geometry.
-6. Fetches data from the SLGA, DEM, and Radiometric sources based on the target sources specified in the settings.
-7. Applies masking to the downloaded files if the data mask flag is True.
-8. Returns the masked data.
+The `run` method is responsible for executing the data fetching process. It performs the following steps:
+1. Adds a buffer to the input geometry if the add_buffer flag is True.
+2. Sets the coordinates based on the latitude and longitude specified in the settings.
+3. Counts the number of sources to download from and lists the source names.
+4. Fetches data from the SLGA, DEM, and Radiometric sources based on the target sources specified in the settings.
+5. Applies masking to the downloaded files if the data mask flag is True.
+
+To use this script, create an instance of the `DataHarvester` class and call the `run` method with the path to the configuration file and the input geometry as parameters.
 """
 
-import os
 from pathlib import Path
 import logging
 
@@ -27,6 +32,13 @@ import numpy as np
 from shapely.geometry import Point
 from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
 from geodata_fetch.utils import load_settings, reproj_mask
+from pathlib import Path
+import logging
+import numpy as np
+from shapely.geometry import Point
+from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
+from geodata_fetch.utils import load_settings, reproj_mask
+import os
 
 logger = logging.getLogger()
 class DataHarvester:
