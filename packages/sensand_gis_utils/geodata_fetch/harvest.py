@@ -24,23 +24,23 @@ The `run` method is responsible for executing the data fetching process. It perf
 To use this script, create an instance of the `DataHarvester` class and call the `run` method with the path to the configuration file and the input geometry as parameters.
 """
 
-from pathlib import Path
 import logging
-
-import numpy as np
-
-from shapely.geometry import Point
-from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
-from geodata_fetch.utils import load_settings, reproj_mask
-from pathlib import Path
-import logging
-import numpy as np
-from shapely.geometry import Point
-from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
-from geodata_fetch.utils import load_settings, reproj_mask
 import os
+from pathlib import Path
+
+import numpy as np
+from shapely.geometry import Point
+
+from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
+from geodata_fetch.utils import load_settings, reproj_mask
 
 logger = logging.getLogger()
+# try this but remove if it doesn't work well with datadog:
+logging.basicConfig(
+    level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+
 class DataHarvester:
     def __init__(self, path_to_config, input_geom):
         self.settings = load_settings(path_to_config)
@@ -73,8 +73,9 @@ class DataHarvester:
         self.count_sources = len(self.target_sources)
         self.list_sources = list(self.target_sources.keys())
 
-
-        print(f"Requested the following {self.count_sources} sources: {self.list_sources}")
+        print(
+            f"Requested the following {self.count_sources} sources: {self.list_sources}"
+        )
 
         # -----add getdata functions here---------------------------------------------------------#
 
@@ -131,7 +132,6 @@ class DataHarvester:
                 print(f"Error fetching RadMap data: {e}")
 
         self._mask_data()
-
 
     def _mask_data(self):
         if self.data_mask is True:
