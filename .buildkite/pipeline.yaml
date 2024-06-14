@@ -31,7 +31,7 @@ docker-compose-deploy-plugin: &docker-compose-deploy
       - IMAGE_URL
 
 steps:
-  - group: "Pytest unit tests"
+  - group: "Pytest Unit Tests"
     key: "pytest-unit-tests"
     steps:
       - label: ":pytest: Run pytest"
@@ -122,9 +122,15 @@ steps:
           - *assume-role-production
           - *docker-compose-deploy
 
-  - group: "GIS Base Image Deploy"
-    key: "gis-base-image-deploy"
+  - group: "GIS Base Image"
+    key: "gis-base-image"
     steps:
+      - block: "Push Base Image (Manual)"
+        prompt: "Push Base Image to Platform ECR?"
+        key: "push-base-image-manual"
+        # if: |
+        #   build.branch == "main" || (build.pull_request.id != null && !build.pull_request.draft)
+
       - label: ":docker: GIS Base Build & Push"
         key: "gis-base-build-and-push"
         plugins:
