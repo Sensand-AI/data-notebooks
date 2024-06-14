@@ -41,7 +41,10 @@ from rio_cogeo.cogeo import cog_translate
 from rio_cogeo.profiles import cog_profiles
 
 logger = logging.getLogger()
-
+# try this but remove if it doesn't work well with datadog:
+logging.basicConfig(
+    level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 ## ------ Setup rasterio profiles ------ ##
 
@@ -93,7 +96,13 @@ default_gtiff_profile = DefaultGTiffProfile()
 
 
 def list_tif_files(path):
-    return [f for f in os.listdir(path) if f.endswith(".tiff")]
+    try:
+        return [f for f in os.listdir(path) if f.endswith(".tiff")]
+    except Exception as e:
+        logger.error(
+            f"Error listing TIFF files in directory {path}: {e}", exc_info=True
+        )
+        return []
 
 
 def load_settings(input_settings):
@@ -122,8 +131,17 @@ def load_settings(input_settings):
         settings.date_min = str(settings.date_start)
         settings.date_max = str(settings.date_end)
         return settings
+    except json.JSONDecodeError as e:
+        logger.error(
+            f"JSON decode error in load_settings with input {input_settings}: {e}",
+            exc_info=True,
+        )
+    except FileNotFoundError as e:
+        logger.error(
+            f"File not found in load_settings: {input_settings}: {e}", exc_info=True
+        )
     except Exception as e:
-        logger.error(f"Error loading the data harvester settings: {e}")
+        logger.error(f"Error loading the data harvester settings: {e}", exc_info=True)
 
 
 def calc_arc2meter(arcsec, latitude):
@@ -139,9 +157,16 @@ def calc_arc2meter(arcsec, latitude):
     ------
     (meters Long, meters Lat)
     """
-    meter_lng = arcsec * np.cos(latitude * np.pi / 180) * 30.922
-    meter_lat = arcsec * 30.87
-    return (meter_lng, meter_lat)
+    try:
+        meter_lng = arcsec * np.cos(latitude * np.pi / 180) * 30.922
+        meter_lat = arcsec * 30.87
+        return (meter_lng, meter_lat)
+    except Exception as e:
+        logger.error(
+            f"Error converting arc seconds to meters for arcsec={arcsec}, latitude={latitude}: {e}",
+            exc_info=True,
+        )
+        return None, None
 
 
 def calc_meter2arc(meter, latitude):
@@ -157,9 +182,16 @@ def calc_meter2arc(meter, latitude):
     ------
     (arcsec Long, arcsec Lat)
     """
-    arcsec_lng = meter / np.cos(latitude * np.pi / 180) / 30.922
-    arcsec_lat = meter / 30.87
-    return (arcsec_lng, arcsec_lat)
+    try:
+        arcsec_lng = meter / np.cos(latitude * np.pi / 180) / 30.922
+        arcsec_lat = meter / 30.87
+        return (arcsec_lng, arcsec_lat)
+    except Exception as e:
+        logger.error(
+            f"Error converting meters to arc seconds for meter={meter}, latitude={latitude}: {e}",
+            exc_info=True,
+        )
+        return None, None
 
 
 def get_wcs_capabilities(url):
@@ -186,27 +218,32 @@ def get_wcs_capabilities(url):
     bboxs : list of floats
         A list of layer bounding boxes.
     """
+    try:
+        # Create WCS object
+        wcs = WebCoverageService(url, version="1.0.0", timeout=600)
+        content = wcs.contents
+        keys = content.keys()
 
-    # Create WCS object
-    wcs = WebCoverageService(url, version="1.0.0", timeout=600)
-    content = wcs.contents
-    keys = content.keys()
+        # Get bounding boxes and crs for each coverage
+        print("Following data layers are available:")
+        bbox_list = []
+        title_list = []
+        description_list = []
+        for key in keys:
+            print(f"key: {key}")
+            print(f"title: {wcs[key].title}")
+            title_list.append(wcs[key].title)
+            print(f"{wcs[key].abstract}")
+            description_list.append(wcs[key].abstract)
+            print(f"bounding box: {wcs[key].boundingboxes}")
+            bbox_list.append(wcs[key].boundingboxes)
 
-    # Get bounding boxes and crs for each coverage
-    print("Following data layers are available:")
-    bbox_list = []
-    title_list = []
-    description_list = []
-    for key in keys:
-        print(f"key: {key}")
-        print(f"title: {wcs[key].title}")
-        title_list.append(wcs[key].title)
-        print(f"{wcs[key].abstract}")
-        description_list.append(wcs[key].abstract)
-        print(f"bounding box: {wcs[key].boundingboxes}")
-        bbox_list.append(wcs[key].boundingboxes)
-
-    return keys, title_list, description_list, bbox_list
+        return keys, title_list, description_list, bbox_list
+    except Exception as e:
+        logger.error(
+            f"Error getting WCS capabilities from URL {url}: {e}", exc_info=True
+        )
+        return None, None, None, None
 
 
 def _getFeatures(gdf):
@@ -220,7 +257,11 @@ def _getFeatures(gdf):
     RETURNS
         json object for rasterio to read
     """
-    return [json.loads(gdf.to_json())["features"][0]["geometry"]]
+    try:
+        return [json.loads(gdf.to_json())["features"][0]["geometry"]]
+    except Exception as e:
+        logger.error(f"Error extracting features from GeoDataFrame: {e}", exc_info=True)
+        return None
 
 
 def _read_file(file):
@@ -237,14 +278,20 @@ def _read_file(file):
         rasterio.errors.RasterioIOError: If the file cannot be opened or read.
 
     """
-    with rasterio.open(file) as src:
-        temp = src.read()
-        dims = temp.shape[0]
-        if dims == 1:
-            return src.read(1)
-        else:
-            # Returns array in form [channels, long, lat]
-            return src.read()
+    try:
+        with rasterio.open(file) as src:
+            temp = src.read()
+            dims = temp.shape[0]
+            if dims == 1:
+                return src.read(1)
+            else:
+                return src.read()
+    except rasterio.errors.RasterioIOError as e:
+        logger.error(f"Rasterio IO error reading file {file}: {e}", exc_info=True)
+        return None
+    except Exception as e:
+        logger.error(f"Error reading file {file}: {e}", exc_info=True)
+        return None
 
 
 def reproj_mask(
@@ -307,62 +354,72 @@ def reproj_mask(
 
         return reprojected
     except Exception as e:
-        print(f"Error occurred while reprojecting and masking raster: {e}")
+        logger.error(
+            f"Error occurred while reprojecting and masking raster {filename}: {e}",
+            exc_info=True,
+        )
+        return None
 
 
 def colour_geotiff_and_save_cog(input_geotiff, colour_map):
     output_colored_tiff_filename = input_geotiff.replace(".tiff", "_colored.tiff")
     output_cog_filename = input_geotiff.replace(".tiff", "_cog.public.tiff")
 
-    with rasterio.open(input_geotiff) as src:
-        meta = src.meta.copy()
-        dst_crs = rasterio.crs.CRS.from_epsg(4326)  # change so not hardcoded?
-        transform, width, height = calculate_default_transform(
-            src.crs, dst_crs, src.width, src.height, *src.bounds
-        )
-
-        meta.update(
-            {"crs": dst_crs, "transform": transform, "width": width, "height": height}
-        )
-
-        tif_data = src.read(
-            1, masked=True
-        ).astype(
-            "float32"
-        )  # setting masked=True here tells rasterio to use masking information if present, but we need to add the mask itself first.
-        tif_formatted = tif_data.filled(np.nan)
-
-        cmap = cm.get_cmap(
-            colour_map
-        )  # can also use 'terrain' cmap to keep this the same as the preview image from above.
-        na = tif_formatted[~np.isnan(tif_formatted)]
-
-        min_value = min(na)
-        max_value = max(na)
-
-        norm = Normalize(vmin=min_value, vmax=max_value)
-
-        coloured_data = (cmap(norm(tif_formatted))[:, :, :3] * 255).astype(np.uint8)
-
-        meta.update({"count": 3})
-
-        with rasterio.open(output_colored_tiff_filename, "w", **meta) as dst:
-            reshape = reshape_as_raster(coloured_data)
-            dst.write(reshape)
-
     try:
-        dst_profile = cog_profiles.get("deflate")
-        with MemoryFile() as mem_dst:
-            cog_translate(
-                output_colored_tiff_filename,
-                output_cog_filename,
-                config=dst_profile,
-                in_memory=True,
-                dtype="uint8",
-                add_mask=False,
-                nodata=0,
-                dst_kwargs=dst_profile,
+        with rasterio.open(input_geotiff) as src:
+            meta = src.meta.copy()
+            dst_crs = rasterio.crs.CRS.from_epsg(4326)
+            transform, width, height = calculate_default_transform(
+                src.crs, dst_crs, src.width, src.height, *src.bounds
             )
 
-    except:
-        raise Exception("Unable to convert to cog")
+            meta.update(
+                {
+                    "crs": dst_crs,
+                    "transform": transform,
+                    "width": width,
+                    "height": height,
+                }
+            )
+
+            tif_data = src.read(1, masked=True).astype("float32")
+            tif_formatted = tif_data.filled(np.nan)
+
+            cmap = cm.get_cmap(colour_map)
+            na = tif_formatted[~np.isnan(tif_formatted)]
+
+            min_value = min(na)
+            max_value = max(na)
+
+            norm = Normalize(vmin=min_value, vmax=max_value)
+
+            coloured_data = (cmap(norm(tif_formatted))[:, :, :3] * 255).astype(np.uint8)
+
+            meta.update({"count": 3})
+
+            with rasterio.open(output_colored_tiff_filename, "w", **meta) as dst:
+                reshape = reshape_as_raster(coloured_data)
+                dst.write(reshape)
+
+        try:
+            dst_profile = cog_profiles.get("deflate")
+            with MemoryFile() as mem_dst:
+                cog_translate(
+                    output_colored_tiff_filename,
+                    output_cog_filename,
+                    config=dst_profile,
+                    in_memory=True,
+                    dtype="uint8",
+                    add_mask=False,
+                    nodata=0,
+                    dst_kwargs=dst_profile,
+                )
+
+        except Exception as e:
+            logger.error(
+                f"Error converting {output_colored_tiff_filename} to COG: {e}",
+                exc_info=True,
+            )
+            raise
+    except Exception as e:
+        logger.error(f"Error colorizing GeoTIFF {input_geotiff}: {e}", exc_info=True)
