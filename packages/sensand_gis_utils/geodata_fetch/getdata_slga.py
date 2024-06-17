@@ -8,6 +8,10 @@ from owslib.wcs import WebCoverageService
 from requests.exceptions import HTTPError
 
 logger = logging.getLogger()
+# try this but remove if it doesn't work well with datadog:
+logging.basicConfig(
+    level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 
 def get_slgadict():
@@ -30,8 +34,12 @@ def get_slgadict():
 
         return slgadict
     except Exception as e:
-        logger.error("Error loading slga_soil.json to getdata_slga module.")
-        raise ValueError(f"Error loading slga_soil.json to getdata_slga module: {e}")
+        logger.error(
+            "Error loading slga_soil.json to getdata_slga module.", exec_info=True
+        )
+        raise ValueError(
+            f"Error loading slga_soil.json to getdata_slga module: {e}"
+        ) from e
 
 
 def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
@@ -58,10 +66,13 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         resolution = get_slgadict()["resolution_arcsec"]
 
     # Create WCS object
-    filename = outfname.split(os.sep)[-1]
+    filename = os.path.basename(outfname)
     try:
         # for the given endpoint e.g. Organic_Carbon, connect to the web coverage service
-        wcs = WebCoverageService(url, version="1.0.0", timeout=300)
+        wcs = WebCoverageService(
+            url, version="1.0.0", timeout=600
+        )  # upping the timeout to see if this reduces SLGA failures
+
         # Use the WCS to download the data as geotiffs. Here, identifier refers to the soil depth e.g. 0-5cm, 5-15cm depth.
         data = wcs.getCoverage(
             identifier,
@@ -76,29 +87,35 @@ def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
         with open(outfname, "wb") as f:
             f.write(data.read())
             print(f"WCS data downloaded and saved as {filename}")
-        return True #where is this being invoked? Can i terminate the whole harvest if this returns false?
+        return True  # where is this being invoked? Can i terminate the whole harvest if this returns false?
     except ServiceException as e:
         logger.error(
-            f"WCS server returned exception while trying to download {filename}: {e} "
+            f"WCS server returned exception while trying to download {filename}: {e} ",
+            exec_info=True,
         )
-        #raise
+        # raise
         return False
     except HTTPError as e:
         # Check the status code of the HTTPError
         if e.response.status_code == 502:
-            logger.error(f"HTTPError 502: Bad Gateway encountered when accessing {url}")
+            logger.error(
+                f"HTTPError 502: Bad Gateway encountered when accessing {url}",
+                exec_info=True,
+            )
         elif e.response.status_code == 503:
             logger.error(
-                f"HTTPError 503: Service Unavailable encountered when accessing {url}"
+                f"HTTPError 503: Service Unavailable encountered when accessing {url}",
+                exec_info=True,
             )
         else:
             logger.error(
-                f"HTTPError {e.response.status_code}: {e.response.reason} when accessing {url}"
+                f"HTTPError {e.response.status_code}: {e.response.reason} when accessing {url}",
+                exec_info=True,
             )
-        #raise  # Re-raise the exception after logging
+        # raise  # Re-raise the exception after logging
         return False
     except Exception as e:
-        logger.error(f"Failed to download {filename}: {e}")
+        logger.error(f"Failed to download {filename}: {e}", exec_info=True)
         raise
 
 
@@ -144,10 +161,9 @@ def depth2identifier(depth_min, depth_max):
             depths_lower,
             depths_upper,
         )
-    except Exception as e:
+    except Exception:
         logger.error(
             "Failed to get identifiers",
-            e,
             exc_info=True,
             extra={"depth_min": depth_min, "depth_max": depth_max},
         )
@@ -185,10 +201,9 @@ def identifier2depthbounds(depths):
                 ncount += 1
         assert ncount == len(depths), f"ncount = {ncount}"
         return depth_min, depth_max
-    except Exception as e:
+    except Exception:
         logger.error(
             "Failed to get min and max depth",
-            e,
             exc_info=True,
             extra={"depths": depths},
         )
@@ -316,10 +331,9 @@ def get_slga_layers(
                     )
 
         return fnames_out
-    except Exception as e:
+    except Exception:
         logger.error(
             "Failed to get SLGA layers",
-            e,
             exc_info=True,
             extra={"layernames": layernames},
         )
