@@ -31,7 +31,8 @@ from pathlib import Path
 import numpy as np
 from shapely.geometry import Point
 
-from geodata_fetch import getdata_dem, getdata_radiometric, getdata_slga
+from geodata_fetch import getdata_radiometric, getdata_slga #getdata_dem
+from geodata_fetch.getdata_dem import dem_harvest #updated call to dem using class
 from geodata_fetch.utils import load_settings, reproj_mask
 
 logger = logging.getLogger()
@@ -56,6 +57,10 @@ class DataHarvester:
         self.settings.lat = None
         self.settings.long = None
         self.fetched_files = []
+
+        self.dem_harvest = None
+        if "DEM" in self.settings.target_sources:
+            self.dem_harvest = dem_harvest()
 
     def run(self):
         if self.add_buffer is True:
@@ -110,7 +115,7 @@ class DataHarvester:
         if "DEM" in self.target_sources:
             dem_layernames = self.target_sources["DEM"]
             try:
-                files_dem = getdata_dem.get_dem_layers(
+                files_dem = self.dem_harvest.get_dem_layers(
                     property_name=self.property_name,
                     layernames=dem_layernames,
                     bbox=self.target_bbox,
@@ -118,6 +123,18 @@ class DataHarvester:
                 )
             except Exception as e:
                 print(f"Error fetching DEM data: {e}")
+
+        # if "DEM" in self.target_sources:
+        #     dem_layernames = self.target_sources["DEM"]
+        #     try:
+        #         files_dem = getdata_dem.get_dem_layers(
+        #             property_name=self.property_name,
+        #             layernames=dem_layernames,
+        #             bbox=self.target_bbox,
+        #             outpath=self.output_data_dir,
+        #         )
+        #     except Exception as e:
+        #         print(f"Error fetching DEM data: {e}")
 
         if "Radiometric" in self.target_sources:
             rm_layernames = self.target_sources["Radiometric"]

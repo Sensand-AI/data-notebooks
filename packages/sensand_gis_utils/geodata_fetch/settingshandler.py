@@ -5,8 +5,14 @@ Functions for reading and handling the input 'settings.json' file that specifies
 
 import datetime
 import json
+import logging
 from types import SimpleNamespace
 
+logger = logging.getLogger()
+# try this but remove if it doesn't work well with datadog:
+logging.basicConfig(
+    level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 def DateEncoder(obj):
     """
@@ -54,13 +60,20 @@ def main(fname_settings, to_namespace=True):
         JSONDecodeError: If the JSON file is not valid.
 
     """
-    with open(fname_settings, "r") as f:
-        settings = json.load(f)
+    try:
+        with open(fname_settings, "r") as f:
+            settings = json.load(f)
 
-    if to_namespace:
-        settings = SimpleNamespace(**settings)
+        if to_namespace:
+            settings = SimpleNamespace(**settings)
 
-    settings.date_min = str(settings.date_start)
-    settings.date_max = str(settings.date_end)
+        settings.date_min = str(settings.date_start)
+        settings.date_max = str(settings.date_end)
 
-    return settings
+        return settings
+    except FileNotFoundError as e:
+        logger.error(f"File not found: {fname_settings}")
+        raise e
+    except json.JSONDecodeError as e:
+        logger.error(f"Invalid JSON file: {fname_settings}")
+        raise e
