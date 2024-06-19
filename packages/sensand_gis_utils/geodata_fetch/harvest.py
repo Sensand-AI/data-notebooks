@@ -31,8 +31,8 @@ from pathlib import Path
 import numpy as np
 from shapely.geometry import Point
 
-from geodata_fetch import getdata_radiometric, getdata_slga #getdata_dem
-from geodata_fetch.getdata_dem import dem_harvest #updated call to dem using class
+from geodata_fetch import getdata_radiometric, getdata_slga  # getdata_dem
+from geodata_fetch.getdata_dem import dem_harvest  # updated call to dem using class
 from geodata_fetch.utils import load_settings, reproj_mask
 
 logger = logging.getLogger()
