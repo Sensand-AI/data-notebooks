@@ -1,6 +1,4 @@
-FROM ghcr.io/lambgeo/lambda-gdal:3.6 as gdal
-
-FROM public.ecr.aws/lambda/python:3.10
+FROM 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest
 
 ARG \
     AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-east-1"} \
@@ -17,36 +15,18 @@ ENV \
 # Copy the Datadog Lambda Extension
 COPY --from=public.ecr.aws/datadog/lambda-extension:latest /opt/extensions/ /opt/extensions
 
-# Install some system dependencies
-RUN yum install -y gcc gcc-c++ unzip && \
-    yum clean all && \
-    rm -rf /var/cache/yum /var/lib/yum/history
-
-# Bring C libs from lambgeo/lambda-gdal image
-COPY --from=gdal /opt/lib/ /opt/lib/
-COPY --from=gdal /opt/include/ /opt/include/
-COPY --from=gdal /opt/share/ /opt/share/
-COPY --from=gdal /opt/bin/ /opt/bin/
-ENV \
-  GDAL_DATA=/opt/share/gdal \
-  PROJ_LIB=/opt/share/proj \
-  GDAL_CONFIG=/opt/bin/gdal-config \
-  GEOS_CONFIG=/opt/bin/geos-config \
-  PATH=/opt/bin:$PATH
-
-# Install Jupyter dependencies
-RUN pip install jupyter nbconvert ipykernel
+WORKDIR ${LAMBDA_TASK_ROOT}
 
 # Copy requirements and install Python dependencies
-COPY requirements-jupyter.txt requirements-custom.txt ${LAMBDA_TASK_ROOT}/
+COPY requirements-jupyter.txt requirements-custom.txt ./
 # Packages are internal so we need this early
-COPY packages/ ${LAMBDA_TASK_ROOT}/packages
-RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-jupyter.txt -t ${LAMBDA_TASK_ROOT} && \
-    pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-custom.txt -t ${LAMBDA_TASK_ROOT}
+COPY packages/ ./packages
+RUN pip install --no-cache-dir -r ./requirements-jupyter.txt && \
+    pip install --no-cache-dir -r ./requirements-custom.txt
 
 # Copy your Lambda function code and notebooks into the container
-COPY lambdas/notebook-executor/app/ ${LAMBDA_TASK_ROOT}/app
-COPY notebooks/ ${LAMBDA_TASK_ROOT}/notebooks
+COPY lambdas/notebook-executor/app/ ./app
+COPY notebooks/ ./notebooks
 
 # Reference the Lambda handler in /app/lambda_function.py
 # This is needed for the Datadog Lambda Extension to find the handler

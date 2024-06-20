@@ -11,6 +11,4 @@ RUN pip install --no-cache-dir -r requirements-custom.txt
 
 RUN pip install pytest
 
-ENTRYPOINT ["/bin/sh"]
-
-CMD ["bash", "-c", "sleep infinity"]
+ENTRYPOINT [ "pytest", "./packages", "-s" ]
