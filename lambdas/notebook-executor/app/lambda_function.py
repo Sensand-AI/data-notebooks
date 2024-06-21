@@ -132,6 +132,11 @@ def lambda_handler(event, _):
     if "body" in event:
         event = json.loads(event["body"])
 
+    # If invoked with an SQS event there's a Records key
+    # there shoud be only one record as the queue is setup with a batch of 1
+    if "Records" in event:
+        event = json.loads(event["Records"][0]["body"])
+
     # Extract notebook name and parameters from the event
     notebook_name = event.get("notebook_name")
 
