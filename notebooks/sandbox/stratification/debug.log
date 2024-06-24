@@ -82,3 +82,45 @@
 2024-06-24 03:06:54,505 - INFO - No uint16 data arrays found.
 2024-06-24 03:06:54,507 - INFO - All data arrays have a consistent CRS.
 2024-06-24 03:06:54,509 - INFO - Converting all data arrays to the target CRS.
+2024-06-24 03:14:14,616 - INFO - All data arrays have consistent data types.
+2024-06-24 03:14:14,618 - INFO - No uint16 data arrays found.
+2024-06-24 03:14:14,620 - INFO - All data arrays have a consistent CRS.
+2024-06-24 03:14:14,621 - INFO - Converting all data arrays to the target CRS.
+2024-06-24 03:16:03,806 - INFO - All data arrays have consistent data types.
+2024-06-24 03:16:03,809 - INFO - No uint16 data arrays found.
+2024-06-24 03:16:03,811 - INFO - All data arrays have a consistent CRS.
+2024-06-24 03:16:03,813 - INFO - Converting all data arrays to the target CRS.
+2024-06-24 03:16:52,673 - INFO - All data arrays have consistent data types.
+2024-06-24 03:16:52,677 - INFO - No uint16 data arrays found.
+2024-06-24 03:16:52,679 - INFO - All data arrays have a consistent CRS.
+2024-06-24 03:16:52,680 - INFO - Converting all data arrays to the target CRS.
+2024-06-24 03:17:32,182 - INFO - All data arrays have consistent data types.
+2024-06-24 03:17:32,184 - INFO - No uint16 data arrays found.
+2024-06-24 03:17:32,187 - INFO - All data arrays have a consistent CRS.
+2024-06-24 03:17:32,189 - INFO - Converting all data arrays to the target CRS.
+2024-06-24 03:18:49,000 - INFO - All data arrays have consistent data types.
+2024-06-24 03:18:49,003 - INFO - No uint16 data arrays found.
+2024-06-24 03:18:49,006 - INFO - All data arrays have a consistent CRS.
+2024-06-24 03:18:49,007 - INFO - Converting all data arrays to the target CRS.
+2024-06-24 03:19:39,809 - INFO - All data arrays have consistent data types.
+2024-06-24 03:19:39,813 - INFO - No uint16 data arrays found.
+2024-06-24 03:19:39,815 - INFO - All data arrays have a consistent CRS.
+2024-06-24 03:19:39,817 - INFO - Converting all data arrays to the target CRS.
+2024-06-24 03:20:21,199 - INFO - All data arrays have consistent data types.
+2024-06-24 03:20:21,202 - INFO - No uint16 data arrays found.
+2024-06-24 03:20:21,204 - INFO - All data arrays have a consistent CRS.
+2024-06-24 03:20:21,205 - INFO - Converting all data arrays to the target CRS.
+2024-06-24 03:49:55,500 - INFO - All data arrays have consistent data types.
+2024-06-24 03:49:55,501 - INFO - No uint16 data arrays found.
+2024-06-24 03:49:55,502 - INFO - All data arrays have a consistent CRS.
+2024-06-24 03:49:55,503 - INFO - Converting all data arrays to the target CRS.
+2024-06-24 03:49:55,768 - WARNING - CPLE_NotSupported in driver COG does not support creation option COG_PROFILES
+2024-06-24 03:49:55,814 - WARNING - CPLE_NotSupported in driver COG does not support creation option COG_PROFILES
+2024-06-24 03:49:55,848 - WARNING - CPLE_NotSupported in driver COG does not support creation option COG_PROFILES
+2024-06-24 03:51:00,554 - INFO - All data arrays have consistent data types.
+2024-06-24 03:51:00,555 - INFO - No uint16 data arrays found.
+2024-06-24 03:51:00,556 - INFO - All data arrays have a consistent CRS.
+2024-06-24 03:51:00,557 - INFO - Converting all data arrays to the target CRS.
+2024-06-24 03:51:00,812 - WARNING - CPLE_NotSupported in driver COG does not support creation option COG_PROFILES
+2024-06-24 03:51:00,837 - WARNING - CPLE_NotSupported in driver COG does not support creation option COG_PROFILES
+2024-06-24 03:51:00,861 - WARNING - CPLE_NotSupported in driver COG does not support creation option COG_PROFILES
