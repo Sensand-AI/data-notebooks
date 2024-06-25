@@ -343,3 +343,166 @@
 2024-06-24 07:27:31,959 - INFO - Converting all data arrays to the target CRS.
 2024-06-24 07:29:55,170 - INFO - All data arrays have a consistent CRS.
 2024-06-24 07:29:55,173 - INFO - Converting all data arrays to the target CRS.
+2024-06-25 02:12:14,624 - INFO - All data arrays have a consistent CRS.
+2024-06-25 02:12:14,626 - INFO - Converting all data arrays to the target CRS.
+2024-06-25 02:12:31,859 - INFO - All data arrays have a consistent CRS.
+2024-06-25 02:12:31,861 - INFO - Converting all data arrays to the target CRS.
+2024-06-25 02:14:40,385 - INFO - All data arrays have a consistent CRS.
+2024-06-25 02:14:40,386 - INFO - Converting all data arrays to the target CRS: {formatted_crs}.
+2024-06-25 02:15:01,152 - INFO - All data arrays have a consistent CRS.
+2024-06-25 02:15:01,155 - INFO - Converting all data arrays to the target CRS: EPSG:3857.
+2024-06-25 02:17:58,144 - INFO - Checking 4 rasters for consistency before merging: 
+
+2024-06-25 02:17:58,145 - INFO - All input rasters are in the same reference system (CRS)
+2024-06-25 02:17:58,146 - INFO - Converting all data arrays to the target CRS: EPSG:3857.
+2024-06-25 02:23:11,516 - INFO - Checking 4 raster data arrays for consistency before merging:
+2024-06-25 02:23:11,517 - INFO - All input rasters are in the same reference system (CRS)
+2024-06-25 02:23:11,518 - INFO - Converting all data arrays to the target CRS: EPSG:3857.
+2024-06-25 02:23:46,017 - INFO - Checking 4 raster data arrays for consistency before merging:
+2024-06-25 02:23:46,018 - INFO - All input rasters are in the same reference system (CRS)
+2024-06-25 02:23:46,019 - INFO - Converting all data arrays to the target CRS: EPSG:3857.
+2024-06-25 03:27:57,448 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 03:27:57,453 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:27:57,512 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:27:57,559 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:27:57,675 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:27:57,714 - INFO - Ensuring float32 dtype for 4 raster data arrays.
+2024-06-25 03:27:57,724 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 03:29:43,001 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 03:29:43,002 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:29:43,038 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:29:43,072 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:29:43,107 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:29:43,144 - INFO - Ensuring float32 dtype for 4 raster data arrays.
+2024-06-25 03:29:43,145 - INFO - Original nodata: nan
+2024-06-25 03:29:43,147 - INFO - Original nodata: 3.4028234663852886e+38
+2024-06-25 03:29:43,149 - INFO - Original nodata: 1.7976931348623157e+308
+2024-06-25 03:29:43,150 - INFO - Original nodata: 3.4028234663852886e+38
+2024-06-25 03:29:43,153 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 03:30:58,929 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 03:30:58,931 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:30:58,966 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:30:59,003 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:30:59,039 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:30:59,075 - INFO - Ensuring float32 dtype for 4 raster data arrays.
+2024-06-25 03:31:06,207 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 03:31:06,208 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:31:06,244 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:31:06,286 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:31:06,324 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:31:06,365 - INFO - Ensuring float32 dtype for 4 raster data arrays.
+2024-06-25 03:40:32,730 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 03:40:32,732 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:40:32,768 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:40:32,800 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:40:32,830 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:40:32,868 - INFO - Ensuring float32 dtype for 4 raster data arrays.
+2024-06-25 03:40:32,871 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 03:43:40,420 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 03:43:40,421 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:43:40,456 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:43:40,493 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:43:40,523 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:44:05,435 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 03:44:05,436 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:44:05,470 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:44:05,505 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:44:05,536 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:44:05,570 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 03:46:16,783 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 03:46:16,785 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:46:16,818 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:46:16,855 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:46:16,891 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:46:16,933 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 03:46:40,076 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 03:46:40,078 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:46:40,120 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:46:40,156 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:46:40,194 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 03:46:40,234 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 04:34:03,302 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 04:34:03,304 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:34:03,350 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:34:03,395 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-06-25 04:34:03,482 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:34:03,537 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 04:36:08,041 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 04:36:08,042 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:36:08,084 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:36:08,134 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-06-25 04:36:08,219 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:36:08,273 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 04:38:31,859 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 04:38:31,861 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:38:31,899 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:38:31,936 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-06-25 04:38:32,011 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:38:32,047 - INFO - Finding the finest raster in the dataset.
+2024-06-25 04:38:32,048 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 04:38:32,057 - INFO - Finding the finest raster in the dataset.
+2024-06-25 04:38:32,058 - INFO - Resampling all rasters to match the finest raster.
+2024-06-25 04:43:05,843 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 04:43:05,844 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:43:05,885 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:43:05,926 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-06-25 04:43:06,000 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:43:06,049 - INFO - Finding the finest raster in the dataset.
+2024-06-25 04:43:06,050 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 04:43:06,059 - INFO - Finding the finest raster in the dataset.
+2024-06-25 04:43:06,061 - INFO - Resampling all rasters to match the finest raster.
+2024-06-25 04:54:04,652 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 04:54:04,653 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:54:04,689 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:54:04,725 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-06-25 04:54:04,787 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:54:04,824 - INFO - Finding the finest raster in the dataset.
+2024-06-25 04:54:04,825 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 04:54:04,832 - INFO - Finding the finest raster in the dataset.
+2024-06-25 04:54:04,833 - INFO - Resampling all rasters to match the finest raster.
+2024-06-25 04:58:32,105 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 04:58:32,106 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:58:32,144 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:58:32,182 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-06-25 04:58:32,250 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 04:58:32,290 - INFO - Finding the finest raster in the dataset.
+2024-06-25 04:58:32,291 - INFO - Finest raster found with resolution: 22.960758636289807
+2024-06-25 04:58:32,292 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 04:58:32,302 - INFO - Finding the finest raster in the dataset.
+2024-06-25 04:58:32,304 - INFO - Finest raster found with resolution: 22.960758636289807
+2024-06-25 04:58:32,304 - INFO - Resampling all rasters to match the finest raster.
+2024-06-25 05:04:47,377 - INFO - Finding the finest raster in the dataset.
+2024-06-25 05:04:47,379 - INFO - Finest raster found with resolution: 0.0002777013858103524
+2024-06-25 05:04:47,381 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 05:04:47,382 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 05:04:47,420 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 05:04:47,460 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-06-25 05:04:47,530 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 05:04:47,568 - INFO - Validating data for 4 raster data arrays.
+2024-06-25 05:04:47,577 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 05:04:47,599 - INFO - Finding the finest raster in the dataset.
+2024-06-25 05:04:47,601 - INFO - Finest raster found with resolution: 22.960758636289807
+2024-06-25 05:04:47,602 - INFO - Resampling all rasters to match the finest raster.
+2024-06-25 05:05:08,715 - INFO - Finding the finest raster in the dataset.
+2024-06-25 05:05:08,717 - INFO - Finest raster found with resolution: 0.0002777013858103524
+2024-06-25 05:05:08,718 - INFO - Checking CRS for 4 raster data arrays.
+2024-06-25 05:05:08,719 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 05:05:08,753 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 05:05:08,788 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-06-25 05:05:08,853 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 05:05:08,898 - INFO - Validating data for 4 raster data arrays.
+2024-06-25 05:05:08,905 - INFO - Setting NoData to NaN for 4 raster data arrays.
+2024-06-25 05:05:08,912 - INFO - Finding the finest raster in the dataset.
+2024-06-25 05:05:08,913 - INFO - Finest raster found with resolution: 22.960758636289807
+2024-06-25 05:05:08,914 - INFO - Resampling all rasters to match the finest raster.
+2024-06-25 05:06:51,100 - INFO - Finding the finest raster in the dataset.
+2024-06-25 05:06:51,102 - INFO - Finest raster found with resolution: 0.0002777013858103524
+2024-06-25 05:06:51,103 - INFO - Checking CRS for 3 raster data arrays.
+2024-06-25 05:06:51,104 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 05:06:51,140 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-06-25 05:06:51,206 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-06-25 05:06:51,241 - INFO - Validating data for 3 raster data arrays.
+2024-06-25 05:06:51,248 - INFO - Setting NoData to NaN for 3 raster data arrays.
+2024-06-25 05:06:51,255 - INFO - Finding the finest raster in the dataset.
+2024-06-25 05:06:51,256 - INFO - Finest raster found with resolution: 22.960758636289807
+2024-06-25 05:06:51,257 - INFO - Resampling all rasters to match the finest raster.
