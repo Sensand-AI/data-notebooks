@@ -1,0 +1,35 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "notebook_name": {
+        "type": "string"
+      },
+      "save_output": {
+        "type": "boolean"
+      },
+      "output_type": {
+        "type": "string"
+      },
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "geojson": {
+            "type": "object"
+          },
+          "propertyName": {
+            "type": "string"
+          },
+          "si_unit": {
+            "type": "string"
+          },
+          "si_unit_short": {
+            "type": "string"
+          }
+        },
+        "required": ["geojson", "propertyName"]
+      }
+    },
+    "required": ["notebook_name", "parameters", "output_type"]
+  }
+  
