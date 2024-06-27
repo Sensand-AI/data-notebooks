@@ -66,8 +66,45 @@ services:
       com.datadoghq.tags.env: development
       com.datadoghq.tags.service: notebook-executor
 
+  vector-data-uploader:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: lambdas/vector-data-uploader/vector-data-uploader.Dockerfile
+      args:
+        AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+        AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+    ports:
+      - "9003:8080"
+    environment:
+      VECTOR_DATA_UPLOADER_S3_BUCKET: ${VECTOR_DATA_UPLOADER_S3_BUCKET}
+      AWS_LAMBDA_FUNCTION_MEMORY_SIZE: 1024
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+      ENV: ${ENVIRONMENT}
+      DD_SITE: ${DD_SITE}
+      DD_API_KEY: ${DD_API_KEY}
+      DD_TRACE_ENABLED: ${DD_TRACE_ENABLED}
+      DD_SERVICE: vector-data-uploader
+      DD_ENV: ${ENVIRONMENT}
+      DD_VERSION: 0.0.1
+      DD_APM_ENABLED: ${DD_APM_ENABLED}
+      DD_LOG_LEVEL: ${DD_LOG_LEVEL}
+      DD_CAPTURE_LAMBDA_PAYLOAD: true
+      DD_LAMBDA_HANDLER: app.lambda_function.lambda_handler
+      AWS_LAMBDA_FUNCTION_TIMEOUT: 120
+      DD_LOCAL_TEST: ${DD_LOCAL_TEST:-false}
+    labels:
+      com.datadoghq.ad.logs: '[{"source": "docker-compose", "service": "vector-data-uploader"}]'
+      com.datadoghq.tags.env: development
+      com.datadoghq.tags.service: vector-data-uploader
+
   postgres:
-    build: 
+    build:
       context: .
       dockerfile: postgres/postgres.Dockerfile
     image: postgis/postgis:16-3.4

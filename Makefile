@@ -5,9 +5,13 @@ IMAGE_URL=622020772926.dkr.ecr.us-east-1.amazonaws.com
 AWS_STAGING_PROFILE=senstag
 AWS_PLATFORM_PROFILE=senplat
 
+VECTOR_DATA_UPLOADER_IMAGE_NAME=vector-data-uploader
+
 BASE_IMAGE_NAME=gis-base
 BASE_CONTAINER_NAME=local-base-container
 
+
+include .env
 
 # Default make command
 all: help
@@ -91,6 +95,18 @@ lambda-update:
 ## lambda-details: Get the lambda function details.
 lambda-details:
 	aws-vault exec $(AWS_STAGING_PROFILE) -- aws lambda get-function --function-name NotebookExecutorFunction --region us-east-1
+
+## build-vector-data-uploader: Build the Docker image.
+build-vector-data-uploader:
+	docker build -t $(VECTOR_DATA_UPLOADER_IMAGE_NAME):latest -f ./lambdas/vector-data-uploader/vector-data-uploader.Dockerfile . --platform linux/amd64
+
+## build-vector-data-uploader-no-cache: Build the Docker image.
+build-vector-data-uploader-no-cache:
+	docker build -t $(VECTOR_DATA_UPLOADER_IMAGE_NAME):latest -f ./lambdas/vector-data-uploader/vector-data-uploader.Dockerfile . --platform linux/amd64 --no-cache
+
+## run-vector-data-uploader: Run vector-data-uploader.
+run-vector-data-uploader:
+	docker compose -f docker-compose.yml up --build -d vector-data-uploader
 
 ## help: Show a list of commands
 help : Makefile
