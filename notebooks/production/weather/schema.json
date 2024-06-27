@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "notebook_name": {
+      "type": "string"
+    },
+    "save_output": {
+      "type": "boolean"
+    },
+    "output_type": {
+      "type": "string"
+    },
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "geojson": {
+          "type": "object"
+        },
+        "propertyName": {
+          "type": "string"
+        },
+        "forecast_days": {
+          "type": "integer"
+        }
+      },
+      "required": ["geojson", "propertyName", "forecast_days"]
+    }
+  },
+  "required": ["notebook_name", "parameters", "output_type"]
+}
