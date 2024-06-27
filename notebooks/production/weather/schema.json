@@ -22,9 +22,7 @@
         },
         "forecast_days": {
           "type": "integer"
-        },
-        "timezone": {
-          "type": "string"}
+        }
       },
       "required": ["geojson", "propertyName", "forecast_days"]
     }
