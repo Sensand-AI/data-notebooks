@@ -22,7 +22,7 @@ def create_levels(custom_levels=None, color_count=21):
         levels = np.linspace(min_level, max_level, color_count)
     return levels
 
-def get_colormap(color_name='viridis', custom_levels=None, color_count=21):
+def get_colormap(color_name='viridis', custom_levels=None, color_count=21, decimals=2):
     """
     Generates a dictionary of colors from a specified colormap, using either a provided custom level range or a default continuous range.
     """
@@ -39,7 +39,8 @@ def get_colormap(color_name='viridis', custom_levels=None, color_count=21):
     hex_colors = [matplotlib.colors.rgb2hex(color) for color in colors]
 
     # Create list of levels and colors
-    custom_color_array = [[float(f"{level:.2f}"), color] for level, color in zip(levels, hex_colors)]
+    format_string = f"{{:.{decimals}f}}"
+    custom_color_array = [[float(format_string.format(level)), color] for level, color in zip(levels, hex_colors)]
 
     return custom_color_array
 
