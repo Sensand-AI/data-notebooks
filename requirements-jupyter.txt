@@ -1,29 +1,6 @@
-# Core numerical and data manipulation libraries
-numpy==1.26.4  # Fundamental package for scientific computing with Python
-pandas==2.2.2  # Data analysis and manipulation tool
-xarray==2024.5.0 # multidimensional data arrays, needed for raster data handling
-
-
-# AWS SDK for Python
-boto3==1.34.107  # Amazon Web Services (AWS) SDK for Python
-
-# Web and asynchronous networking libraries
-tornado==6.4  # Web framework and asynchronous networking library
-requests==2.31.0  # Elegant and simple HTTP library for Python, built for human beings
-
-# Data visualization libraries
-matplotlib==3.8.4  # Comprehensive library for creating static, animated, and interactive visualizations in Python
-
-# Geospatial data analysis libraries
-geopandas==0.14.0  # Extends pandas for geospatial data operations
-shapely==2.0.4  # Manipulation and analysis of geometric objects
-rasterio[s3]==1.3.10  # Rasterio with S3 support
-rioxarray==0.15.5  # read in raster data as xarrays. Needed for some processing packages
-rio_cogeo==5.3.0  # Cloud Optimized GeoTIFF (COG) creation and validation
-
 # Geospatial data processing tools
 pystac==1.10.1  # Python library for working with SpatioTemporal Asset Catalog (STAC)
-pystac-client==0.7.7  # Python client for working with STAC APIs
+
 stackstac[viz]==0.5.0  # Turn STAC Items into dask-based xarrays
 
 # geospatial data visualisation tools
@@ -32,16 +9,6 @@ geoviews==1.12.0
 holoviews==1.18.3
 datashader==0.16.1  # required for hvplot to render raster data
 jupyter-bokeh==3.0.4  # needed to render bokeh plots in jupyter notebooks
-
-# Experimental
-papermill==2.6.0  # Tool for parameterizing, executing, and analyzing Jupyter Notebooks. Added version to resolve docker build issue.
-wheel==0.41.2 # for package development
-#experimental for geodata-harvester package Jenna is working on
-
-# Time
-pytz==2024.1  # World timezone definitions, modern and historical
-
-# Visualizations
 plotly==5.22.0	# Interactive, browser-based graphing library for Python
 
 # Weather
@@ -55,3 +22,6 @@ datadog==0.49.1 # Datadog monitoring library
 datadog_lambda==5.94.0 # Datadog monitoring library for AWS Lambda
 
 pyarrow==16.1.0 # apache arrow bindings for python
+
+psycopg2==2.9.9 # PostgreSQL database adapter for Python
+sqlalchemy==2.0.31 # SQL toolkit and Object-Relational Mapping (ORM) library for Python
