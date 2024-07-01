@@ -346,7 +346,9 @@ def reproj_mask(
             )
 
         # Clip the raster using the geometry, ensuring to invert the mask
-        clipped = input_raster.rio.clip(bbox.geometry, crs=input_raster.rio.crs)
+        clipped = input_raster.rio.clip(
+            bbox.geometry, crs=input_raster.rio.crs, all_touched=True
+        )
 
         # Reproject the clipped raster and save
         reprojected = clipped.rio.reproject(crscode)
