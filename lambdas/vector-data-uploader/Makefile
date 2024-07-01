@@ -40,12 +40,10 @@ clean-image:
 ## test-local: Test the Lambda function locally
 test-local:
 	curl -XPOST "http://localhost:$(LOCAL_PORT)/2015-03-31/functions/function/invocations" -d '{ \
-		"notebook_name": "dem.ipynb", \
 		"parameters": { \
 			"param1": "value1", \
 			"param2": "value2" \
-		}, \
-		"save_output": true \
+		} \
 	}'
 
 ## help: Show a list of commands

@@ -3,6 +3,8 @@ ddtrace==2.8.4 # Datadog tracing library
 datadog==0.49.1 # Datadog monitoring library
 datadog_lambda==5.94.0 # Datadog monitoring library for AWS Lambda
 awslambdaric==2.0.11	# AWS Lambda Python runtime interface client (RIC)
+aws-secretsmanager-caching==1.1.3 # AWS Secrets Manager caching client
 
 psycopg2==2.9.9 # PostgreSQL database adapter for Python
 sqlalchemy==2.0.31 # SQL toolkit and Object-Relational Mapping (ORM) library for Python
+GeoAlchemy2==0.15.1
