@@ -1,8 +1,5 @@
-"""Module to execute a Jupyter notebook with parameters as a Lambda function."""
-
 import logging
 import os
-import shutil
 import botocore
 import signal
 import json
@@ -10,17 +7,19 @@ import sys
 from aws_secretsmanager_caching import SecretCache, SecretCacheConfig 
 from sqlalchemy import create_engine
 
-
 from app.lib.geopandas import find_shapefile, get_gdf, write_to_postgis
 from app.lib.s3 import download_from_prefix
 from app.lib.config import Config
+from app.lib.utils import delete_directory
 
-# TODO: exception handling
-from botocore.exceptions import BotoCoreError, ClientError
 from ddtrace import tracer
 
 aws_default_region = os.getenv("AWS_DEFAULT_REGION")
 AWS_LAMBDA_FUNCTION_NAME = "vector-data-uploader"
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logger = logging.getLogger("VectorDataUploader")
+logger.setLevel(logging.INFO)
 
 is_dev = os.environ.get("IS_DEV", "False") == "True"
 
@@ -62,38 +61,6 @@ def init_db():
     if ENGINE is None:
         logger.info(f"Connecting to db {dbname} as {user} on {host}:{port}")
         ENGINE = create_engine(f"postgresql://{user}:{password}@{host}:{port}/{dbname}")
-
-# Configure logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging.getLogger("VectorDataUploader")
-logger.setLevel(logging.INFO)
-
-def delete_directory(directory_path):
-    """
-    Deletes the specified directory along with all its contents.
-
-    Parameters:
-    - directory_path (str): The path to the directory to be deleted.
-
-    Returns:
-    - None
-    """
-    try:
-        shutil.rmtree(directory_path)
-    except FileNotFoundError:
-        logger.error(
-            "Directory: does not exist", extra=dict(data={"directory": directory_path})
-        )
-    except PermissionError:
-        logger.error(
-            "Directory: permission denied",
-            extra=dict(data={"directory": directory_path}),
-        )
-    except Exception as e:  # This catches other potential exceptions and logs them.
-        logger.error(
-            "Directory: failed to delete",
-            extra=dict(data={"directory": directory_path, "error": str(e)}),
-        )
 
 @tracer.wrap(name='lambda_handler')
 def lambda_handler(event, _):

@@ -11,7 +11,7 @@ BASE_IMAGE_NAME=gis-base
 BASE_CONTAINER_NAME=local-base-container
 
 
-include .env
+# include .env
 
 # Default make command
 all: help
