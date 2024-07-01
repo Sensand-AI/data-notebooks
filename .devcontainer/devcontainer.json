@@ -14,12 +14,12 @@
 		"PYTHON_VERSION": "3.10"
 	},
 	"features": {
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-			"moby": "true",
-			"version": "latest",
-			"installDockerBuildx": true,
-			"dockerDashComposeVersion": "v2"
-		},
+		// "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+		// 	"moby": "true",
+		// 	"version": "latest",
+		// 	"installDockerBuildx": true,
+		// 	"dockerDashComposeVersion": "v2"
+		// },
 		"ghcr.io/devcontainers/features/aws-cli:1": {
 			"version": "latest"
 		},
