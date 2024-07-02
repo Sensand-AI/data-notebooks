@@ -231,6 +231,14 @@ def lambda_handler(event, _):
                 output_files = os.listdir(output_dir)
                 bucket_name = aws_s3_notebook_output
                 uploaded_files = []  # Keep track of successfully uploaded files
+                logger.info(
+                    "Payload: Files Generated",
+                    extra=dict(data={
+                        "status": "success", 
+                        "notebook_name": notebook_name, 
+                        "output_files": output_files
+                    }),
+                )
                 for file in output_files:
                     file_path = os.path.join(output_dir, file)
                     object_key = f"{s3_prefix}/{file}"  # S3 object key with prefix
@@ -269,6 +277,14 @@ def lambda_handler(event, _):
                                     {
                                         "file_name": file,
                                         "presigned_url": presigned_url,
+                                        "metadata": metadata,
+                                    }
+                                )
+                            # If the file is not a public file, we just want to return the metadata
+                            else:
+                                uploaded_files.append(
+                                    {
+                                        "file_name": file,
                                         "metadata": metadata,
                                     }
                                 )
