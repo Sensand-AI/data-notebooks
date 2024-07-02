@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import geopandas as gpd
+from .exceptions import InvalidCRSException
 from sqlalchemy import engine
 from sqlalchemy.dialects.postgresql import JSONB
 from pathlib import Path
@@ -40,6 +41,9 @@ def get_gdf(path: str) -> gpd.GeoDataFrame:
     - gpd.GeoDataFrame: The GeoDataFrame representing the shapefile.
     """
     read_gdf = gpd.read_file(path)
+    if read_gdf.crs is None:
+        raise InvalidCRSException("CRS is missing from the shapefile.")
+
     transformed_gdf = gpd.GeoDataFrame()
 
     gdf_copy = read_gdf.copy()

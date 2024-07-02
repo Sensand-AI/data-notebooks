@@ -1,5 +1,6 @@
 import logging
 import os
+from app.lib.exceptions import InvalidCRSException
 import botocore
 import signal
 import json
@@ -79,16 +80,20 @@ def lambda_handler(event, _):
     """
 
     logger.info("Payload: received", extra=dict(data={"event": event}))
-    init_db()
-    download_directory = download_from_prefix(Config.UPLOAD_BUCKET_PREFIX)
-    shapefile = find_shapefile(download_directory)
-    if shapefile is None:
-        logger.error("Shapefile: not found", extra=dict(data={"directory": download_directory}))
-        delete_directory(download_directory)
-        return {"statusCode": 404, "body": json.dumps({"message": "Shapefile not found"})}
+    try:
+        init_db()
+        download_directory = download_from_prefix(Config.UPLOAD_BUCKET_PREFIX)
+        shapefile = find_shapefile(download_directory)
+        if shapefile is None:
+            logger.error("Shapefile: not found", extra=dict(data={"directory": download_directory}))
+            delete_directory(download_directory)
+            return {"statusCode": 404, "body": json.dumps({"message": "Shapefile not found"})}
 
-    gdf = get_gdf(shapefile)
-    logger.info("GeoDataFrame: created", extra=dict(data={"gdf": gdf.head()}))
-    write_to_postgis(gdf, ENGINE)
-    logger.info("GeoDataFrame: written to DB")
-    delete_directory(download_directory)
+        gdf = get_gdf(shapefile)
+        logger.info("GeoDataFrame: created", extra=dict(data={"gdf": gdf.head()}))
+        write_to_postgis(gdf, ENGINE)
+        logger.info("GeoDataFrame: written to DB")
+        delete_directory(download_directory)
+    except InvalidCRSException as e:
+        logger.error(f"InvalidCRSException: {e}")
+        return {"statusCode": 400, "body": json.dumps({"message": "CRS is missing from the shapefile"})}

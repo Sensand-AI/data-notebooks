@@ -1,0 +1,2 @@
+class InvalidCRSException(Exception):
+    pass
