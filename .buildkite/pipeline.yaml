@@ -54,9 +54,9 @@ steps:
           - docker-compose#v4.14.0:
               build: notebook-executor
               image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
-              image-name: "${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}"
+              image-name: "${BUILDKITE_BRANCH_SLUG}-${BUILDKITE_COMMIT}"
               cache-from:
-                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}
+                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:${BUILDKITE_BRANCH_SLUG}-${BUILDKITE_COMMIT}
                 - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
               config:
                 - docker-compose.yml
@@ -72,7 +72,7 @@ steps:
               image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor
               image-name: latest
               cache-from:
-                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT}
+                - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:${BUILDKITE_BRANCH_SLUG}-${BUILDKITE_COMMIT}
                 - notebook-executor:622020772926.dkr.ecr.us-east-1.amazonaws.com/notebook-executor:latest
               config:
                 - docker-compose.yml
@@ -93,7 +93,7 @@ steps:
           IMAGE_NAME: notebook-executor
           IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
         command:
-          - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT} --region us-east-1
+          - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH_SLUG}-${BUILDKITE_COMMIT} --region us-east-1
         depends_on:
           - "deploy-staging-manual"
         plugins:
@@ -101,7 +101,7 @@ steps:
           - *docker-compose-deploy
         if: |
           build.branch == "main" || (build.pull_request.id != null && !build.pull_request.draft)
-      
+
       - block: "Deploy Production (Manual)"
         prompt: "Update Lambda Function in Production?"
         branches: main
@@ -115,7 +115,7 @@ steps:
           IMAGE_NAME: notebook-executor
           IMAGE_URL: 622020772926.dkr.ecr.us-east-1.amazonaws.com
         command:
-          - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH}-${BUILDKITE_COMMIT} --region us-east-1
+          - aws lambda update-function-code --function-name NotebookExecutorFunction --image-uri $$IMAGE_URL/$$IMAGE_NAME:${BUILDKITE_BRANCH_SLUG}-${BUILDKITE_COMMIT} --region us-east-1
         depends_on:
           - "deploy-production-manual"
         plugins:

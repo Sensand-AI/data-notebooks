@@ -1,0 +1,5 @@
+#!/bin/bash
+set -euo pipefail
+
+echo '--- :docker: Setting BUILDKITE_BRANCH_SLUG for use in image tagging'
+export BUILDKITE_BRANCH_SLUG=$(echo $BUILDKITE_BRANCH | sed 's|/|--|g')
