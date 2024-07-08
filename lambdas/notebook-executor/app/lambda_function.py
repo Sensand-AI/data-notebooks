@@ -168,6 +168,7 @@ def lambda_handler(event, _):
         }
 
     parameters = event.get("parameters", {})
+    boundaryId = parameters['boundaryId'] if 'boundaryId' in parameters else 'unknown'
     # Append a deterministic UUID to the parameters as a notebook_key
     # This will be used to identify the executed notebook in the S3 bucket
     # and later to retrieve the output
@@ -188,7 +189,7 @@ def lambda_handler(event, _):
     s3_output_key = f"executed_{notebook_basename}_{datetime_stamp}.ipynb"
     # Initialize the S3. Don't need to pass credentials if the Lambda has the right IAM role
     # concatenate the notebook name with the notebook key as a prefix and with datetime stamp
-    s3_prefix = f"{notebook_name}/{date_stamp}/{notebook_key}"
+    s3_prefix = f"{notebook_name}/{date_stamp}/{boundaryId}"
     s3_utils = init_aws_utils(prefix=s3_prefix)
 
     # Define the source and output notebook paths
