@@ -22,9 +22,21 @@
         },
         "forecast_days": {
           "type": "integer"
+        },
+        "start_year": {
+          "type": "integer"
+        },
+        "end_year": {
+          "type": "integer"
+        },
+        "historical": {
+          "type": "boolean"
+        },
+        "forecast": {
+          "type": "boolean"
         }
       },
-      "required": ["geojson", "propertyName", "forecast_days"]
+      "required": ["geojson", "propertyName", "forecast_days", "historical", "forecast", "start_year", "end_year"]
     }
   },
   "required": ["notebook_name", "parameters", "output_type"]
