@@ -31,19 +31,16 @@ docker-compose-deploy-plugin: &docker-compose-deploy
       - IMAGE_URL
 
 steps:
-  - group: "Pytest unit tests"
+  - group: "Pytest Unit Tests"
     key: "pytest-unit-tests"
     steps:
       - label: ":pytest: Run pytest"
         key: "run-pytest"
-        command:
-          - pip install -r requirements-jupyter.txt
-          - pip install -r requirements-custom.txt
-          - pip install pytest
-          - pytest ./packages -s
         plugins:
-          - docker#v5.9.0:
-              image: "python:3.10-bullseye"
+          - docker-compose#v4.15.0:
+              run: pytest
+              config: docker-compose.pytest.yaml
+          - *ecr-sensand
         if: build.message !~ /skippy/
 
   - wait
@@ -124,4 +121,25 @@ steps:
         plugins:
           - *assume-role-production
           - *docker-compose-deploy
-          
+
+  - group: "GIS Base Image"
+    key: "gis-base-image"
+    steps:
+      - block: "Push Base Image (Manual)"
+        prompt: "Push Base Image to Platform ECR?"
+        key: "push-base-image-manual"
+
+      - label: ":docker: GIS Base Build & Push"
+        key: "gis-base-build-and-push"
+        plugins:
+          - docker-compose#v4.14.0:
+              build: gis-base
+              image-repository: 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base
+              image-name: latest
+              cache-from:
+                - gis-base:622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest
+              config:
+                - docker-compose.base.yaml
+          - *ecr-sensand
+        
+        

@@ -1,0 +1,86 @@
+2024-07-03 23:31:08,621 - INFO - Finding the finest raster in the dataset.
+2024-07-03 23:31:08,622 - INFO - Finest raster found with resolution: 0.0002777013858103524
+2024-07-03 23:31:08,623 - INFO - Checking CRS for 2 raster data arrays.
+2024-07-03 23:31:08,627 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-07-03 23:31:08,639 - INFO - Found credentials in environment variables.
+2024-07-03 23:31:08,674 - INFO - Found credentials in environment variables.
+2024-07-03 23:31:08,686 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-07-03 23:31:08,695 - INFO - Found credentials in environment variables.
+2024-07-03 23:31:08,705 - INFO - Found credentials in environment variables.
+2024-07-03 23:31:08,713 - INFO - Validating data for 2 raster data arrays.
+2024-07-03 23:31:08,720 - INFO - Setting NoData to -9999 for 2 raster data arrays.
+2024-07-03 23:31:08,725 - INFO - Finding the finest raster in the dataset.
+2024-07-03 23:31:08,726 - INFO - Finest raster found with resolution: 22.960758636289807
+2024-07-03 23:31:08,727 - INFO - Resampling all rasters to match the finest raster.
+2024-07-03 23:31:09,032 - INFO - Found credentials in environment variables.
+2024-07-03 23:31:09,252 - INFO - Found credentials in environment variables.
+2024-07-03 23:31:09,315 - INFO - Found credentials in environment variables.
+2024-07-03 23:45:19,659 - INFO - GDAL signalled an error: err_no=4, msg="`/workspace/notebooks/sandbox/stratification/showcase/data/01-data_collection/NDVI_median_2024-04-01_2024-06-01_stardew_valley.tiff' not recognized as a supported file format."
+2024-07-03 23:55:09,136 - INFO - Finding the finest raster in the dataset.
+2024-07-03 23:55:09,137 - INFO - Finest raster found with resolution: 0.0002776493047292413
+2024-07-03 23:55:09,138 - INFO - Checking CRS for 2 raster data arrays.
+2024-07-03 23:55:09,139 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-07-03 23:55:09,153 - INFO - Found credentials in environment variables.
+2024-07-03 23:55:09,190 - INFO - Found credentials in environment variables.
+2024-07-03 23:55:09,207 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-07-03 23:55:09,219 - INFO - Found credentials in environment variables.
+2024-07-03 23:55:09,235 - INFO - Found credentials in environment variables.
+2024-07-03 23:55:09,249 - INFO - Validating data for 2 raster data arrays.
+2024-07-03 23:55:09,259 - INFO - Setting NoData to -9999 for 2 raster data arrays.
+2024-07-03 23:55:09,264 - INFO - Finding the finest raster in the dataset.
+2024-07-03 23:55:09,266 - INFO - Finest raster found with resolution: 22.960758636289807
+2024-07-03 23:55:09,267 - INFO - Resampling all rasters to match the finest raster.
+2024-07-03 23:55:09,583 - INFO - Found credentials in environment variables.
+2024-07-03 23:55:09,918 - INFO - Found credentials in environment variables.
+2024-07-03 23:55:09,993 - INFO - Found credentials in environment variables.
+2024-07-04 01:05:29,401 - INFO - Finding the finest raster in the dataset.
+2024-07-04 01:05:29,402 - INFO - Finest raster found with resolution: 0.0002776493047292413
+2024-07-04 01:05:29,403 - INFO - Checking CRS for 2 raster data arrays.
+2024-07-04 01:05:29,406 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-07-04 01:05:29,416 - INFO - Found credentials in environment variables.
+2024-07-04 01:05:29,429 - INFO - Found credentials in environment variables.
+2024-07-04 01:05:29,437 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-07-04 01:05:29,446 - INFO - Found credentials in environment variables.
+2024-07-04 01:05:29,483 - INFO - Found credentials in environment variables.
+2024-07-04 01:05:29,502 - INFO - Validating data for 2 raster data arrays.
+2024-07-04 01:05:29,511 - INFO - Setting NoData to -9999 for 2 raster data arrays.
+2024-07-04 01:05:29,515 - INFO - Finding the finest raster in the dataset.
+2024-07-04 01:05:29,517 - INFO - Finest raster found with resolution: 22.960758636289807
+2024-07-04 01:05:29,518 - INFO - Resampling all rasters to match the finest raster.
+2024-07-04 01:05:29,528 - INFO - Found credentials in environment variables.
+2024-07-04 01:05:30,029 - INFO - Found credentials in environment variables.
+2024-07-04 01:05:30,086 - INFO - Found credentials in environment variables.
+2024-07-04 04:26:38,525 - INFO - Finding the finest raster in the dataset.
+2024-07-04 04:26:38,526 - INFO - Finest raster found with resolution: 0.0002776493047292413
+2024-07-04 04:26:38,527 - INFO - Checking CRS for 2 raster data arrays.
+2024-07-04 04:26:38,529 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-07-04 04:26:38,543 - INFO - Found credentials in environment variables.
+2024-07-04 04:26:38,559 - INFO - Found credentials in environment variables.
+2024-07-04 04:26:38,569 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-07-04 04:26:38,584 - INFO - Found credentials in environment variables.
+2024-07-04 04:26:38,619 - INFO - Found credentials in environment variables.
+2024-07-04 04:26:38,635 - INFO - Validating data for 2 raster data arrays.
+2024-07-04 04:26:38,645 - INFO - Setting NoData to -9999 for 2 raster data arrays.
+2024-07-04 04:26:38,649 - INFO - Finding the finest raster in the dataset.
+2024-07-04 04:26:38,651 - INFO - Finest raster found with resolution: 22.960758636289807
+2024-07-04 04:26:38,652 - INFO - Resampling all rasters to match the finest raster.
+2024-07-04 04:26:38,664 - INFO - Found credentials in environment variables.
+2024-07-04 04:26:39,206 - INFO - Found credentials in environment variables.
+2024-07-04 04:26:39,279 - INFO - Found credentials in environment variables.
+2024-07-04 04:52:03,915 - INFO - Finding the finest raster in the dataset.
+2024-07-04 04:52:03,916 - INFO - Finest raster found with resolution: 0.0002776493047292413
+2024-07-04 04:52:03,918 - INFO - Checking CRS for 2 raster data arrays.
+2024-07-04 04:52:03,919 - INFO - Reprojecting EPSG:4326 to EPSG:3857
+2024-07-04 04:52:03,932 - INFO - Found credentials in environment variables.
+2024-07-04 04:52:03,945 - INFO - Found credentials in environment variables.
+2024-07-04 04:52:03,961 - INFO - Reprojecting EPSG:32750 to EPSG:3857
+2024-07-04 04:52:03,973 - INFO - Found credentials in environment variables.
+2024-07-04 04:52:04,008 - INFO - Found credentials in environment variables.
+2024-07-04 04:52:04,026 - INFO - Validating data for 2 raster data arrays.
+2024-07-04 04:52:04,031 - INFO - Setting NoData to -9999 for 2 raster data arrays.
+2024-07-04 04:52:04,035 - INFO - Finding the finest raster in the dataset.
+2024-07-04 04:52:04,036 - INFO - Finest raster found with resolution: 22.960758636289807
+2024-07-04 04:52:04,037 - INFO - Resampling all rasters to match the finest raster.
+2024-07-04 04:52:04,050 - INFO - Found credentials in environment variables.
+2024-07-04 04:52:04,639 - INFO - Found credentials in environment variables.
+2024-07-04 04:52:04,711 - INFO - Found credentials in environment variables.

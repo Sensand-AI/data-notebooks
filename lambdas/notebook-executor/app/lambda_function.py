@@ -132,6 +132,11 @@ def lambda_handler(event, _):
     if "body" in event:
         event = json.loads(event["body"])
 
+    # If invoked with an SQS event there's a Records key
+    # there shoud be only one record as the queue is setup with a batch of 1
+    if "Records" in event:
+        event = json.loads(event["Records"][0]["body"])
+
     # Extract notebook name and parameters from the event
     notebook_name = event.get("notebook_name")
 
@@ -163,6 +168,7 @@ def lambda_handler(event, _):
         }
 
     parameters = event.get("parameters", {})
+    boundaryId = parameters['boundaryId'] if 'boundaryId' in parameters else 'unknown'
     # Append a deterministic UUID to the parameters as a notebook_key
     # This will be used to identify the executed notebook in the S3 bucket
     # and later to retrieve the output
@@ -183,7 +189,7 @@ def lambda_handler(event, _):
     s3_output_key = f"executed_{notebook_basename}_{datetime_stamp}.ipynb"
     # Initialize the S3. Don't need to pass credentials if the Lambda has the right IAM role
     # concatenate the notebook name with the notebook key as a prefix and with datetime stamp
-    s3_prefix = f"{notebook_name}/{date_stamp}/{notebook_key}"
+    s3_prefix = f"{notebook_name}/{date_stamp}/{boundaryId}"
     s3_utils = init_aws_utils(prefix=s3_prefix)
 
     # Define the source and output notebook paths
@@ -226,6 +232,14 @@ def lambda_handler(event, _):
                 output_files = os.listdir(output_dir)
                 bucket_name = aws_s3_notebook_output
                 uploaded_files = []  # Keep track of successfully uploaded files
+                logger.info(
+                    "Payload: Files Generated",
+                    extra=dict(data={
+                        "status": "success", 
+                        "notebook_name": notebook_name, 
+                        "output_files": output_files
+                    }),
+                )
                 for file in output_files:
                     file_path = os.path.join(output_dir, file)
                     object_key = f"{s3_prefix}/{file}"  # S3 object key with prefix
@@ -264,6 +278,14 @@ def lambda_handler(event, _):
                                     {
                                         "file_name": file,
                                         "presigned_url": presigned_url,
+                                        "metadata": metadata,
+                                    }
+                                )
+                            # If the file is not a public file, we just want to return the metadata
+                            else:
+                                uploaded_files.append(
+                                    {
+                                        "file_name": file,
                                         "metadata": metadata,
                                     }
                                 )

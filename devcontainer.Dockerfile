@@ -11,10 +11,11 @@ WORKDIR /workspace
 RUN pip install --upgrade pip
 
 # Copy dependencies and install them
+COPY requirements-core.txt /workspace/requirements-core.txt
 COPY requirements-jupyter.txt /workspace/requirements-jupyter.txt
 COPY requirements-dev.txt /workspace/requirements-dev.txt
 
-RUN cat /workspace/requirements-jupyter.txt /workspace/requirements-dev.txt > /workspace/requirements.txt
+RUN cat /workspace/requirements-core.txt /workspace/requirements-jupyter.txt /workspace/requirements-dev.txt > /workspace/requirements.txt
 
 RUN pip install -r /workspace/requirements.txt
 

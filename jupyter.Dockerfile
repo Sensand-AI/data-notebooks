@@ -23,8 +23,10 @@ RUN pip install jupyterlab notebook jupyterhub nbclassic ipykernel
 RUN pip install --upgrade pip
 
 # Install Python packages
-COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/requirements.txt
-RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements.txt -t ${LAMBDA_TASK_ROOT}
+COPY requirements-core.txt ${LAMBDA_TASK_ROOT}/requirements-core.txt
+RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements-core.txt -t ${LAMBDA_TASK_ROOT}
+COPY requirements-jupyter.txt ${LAMBDA_TASK_ROOT}/requirements-jupyter.txt
+RUN pip install -r ${LAMBDA_TASK_ROOT}/requirements-jupyter.txt -t ${LAMBDA_TASK_ROOT}
 
 # Install local packages
 COPY packages/ ${LAMBDA_TASK_ROOT}/packages
