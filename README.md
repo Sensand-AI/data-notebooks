@@ -122,4 +122,11 @@ You will get another prompt to select the kernel. Select the kernel listed with 
 
 Please ensure your custom packages have a `test_[filename].py` which includes unit tests for the functions in the package.
 
-These tests do not run automatically in the buildkite pipeline, but can be run locally using the following command in a terminal: `pytest`
+These tests are run automatically in the buildkite pipeline, and can be run locally using the following command in a terminal: `pytest`
+
+
+## Updating the GIS base image
+
+To update the base image, add additional packages to `requirements-core.txt`.
+After committing the changes, you must manually trigger the base image build step (in Buildkite at the bottom).
+Since prior build steps use this base image, please Rebuild the pipeline (in Buildkite, top right).
