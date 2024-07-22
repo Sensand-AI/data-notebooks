@@ -7,6 +7,8 @@ from owslib.coverage.wcsBase import ServiceException
 from owslib.wcs import WebCoverageService
 from requests.exceptions import HTTPError
 
+from utils import retry_decorator
+
 logger = logging.getLogger()
 # try this but remove if it doesn't work well with datadog:
 logging.basicConfig(
@@ -41,6 +43,7 @@ class dem_harvest:
         self.layers_url = dem_json.get("layers_url")
         self.fetched_files = []
 
+    @retry_decorator(max_retries=3, backoff_factor=2, retry_statuses=(502, 503))
     def getwcs_dem(self, url, crs, resolution, bbox, property_name, outpath):
         """
         Downloads a Digital Elevation Model (DEM) using the Web Coverage Service (WCS) protocol.

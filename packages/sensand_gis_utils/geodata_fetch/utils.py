@@ -19,12 +19,18 @@ reproj_mask: Masks a raster to the area of a shape, and reprojects.
 
 colour_geotiff_and_save_cog: Colorizes a GeoTIFF image using a specified color map and saves it as a COG (Cloud-Optimized GeoTIFF).
 
+retry_decorator: A decorator to retry the WCS endpoint if an HTTP 502 or 503 error occurs.
+
 """
 
 import json
 import logging
 import os
 from types import SimpleNamespace
+
+from functools import wraps
+from requests.exceptions import HTTPError
+import time
 
 import numpy as np
 import rasterio
@@ -45,54 +51,6 @@ logger = logging.getLogger()
 logging.basicConfig(
     level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-
-## ------ Setup rasterio profiles ------ ##
-
-
-class Profile:
-    """Base class for Rasterio dataset profiles.
-
-    Subclasses will declare a format driver and driver-specific
-    creation options.
-    """
-
-    driver = None
-    defaults = {}
-
-    def __call__(self, **kwargs):
-        """Returns a mapping of keyword args for writing a new datasets.
-
-        Example:
-
-            profile = SomeProfile()
-            with rasterio.open('foo.tiff', 'w', **profile()) as dst:
-                # Write data ...
-
-        """
-        if kwargs.get("driver", self.driver) != self.driver:
-            raise ValueError("Overriding this profile's driver is not allowed.")
-        profile = self.defaults.copy()
-        profile.update(**kwargs)
-        profile["driver"] = self.driver
-        return profile
-
-
-class DefaultGTiffProfile(Profile):
-    """A tiled, band-interleaved, LZW-compressed, 8-bit GTiff profile."""
-
-    driver = "GTiff"
-    defaults = {
-        "interleave": "band",
-        "tiled": True,
-        "blockxsize": 256,
-        "blockysize": 256,
-        "compress": "lzw",
-        "nodata": 0,
-        "dtype": uint8,
-    }
-
-
-default_gtiff_profile = DefaultGTiffProfile()
 
 
 def list_tif_files(path):
@@ -425,3 +383,41 @@ def colour_geotiff_and_save_cog(input_geotiff, colour_map):
             raise
     except Exception as e:
         logger.error(f"Error colorizing GeoTIFF {input_geotiff}: {e}", exc_info=True)
+
+
+def retry_decorator(max_retries=3, backoff_factor=1, retry_statuses=(502,503)):
+    """
+    A decorator to retry a function if it raises specified HTTP errors.
+
+    Args:
+        max_retries (int): The maximum number of retries.
+        backoff_factor (float): The factor by which the wait time increases.
+        retry_statuses (tuple): HTTP status codes that trigger a retry.
+
+    Returns:
+        function: The wrapped function with retry logic.
+    """
+    def decorator_retry(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            attempts = 0
+            while attempts < max_retries:
+                try:
+                    return func(*args, **kwargs)
+                except HTTPError as e:
+                    if e.response.status_code in retry_statuses:
+                        attempts += 1
+                        sleep_time = backoff_factor * (2 ** attempts)
+                        time.sleep(sleep_time)
+                    else:
+                        raise
+                except Exception as e:
+                    if attempts < max_retries:
+                        attempts += 1
+                        sleep_time = backoff_factor * (2 ** attempts)
+                        time.sleep(sleep_time)
+                    else:
+                        raise
+                return func(*args, **kwargs)
+            return wrapper
+        return decorator_retry
