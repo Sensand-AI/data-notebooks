@@ -7,7 +7,7 @@ from owslib.coverage.wcsBase import ServiceException
 from owslib.wcs import WebCoverageService
 from requests.exceptions import HTTPError
 
-from utils import retry_decorator
+from geodata_fetch.utils import retry_decorator
 
 logger = logging.getLogger()
 # try this but remove if it doesn't work well with datadog:

@@ -419,5 +419,5 @@ def retry_decorator(max_retries=3, backoff_factor=1, retry_statuses=(502,503)):
                     else:
                         raise
                 return func(*args, **kwargs)
-            return wrapper
-        return decorator_retry
+        return wrapper
+    return decorator_retry
