@@ -43,7 +43,7 @@ def get_slgadict():
             f"Error loading slga_soil.json to getdata_slga module: {e}"
         ) from e
 
-
+@retry_decorator()
 def get_wcsmap(url, identifier, crs, bbox, resolution, outfname):
     """
     Download and save geotiff from WCS layer

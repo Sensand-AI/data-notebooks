@@ -43,7 +43,7 @@ class dem_harvest:
         self.layers_url = dem_json.get("layers_url")
         self.fetched_files = []
 
-    @retry_decorator(max_retries=3, backoff_factor=2, retry_statuses=(502, 503))
+    @retry_decorator()
     def getwcs_dem(self, url, crs, resolution, bbox, property_name, outpath):
         """
         Downloads a Digital Elevation Model (DEM) using the Web Coverage Service (WCS) protocol.

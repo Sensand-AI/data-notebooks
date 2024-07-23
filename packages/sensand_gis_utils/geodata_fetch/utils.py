@@ -23,6 +23,8 @@ retry_decorator: A decorator to retry the WCS endpoint if an HTTP 502 or 503 err
 
 """
 
+# TODO: add function that can take a list or dictionary of variables and create the json-like object needed by load_settings. This removes it from the notebooks and user's responsibility.
+
 import json
 import logging
 import os
