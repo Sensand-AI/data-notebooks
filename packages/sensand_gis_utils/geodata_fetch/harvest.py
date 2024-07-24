@@ -206,12 +206,15 @@ class DataSourceFactory:
 
 
 class DEMDataSource(DataSourceInterface):
+    def __init__(self):
+        self.dem_harvester = dem_harvest()
+
     def fetch_data(self, settings):
         try:
-            dem_data = dem_harvest.get_dem_layers(
+            dem_data = self.dem_harvester.get_dem_layers(
                 property_name=settings.property_name,
                 layernames=settings.target_sources['DEM'],
-                bbox=settings.bbox,
+                bbox=settings.target_bbox,
                 outpath=settings.outpath
             )
             return dem_data
@@ -221,9 +224,10 @@ class DEMDataSource(DataSourceInterface):
 
 
 class SLGADataSource(DataSourceInterface):
+    def __init__(self):
+        self.slga_harvester = slga_harvest()
+
     def fetch_data(self, settings):
-        print("Fetching SLGA data...")
-        # Similar structure as DEM, adapted for SLGA
         try:
             depth_min = []
             depth_max = []
@@ -233,10 +237,10 @@ class SLGADataSource(DataSourceInterface):
                 depth_min.append(dmin)
                 depth_max.append(dmax)
 
-            files_slga = slga_harvest.get_slga_layers(
+            files_slga = self.slga_harvester.get_slga_layers(
                 property_name=settings.property_name,
                 layernames=list(settings.target_sources["SLGA"].keys()),
-                bbox=settings.bbox,
+                bbox=settings.target_bbox,
                 outpath=settings.outpath,
                 depth_min=depth_min,
                 depth_max=depth_max,
@@ -273,15 +277,21 @@ class DataHarvester:
             self.mask_data()
 
     def mask_data(self):
-        tif_files = [f for f in os.listdir(self.settings.outpath)
-                     if f.endswith(".tiff")
-                     and not f.endswith(("_masked.tiff", "_colored.tiff", "_cog.tiff", "_cog.public.tiff"))]
+        try:
+            tif_files = [f for f in os.listdir(self.settings.outpath)
+                        if f.endswith(".tiff")
+                        and not f.endswith(("_masked.tiff", "_colored.tiff", "_cog.tiff", "_cog.public.tiff"))]
+        except Exception as e:
+            logger.error(f"Error listing tiff files: {e}")
 
         for tif in tif_files:
-            reproj_mask(
-                filename=tif, 
-                input_filepath=self.settings.outpath, 
-                bbox=self.input_geom,
-                crscode=self.settings.target_crs, 
-                output_filepath=self.settings.outpath, 
-                resample=self.settings.resample)
+            try:
+                reproj_mask(
+                    filename=tif, 
+                    input_filepath=self.settings.outpath, 
+                    bbox=self.input_geom,
+                    crscode=self.settings.target_crs, 
+                    output_filepath=self.settings.outpath, 
+                    resample=self.settings.resample)
+            except Exception as e:
+                logger.error(f"Error masking {tif}: {e}")
