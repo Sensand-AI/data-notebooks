@@ -3,9 +3,7 @@ import logging
 import os
 from importlib import resources
 
-from owslib.coverage.wcsBase import ServiceException
 from owslib.wcs import WebCoverageService
-from requests.exceptions import HTTPError
 
 from geodata_fetch.utils import retry_decorator
 
@@ -91,13 +89,8 @@ class dem_harvest:
             with open(outfname, "wb") as f:
                 f.write(data.read())
                 logger.info(f"WCS data downloaded and saved as {fname_out}")
-        except ServiceException as e:
-            logger.error(
-                f"WCS server returned exception while trying to download {fname_out}: {e} ",
-                exec_info=True,
-            )
-            return False
-        except HTTPError as e:
+
+        except Exception as e:
             if e.response.status_code == 502:
                 logger.error(
                     f"HTTPError 502: Bad Gateway encountered when accessing {url}",
@@ -110,13 +103,9 @@ class dem_harvest:
                 )
             else:
                 logger.error(
-                    f"HTTPError {e.response.status_code}: {e.response.reason} when accessing {url}",
+                    f"Error {e.response.status_code}: {e.response.reason} when accessing {url}",
                     exec_info=True,
                 )
-            return False
-        except Exception as e:
-            logger.error(f"Failed to download {fname_out}: {e}", exec_info=True)
-            raise
         return outfname
 
     def get_dem_layers(self, property_name, layernames, bbox, outpath):
