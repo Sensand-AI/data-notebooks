@@ -16,17 +16,15 @@ logging.basicConfig(
 
 class slga_harvest:
     def __init__(self):
+        self.load_configuration()
+
+    def load_configuration(self):
         try:
             with resources.open_text("data", "slga_soil.json") as f:
-                dem_json = json.load(f)
-            self.initialise_attributes_from_json(dem_json)
+                config_json = json.load(f)
+            self.initialise_attributes_from_json(config_json)
         except Exception as e:
-            logger.error(
-                "Error loading slga_soil.json to dem_harvest module.", exec_info=True
-            )
-            raise ValueError(
-                f"Error loading slga_soil.json to dem_harvest module: {e}"
-            ) from e
+            logger.error(f"Error loading slga_soil.json to dem_harvest module: {e}")
 
     def initialise_attributes_from_json(self, slga_json):
         self.title = slga_json.get("title")
@@ -42,33 +40,6 @@ class slga_harvest:
         self.depth_max = slga_json.get("depth_max")
         self.layers_url = slga_json.get("layers_url")
         self.fetched_files = []
-
-    # def get_slgadict():
-    #     try:
-    #         with resources.open_text("data", "slga_soil.json") as f:
-    #             slga_json = json.load(f)
-
-    #         slgadict = {}
-    #         slgadict["title"] = slga_json["title"]
-    #         slgadict["description"] = slga_json["description"]
-    #         slgadict["license"] = slga_json["license"]
-    #         slgadict["source_url"] = slga_json["source_url"]
-    #         slgadict["copyright"] = slga_json["copyright"]
-    #         slgadict["attribution"] = slga_json["attribution"]
-    #         slgadict["crs"] = slga_json["crs"]
-    #         slgadict["resolution_arcsec"] = slga_json["resolution_arcsec"]
-    #         slgadict["depth_min"] = slga_json["depth_min"]
-    #         slgadict["depth_max"] = slga_json["depth_max"]
-    #         slgadict["layers_url"] = slga_json["layers_url"]
-
-    #         return slgadict
-    #     except Exception as e:
-    #         logger.error(
-    #             "Error loading slga_soil.json to getdata_slga module.", exec_info=True
-    #         )
-    #         raise ValueError(
-    #             f"Error loading slga_soil.json to getdata_slga module: {e}"
-    #         ) from e
 
     @retry_decorator()
     def getwcs_slga(self, url, identifier, crs, bbox, resolution, outfname):
@@ -91,11 +62,7 @@ class slga_harvest:
             output file name
 
         """
-        if resolution is None:
-            resolution = self.resolution_arcsec
-
-        # Create WCS object
-        filename = os.path.basename(outfname)
+        resolution = resolution if resolution is not None else self.resolution_arcsec
         try:
             # for the given endpoint e.g. Organic_Carbon, connect to the web coverage service
             wcs = WebCoverageService(
@@ -115,23 +82,20 @@ class slga_harvest:
             # Save data
             with open(outfname, "wb") as f:
                 f.write(data.read())
-                print(f"WCS data downloaded and saved as {filename}")
+                print(f"WCS data downloaded and saved as {os.path.basename(outfname)}")
 
         except Exception as e:
             if e.response.status_code == 502:
                 logger.error(
-                    f"HTTPError 502: Bad Gateway encountered when accessing {url}",
-                    exec_info=True,
+                    f"HTTPError 502: Bad Gateway encountered when accessing {url}"
                 )
             elif e.response.status_code == 503:
                 logger.error(
-                    f"HTTPError 503: Service Unavailable encountered when accessing {url}",
-                    exec_info=True,
+                    f"HTTPError 503: Service Unavailable encountered when accessing {url}"
                 )
             else:
                 logger.error(
-                    f"Error {e.response.status_code}: {e.response.reason} when accessing {url}",
-                    exec_info=True,
+                    f"Error {e.response.status_code}: {e.response.reason} when accessing {url}"
                 )
 
     def get_slga_layers(
@@ -162,37 +126,32 @@ class slga_harvest:
         fnames_out : list of output file names
         """
         try:
-            # Check if layernames is a list
-            if not isinstance(layernames, list):
-                layernames = [layernames]
+            layernames = layernames if isinstance(layernames, list) else [layernames]
+            depth_min = (
+                [depth_min] * len(layernames)
+                if not isinstance(depth_min, list)
+                else depth_min
+            )
+            depth_max = (
+                [depth_max] * len(layernames)
+                if not isinstance(depth_max, list)
+                else depth_max
+            )
 
-            # Check if depth_min and depth_max are lists:
-            if not isinstance(depth_min, list):
-                depth_min = [depth_min] * len(layernames)
-            if not isinstance(depth_max, list):
-                depth_max = [depth_max] * len(layernames)
+            if not (len(depth_min) == len(depth_max) == len(layernames)):
+                logger.error("Depth and layer name lists must be of the same length.")
 
-            assert len(depth_min) == len(
-                depth_max
-            ), "depth_min and depth_max should be lists of same length"
-            assert len(depth_min) == len(
-                layernames
-            ), "depth_min and depth_max should be lists with same length as layernames"
-
-            # Check if outpath exist, if not create it
             os.makedirs(outpath, exist_ok=True)
 
             # If the resolution passed is None, set to native resolution of datasource
-            if resolution is None:
-                resolution = self.resolution_arcsec
+            resolution = (
+                resolution if resolution is not None else self.resolution_arcsec
+            )
             resolution_deg = resolution / 3600.0
-
-            layers_url = self.layers_url
-            crs = self.crs
 
             fnames_out = []
             for idx, layername in enumerate(layernames):
-                layer_url = layers_url[layername]
+                layer_url = self.layers_url[layername]
                 # Get depth identifiers for layers
                 (
                     identifiers,
@@ -214,7 +173,7 @@ class slga_harvest:
                     )
                     # download data
                     dl = self.getwcs_slga(
-                        layer_url, identifier, crs, bbox, resolution_deg, fname_out
+                        layer_url, identifier, self.crs, bbox, resolution_deg, fname_out
                     )
                     if dl:
                         fnames_out.append(fname_out)
@@ -258,12 +217,8 @@ class slga_harvest:
                             fnames_out.append(fname_out_5, fname_out_95)
 
             return fnames_out
-        except Exception:
-            logger.error(
-                "Failed to get SLGA layers",
-                exc_info=True,
-                extra={"layernames": layernames},
-            )
+        except Exception as e:
+            logger.error(f"Failed to get SLGA layers: {e}")
             return None
 
 
@@ -310,12 +265,8 @@ def depth2identifier(depth_min, depth_max):
             depths_lower,
             depths_upper,
         )
-    except Exception:
-        logger.error(
-            "Failed to get identifiers",
-            exc_info=True,
-            extra={"depth_min": depth_min, "depth_max": depth_max},
-        )
+    except Exception as e:
+        logger.error(f"Failed to get identifiers: {e}")
         return None, None, None, None, None
 
 
@@ -357,10 +308,6 @@ def identifier2depthbounds(depths):
                 ncount += 1
         assert ncount == len(depths), f"ncount = {ncount}"
         return depth_min, depth_max
-    except Exception:
-        logger.error(
-            "Failed to get min and max depth",
-            exc_info=True,
-            extra={"depths": depths},
-        )
+    except Exception as e:
+        logger.error(f"Failed to get min and max depth: {e}")
         return None, None

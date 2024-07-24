@@ -26,14 +26,10 @@ To use this script, create an instance of the `DataHarvester` class and call the
 
 import logging
 import os
-from pathlib import Path
 
-import numpy as np
-from shapely.geometry import Point
-
-#from geodata_fetch import getdata_radiometric  # getdata_dem
+# from geodata_fetch import getdata_radiometric  # getdata_dem
 from geodata_fetch.getdata_dem import dem_harvest  # updated call to dem using class
-from geodata_fetch.getdata_slga import slga_harvest, identifier2depthbounds
+from geodata_fetch.getdata_slga import identifier2depthbounds, slga_harvest
 from geodata_fetch.utils import load_settings, reproj_mask
 
 logger = logging.getLogger()
@@ -139,40 +135,40 @@ logging.basicConfig(
 
 #         self._mask_data()
 
-    # def _mask_data(self):
-    #     if self.data_mask is True:
-    #         print(f"Masking data in {self.output_data_dir}")
+# def _mask_data(self):
+#     if self.data_mask is True:
+#         print(f"Masking data in {self.output_data_dir}")
 
-    #         # make a list of all the tif files in the 'data' package that were harvested from sources
-    #         tif_files = [
-    #             f
-    #             for f in os.listdir(self.output_data_dir)
-    #             if f.endswith(".tiff")
-    #             and not f.endswith(
-    #                 ("_masked.tiff", "_colored.tiff", "_cog.tiff", "_cog.public.tiff")
-    #             )
-    #         ]
+#         # make a list of all the tif files in the 'data' package that were harvested from sources
+#         tif_files = [
+#             f
+#             for f in os.listdir(self.output_data_dir)
+#             if f.endswith(".tiff")
+#             and not f.endswith(
+#                 ("_masked.tiff", "_colored.tiff", "_cog.tiff", "_cog.public.tiff")
+#             )
+#         ]
 
-    #         print(f"files to mask: {tif_files}")
-    #         for tif in tif_files:
-    #             # Clips a raster to the area of a shape, and reprojects.
-    #             masked_data = reproj_mask(
-    #                 filename=tif,
-    #                 input_filepath=self.output_data_dir,
-    #                 bbox=self.input_geom,
-    #                 crscode=self.target_crs,
-    #                 output_filepath=self.output_data_dir,
-    #                 resample=self.resample,
-    #             )
-    #             return masked_data
+#         print(f"files to mask: {tif_files}")
+#         for tif in tif_files:
+#             # Clips a raster to the area of a shape, and reprojects.
+#             masked_data = reproj_mask(
+#                 filename=tif,
+#                 input_filepath=self.output_data_dir,
+#                 bbox=self.input_geom,
+#                 crscode=self.target_crs,
+#                 output_filepath=self.output_data_dir,
+#                 resample=self.resample,
+#             )
+#             return masked_data
 
 
-
-#------------------refactoring attempt:-------------------------#
+# ------------------refactoring attempt:-------------------------#
 """
 JAG: attempting to refactor this module using concepts from the factory design pattern. 
 Keep the fetching of each data source compartmentalised so core code logic doesn't need to be touched as new data sources are added.
 """
+
 
 class Settings:
     def __init__(self, config):
@@ -181,9 +177,9 @@ class Settings:
         self.property_name = config.property_name
         self.outpath = config.outpath
         self.target_crs = config.target_crs
-        self.resample = getattr(config, 'resample', False)
-        self.add_buffer = getattr(config, 'add_buffer', False)
-        self.data_mask = getattr(config, 'data_mask', False)
+        self.resample = getattr(config, "resample", False)
+        self.add_buffer = getattr(config, "add_buffer", False)
+        self.data_mask = getattr(config, "data_mask", False)
         self.lat = None
         self.long = None
 
@@ -213,9 +209,9 @@ class DEMDataSource(DataSourceInterface):
         try:
             dem_data = self.dem_harvester.get_dem_layers(
                 property_name=settings.property_name,
-                layernames=settings.target_sources['DEM'],
+                layernames=settings.target_sources["DEM"],
                 bbox=settings.target_bbox,
-                outpath=settings.outpath
+                outpath=settings.outpath,
             )
             return dem_data
         except Exception as e:
@@ -244,13 +240,12 @@ class SLGADataSource(DataSourceInterface):
                 outpath=settings.outpath,
                 depth_min=depth_min,
                 depth_max=depth_max,
-                get_ci=False  # Example flag, should be configured via settings if possible
+                get_ci=False,  # Example flag, should be configured via settings if possible
             )
             return files_slga
         except Exception as e:
             print(f"Error fetching SLGA data: {e}")
             return []
-
 
 
 class DataHarvester:
@@ -259,7 +254,10 @@ class DataHarvester:
         self.settings = Settings(config)
         self.input_geom = input_geom
 
-        self.data_sources = {key: DataSourceFactory.get_data_source(key) for key in self.settings.target_sources}
+        self.data_sources = {
+            key: DataSourceFactory.get_data_source(key)
+            for key in self.settings.target_sources
+        }
 
     def run(self):
         if self.settings.add_buffer:
@@ -278,20 +276,26 @@ class DataHarvester:
 
     def mask_data(self):
         try:
-            tif_files = [f for f in os.listdir(self.settings.outpath)
-                        if f.endswith(".tiff")
-                        and not f.endswith(("_masked.tiff", "_colored.tiff", "_cog.tiff", "_cog.public.tiff"))]
+            tif_files = [
+                f
+                for f in os.listdir(self.settings.outpath)
+                if f.endswith(".tiff")
+                and not f.endswith(
+                    ("_masked.tiff", "_colored.tiff", "_cog.tiff", "_cog.public.tiff")
+                )
+            ]
         except Exception as e:
             logger.error(f"Error listing tiff files: {e}")
 
         for tif in tif_files:
             try:
                 reproj_mask(
-                    filename=tif, 
-                    input_filepath=self.settings.outpath, 
+                    filename=tif,
+                    input_filepath=self.settings.outpath,
                     bbox=self.input_geom,
-                    crscode=self.settings.target_crs, 
-                    output_filepath=self.settings.outpath, 
-                    resample=self.settings.resample)
+                    crscode=self.settings.target_crs,
+                    output_filepath=self.settings.outpath,
+                    resample=self.settings.resample,
+                )
             except Exception as e:
                 logger.error(f"Error masking {tif}: {e}")
