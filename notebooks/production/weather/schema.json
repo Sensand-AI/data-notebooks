@@ -36,7 +36,7 @@
           "type": "boolean"
         }
       },
-      "required": ["geojson", "propertyName", "forecast_days", "historical", "forecast", "start_year", "end_year"]
+      "required": ["geojson", "propertyName"]
     }
   },
   "required": ["notebook_name", "parameters", "output_type"]
