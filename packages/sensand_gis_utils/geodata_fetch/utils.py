@@ -28,11 +28,9 @@ retry_decorator: A decorator to retry the WCS endpoint if an HTTP 502 or 503 err
 import json
 import logging
 import os
-from types import SimpleNamespace
-
-from functools import wraps
-from requests.exceptions import HTTPError
 import time
+from functools import wraps
+from types import SimpleNamespace
 
 import numpy as np
 import rasterio
@@ -40,7 +38,6 @@ import rioxarray as rxr
 from matplotlib import cm
 from matplotlib.colors import Normalize
 from owslib.wcs import WebCoverageService
-from rasterio.dtypes import uint8
 from rasterio.enums import Resampling
 from rasterio.io import MemoryFile
 from rasterio.plot import reshape_as_raster
@@ -387,7 +384,7 @@ def colour_geotiff_and_save_cog(input_geotiff, colour_map):
         logger.error(f"Error colorizing GeoTIFF {input_geotiff}: {e}", exc_info=True)
 
 
-def retry_decorator(max_retries=3, backoff_factor=1, retry_statuses=(502,503)):
+def retry_decorator(max_retries=3, backoff_factor=1, retry_statuses=(502, 503)):
     """
     A decorator to retry a function if it raises specified HTTP errors.
 
@@ -399,27 +396,29 @@ def retry_decorator(max_retries=3, backoff_factor=1, retry_statuses=(502,503)):
     Returns:
         function: The wrapped function with retry logic.
     """
+
     def decorator_retry(func):
         @wraps(func)
+        # having the func wrapper andt args, kwargs gives access to the function itself and its arguments.
         def wrapper(*args, **kwargs):
             attempts = 0
             while attempts < max_retries:
                 try:
                     return func(*args, **kwargs)
-                except HTTPError as e:
-                    if e.response.status_code in retry_statuses:
-                        attempts += 1
-                        sleep_time = backoff_factor * (2 ** attempts)
-                        time.sleep(sleep_time)
-                    else:
-                        raise
                 except Exception as e:
-                    if attempts < max_retries:
+                    if e.response.status_code in retry_statuses:
+                        print(e.response.status_code)
                         attempts += 1
-                        sleep_time = backoff_factor * (2 ** attempts)
+                        sleep_time = backoff_factor * (2**attempts)
                         time.sleep(sleep_time)
+                        logger.error(
+                            f"HTTP error {e.response.status_code} occurred. Retrying."
+                        )
                     else:
                         raise
-                return func(*args, **kwargs)
+
+            logger.error("Max retries exceeded. Giving up.")
+
         return wrapper
+
     return decorator_retry
