@@ -34,6 +34,12 @@
         },
         "forecast": {
           "type": "boolean"
+        },
+        "hourly_forecast": {
+          "type": "boolean"
+        },
+        "hourly_historical": {
+          "type": "boolean"
         }
       },
       "required": ["geojson", "propertyName"]

@@ -7,7 +7,7 @@ from importlib import resources
 
 from owslib.wcs import WebCoverageService
 
-from geodata_fetch import utils
+from geodata_fetch.utils import retry_decorator
 
 logger = logging.getLogger()
 
@@ -88,7 +88,7 @@ def get_radiometric_layers(property_name, layernames, bbox, outpath):
     return fnames_out
 
 
-
+@retry_decorator()
 def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
     """
     Download radiometric data layer and save geotiff from WCS layer.

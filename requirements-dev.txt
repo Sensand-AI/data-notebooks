@@ -2,3 +2,4 @@ awslambdaric==2.0.11	# AWS Lambda Python runtime interface client (RIC) for Pyth
 pylint==3.2.0	# Python code static checker
 pytest==8.2.0 # Testing framework
 ruff # Python code formatter
+requests-mock # fortesting requests in the custom python packages
