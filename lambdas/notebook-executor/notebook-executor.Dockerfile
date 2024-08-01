@@ -13,7 +13,7 @@ ENV \
     AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
 
 # Copy the Datadog Lambda Extension
-COPY --from=public.ecr.aws/datadog/lambda-extension:latest /opt/extensions/ /opt/extensions
+COPY --from=public.ecr.aws/datadog/lambda-extension:62 /opt/. /opt/
 
 WORKDIR ${LAMBDA_TASK_ROOT}
 
