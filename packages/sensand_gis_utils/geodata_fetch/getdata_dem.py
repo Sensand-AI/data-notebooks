@@ -3,7 +3,9 @@ import logging
 import os
 from importlib import resources
 
+from odc.stac import configure_rio, stac_load
 from owslib.wcs import WebCoverageService
+from pystac_client import Client
 
 from geodata_fetch.utils import retry_decorator
 
@@ -13,8 +15,11 @@ logging.basicConfig(
     level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
+configure_rio(cloud_defaults=True, aws={"aws_unsigned": True})
+os.environ["AWS_NO_SIGN_REQUEST"] = "YES"
 
-class BaseHarvest:
+
+class _BaseHarvest:
     def __init__(self, config_filename):
         try:
             with resources.open_text("data", config_filename) as f:
@@ -31,19 +36,20 @@ class BaseHarvest:
 
     def initialise_attributes_from_json(self, config_json):
         self.title = config_json.get("title")
-        self.description = config_json.get("description")
-        self.license = config_json.get("license")
+        self.description = config_json.get("description", None)
+        self.license = config_json.get("license", None)
         self.source_url = config_json.get("source_url")
-        self.copyright = config_json.get("copyright")
-        self.attribution = config_json.get("attribution")
+        self.copyright = config_json.get("copyright", None)
+        self.attribution = config_json.get("attribution", None)
         self.crs = config_json.get("crs")
-        self.bbox = config_json.get("bbox")
-        self.resolution_arcsec = config_json.get("resolution_arcsec")
+        self.bbox = config_json.get("bbox", None)
+        self.resolution_arcsec = config_json.get("resolution_arcsec", None)
+        self.resolution_metre = config_json.get("resolution_metre", None)
         self.layers_url = config_json.get("layers_url")
         self.fetched_files = []
 
 
-class dem_harvest(BaseHarvest):
+class dem_harvest(_BaseHarvest):
     def __init__(self):
         super().__init__("dem.json")
 
@@ -137,13 +143,18 @@ class dem_harvest(BaseHarvest):
 
             os.makedirs(outpath, exist_ok=True)
 
+            """
+            TODO: Adjust resolution param to take ana rcsecond OR metre as input rather than hard-code here.
+            """
+            resolution = 30
+
             fnames_out = []
             for layername in layernames:
                 if layername == "DEM":
                     outfname = self.getwcs_dem(
                         url=self.layers_url["DEM"],
                         crs=self.crs,
-                        resolution=self.resolution_arcsec,
+                        resolution=resolution,
                         bbox=bbox,
                         property_name=property_name,
                         outpath=outpath,
@@ -161,6 +172,60 @@ class dem_harvest(BaseHarvest):
             return None
 
 
-class dem_harves_global(BaseHarvest):
+class dem_harvest_global(_BaseHarvest):
     def __init__(self):
         super().__init__("stac_dem.json")
+
+    def get_global_stac_dem(self, property_name, layernames, bbox, outpath):
+        if not isinstance(layernames, list):
+            layernames = [layernames]
+        try:
+            os.makedirs(outpath, exist_ok=True)
+
+            fnames_out = []
+            for layername in layernames:
+                if layername == "DEM Global":
+                    print(layername)
+                    fname_out = (
+                        layername.replace(" ", "_") + "_" + property_name + ".tiff"
+                    )
+                    crs = 3857
+                    resolution = 120
+                    collections = ["cop-dem-glo-30"]
+
+                    """
+                    not sure if importing gis_utils stac was causing a problem, so I've hardcoded in here for now.
+                    """
+                    catalog = Client.open(self.source_url)
+                    query = catalog.search(collections=collections, bbox=bbox)
+                    items = list(query.items())
+
+                    print("checkpoint in class 5")
+
+                    stac_load_xarray = stac_load(
+                        items,
+                        crs=f"epsg:{crs}",
+                        resolution=resolution,
+                        bbox=bbox,
+                        chunksize=(1024, 1024),
+                    )  # only squeeze if you KNOW there is only one time dimension
+                    print("checkpoint before memory load of dem")
+                    stac_load_xarray = stac_load_xarray.squeeze()
+                    stac_load_xarray = stac_load_xarray.load()
+                    print("checkpoint after memory load of dem")
+                    xarray_data = stac_load_xarray.data
+
+                    final_raster = xarray_data.rio.to_raster(fname_out, driver="COG")
+                    fnames_out.append(final_raster)
+            if fnames_out:
+                logger.info(f"Global DEM layer saved as {fnames_out[0]}")
+            if not fnames_out:
+                logger.error("Failed to get Global DEM layer")
+            return fnames_out
+        except Exception as e:
+            logger.error(
+                "Failed to get Global DEM layer",
+                exc_info=True,
+                extra={"layernames": layernames, "error": str(e)},
+            )
+            return None

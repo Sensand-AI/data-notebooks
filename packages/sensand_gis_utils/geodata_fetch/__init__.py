@@ -4,6 +4,5 @@ from . import (
     getdata_slga,
     harvest,
     settingshandler,
-    stac,
     utils,
 )
