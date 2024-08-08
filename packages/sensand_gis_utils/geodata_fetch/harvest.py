@@ -90,6 +90,7 @@ class DEM_data_source(data_source_interface):
                 layernames=settings.target_sources["DEM"],
                 bbox=settings.target_bbox,
                 outpath=settings.outpath,
+                crs=settings.target_crs,
             )
             return dem_data
         except Exception as e:
@@ -102,16 +103,14 @@ class glob_DEM_data_source(data_source_interface):
         self.dem_harvester_global = dem_harvest_global()
 
     def fetch_data(self, settings):
-        print("checkpoint in harvest 1")
         try:
-            print("checkpoint in harvest 2")
             glob_dem_data = self.dem_harvester_global.get_global_stac_dem(
                 property_name=settings.property_name,
                 layernames=settings.target_sources["DEM Global"],
                 bbox=settings.target_bbox,
                 outpath=settings.outpath,
+                crs = settings.target_crs
             )
-            print("checkpoint in harvest 3")
             return glob_dem_data
         except Exception as e:
             print(f"Error fetching DEM Global data: {e}")
@@ -170,7 +169,6 @@ class DataHarvester:
                 print(f"error fetching {source_name}: {e}")
 
         if self.settings.data_mask:
-            print(f"Masking data in {self.settings.outpath}")
             self.mask_data()
 
     def mask_data(self):
@@ -188,6 +186,7 @@ class DataHarvester:
 
         for tif in tif_files:
             try:
+                print(f"Masking {tif}")
                 reproj_mask(
                     filename=tif,
                     input_filepath=self.settings.outpath,

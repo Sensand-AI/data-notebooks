@@ -67,7 +67,7 @@ class dem_harvest(_BaseHarvest):
             outpath (str): The output directory where the downloaded DEM will be saved.
 
         Returns:
-            str: The filepath of the downloaded DEM.
+            data array containing pixels
 
         Raises:
             ServiceException: If the WCS server returns an exception.
@@ -85,8 +85,6 @@ class dem_harvest(_BaseHarvest):
             fname_out = layername.replace(" ", "_") + "_" + property_name + ".tiff"
             outfname = os.path.join(outpath, fname_out)
 
-            print(outfname)
-
             os.makedirs(outpath, exist_ok=True)
 
             data = wcs.getCoverage(
@@ -97,11 +95,6 @@ class dem_harvest(_BaseHarvest):
                 resx=resolution,
                 resy=resolution,
             )
-
-            with open(outfname, "wb") as f:
-                f.write(data.read())
-                logger.info(f"WCS data downloaded and saved as {fname_out}")
-
         except Exception as e:
             if e.response.status_code == 502:
                 logger.error(
@@ -118,9 +111,9 @@ class dem_harvest(_BaseHarvest):
                     f"Error {e.response.status_code}: {e.response.reason} when accessing {url}",
                     exec_info=True,
                 )
-        return outfname
+        return data.read()  # outfname
 
-    def get_dem_layers(self, property_name, layernames, bbox, outpath):
+    def get_dem_layers(self, property_name, layernames, bbox, crs, outpath):
         """
         Fetches DEM layers based on the provided parameters.
 
@@ -151,7 +144,7 @@ class dem_harvest(_BaseHarvest):
             fnames_out = []
             for layername in layernames:
                 if layername == "DEM":
-                    outfname = self.getwcs_dem(
+                    data = self.getwcs_dem(
                         url=self.layers_url["DEM"],
                         crs=self.crs,
                         resolution=resolution,
@@ -159,8 +152,14 @@ class dem_harvest(_BaseHarvest):
                         property_name=property_name,
                         outpath=outpath,
                     )
-                    if outfname:
+                    fname_out = f"DEM_SRTM_1_Second_Hydro_Enforced_{property_name}.tiff"
+                    outfname = os.path.join(outpath, fname_out)
+                    with open(outfname, "wb") as f:
+                        f.write(data)
                         fnames_out.append(outfname)
+                        logger.info(f"WCS data downloaded and saved as {fname_out}")
+                    # if outfname:
+                    #     fnames_out.append(outfname)
 
             return fnames_out
         except Exception as e:
@@ -185,11 +184,17 @@ class dem_harvest_global(_BaseHarvest):
             fnames_out = []
             for layername in layernames:
                 if layername == "DEM Global":
-                    print(layername)
                     fname_out = (
-                        layername.replace(" ", "_") + "_" + property_name + ".tiff"
+                        layername.replace(" ", "_")
+                        + "_COP_30_GLO_"
+                        + property_name
+                        + ".tiff"
                     )
-                    crs = 3857
+
+                    outfname = os.path.join(outpath, fname_out)
+                    """
+                    There are some oddities with handling CRS here. The stac items need to be passed to stac_load_xarray as a SPATIAL reference system (3857) but our final stored data expects a  CARTESIAN system (4326). So, we need to do a reproject after downloading the data.
+                    """
                     resolution = 120
                     collections = ["cop-dem-glo-30"]
 
@@ -200,27 +205,25 @@ class dem_harvest_global(_BaseHarvest):
                     query = catalog.search(collections=collections, bbox=bbox)
                     items = list(query.items())
 
-                    print("checkpoint in class 5")
-
                     stac_load_xarray = stac_load(
                         items,
-                        crs=f"epsg:{crs}",
+                        crs="epsg:3857",
                         resolution=resolution,
                         bbox=bbox,
                         chunksize=(1024, 1024),
                     )  # only squeeze if you KNOW there is only one time dimension
-                    print("checkpoint before memory load of dem")
+                    # print("checkpoint before memory load of dem")
                     stac_load_xarray = stac_load_xarray.squeeze()
                     stac_load_xarray = stac_load_xarray.load()
-                    print("checkpoint after memory load of dem")
                     xarray_data = stac_load_xarray.data
 
-                    final_raster = xarray_data.rio.to_raster(fname_out, driver="COG")
+                    print(f"data array: {xarray_data}")
+
+                    d = xarray_data.rio.set_crs("epsg:3857")
+                    d.reproject(f"epsg:{self.crs}")
+                    final_raster = d.rio.to_raster(outfname, driver="COG")
                     fnames_out.append(final_raster)
-            if fnames_out:
-                logger.info(f"Global DEM layer saved as {fnames_out[0]}")
-            if not fnames_out:
-                logger.error("Failed to get Global DEM layer")
+            print(fnames_out)
             return fnames_out
         except Exception as e:
             logger.error(
