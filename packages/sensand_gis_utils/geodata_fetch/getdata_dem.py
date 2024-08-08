@@ -3,9 +3,11 @@ import logging
 import os
 from importlib import resources
 
+import rioxarray
 from odc.stac import configure_rio, stac_load
 from owslib.wcs import WebCoverageService
 from pystac_client import Client
+from rasterio.io import MemoryFile
 
 from geodata_fetch.utils import retry_decorator
 
@@ -81,9 +83,9 @@ class dem_harvest(_BaseHarvest):
 
             wcs = WebCoverageService(url, version="1.0.0", timeout=600)
             # layername is handled differently here compared to SLGA due to structure of the endpoint
-            layername = wcs["1"].title
-            fname_out = layername.replace(" ", "_") + "_" + property_name + ".tiff"
-            outfname = os.path.join(outpath, fname_out)
+            # layername = wcs["1"].title
+            # fname_out = layername.replace(" ", "_") + "_" + property_name + ".tiff"
+            # outfname = os.path.join(outpath, fname_out)
 
             os.makedirs(outpath, exist_ok=True)
 
@@ -154,12 +156,16 @@ class dem_harvest(_BaseHarvest):
                     )
                     fname_out = f"DEM_SRTM_1_Second_Hydro_Enforced_{property_name}.tiff"
                     outfname = os.path.join(outpath, fname_out)
-                    with open(outfname, "wb") as f:
-                        f.write(data)
-                        fnames_out.append(outfname)
-                        logger.info(f"WCS data downloaded and saved as {fname_out}")
-                    # if outfname:
-                    #     fnames_out.append(outfname)
+
+                    # take the downlaoded data, project it to correct CRS and save:
+                    # Load data into rioxarray, reproject, and save
+                    with MemoryFile(data) as memfile:
+                        with memfile.open() as src:
+                            rxr = rioxarray.open_rasterio(src, masked=True)
+                            rxr_reprojected = rxr.rio.reproject("EPSG:3857")
+                            rxr_reprojected.rio.to_raster(outfname)
+                            fnames_out.append(outfname)
+                            logger.info(f"Reprojected WCS data saved as {fname_out}")
 
             return fnames_out
         except Exception as e:
@@ -195,7 +201,7 @@ class dem_harvest_global(_BaseHarvest):
                     """
                     There are some oddities with handling CRS here. The stac items need to be passed to stac_load_xarray as a SPATIAL reference system (3857) but our final stored data expects a  CARTESIAN system (4326). So, we need to do a reproject after downloading the data.
                     """
-                    resolution = 120
+                    resolution = 30
                     collections = ["cop-dem-glo-30"]
 
                     """
@@ -217,11 +223,7 @@ class dem_harvest_global(_BaseHarvest):
                     stac_load_xarray = stac_load_xarray.load()
                     xarray_data = stac_load_xarray.data
 
-                    print(f"data array: {xarray_data}")
-
-                    d = xarray_data.rio.set_crs("epsg:3857")
-                    d.reproject(f"epsg:{self.crs}")
-                    final_raster = d.rio.to_raster(outfname, driver="COG")
+                    final_raster = xarray_data.rio.to_raster(outfname, driver="COG")
                     fnames_out.append(final_raster)
             print(fnames_out)
             return fnames_out

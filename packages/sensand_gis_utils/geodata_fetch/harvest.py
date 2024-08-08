@@ -109,7 +109,6 @@ class glob_DEM_data_source(data_source_interface):
                 layernames=settings.target_sources["DEM Global"],
                 bbox=settings.target_bbox,
                 outpath=settings.outpath,
-                crs = settings.target_crs
             )
             return glob_dem_data
         except Exception as e:
@@ -191,7 +190,7 @@ class DataHarvester:
                     filename=tif,
                     input_filepath=self.settings.outpath,
                     bbox=self.input_geom,
-                    crscode=self.settings.target_crs,
+                    out_crscode=self.settings.target_crs,
                     output_filepath=self.settings.outpath,
                     resample=self.settings.resample,
                 )
