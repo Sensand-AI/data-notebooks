@@ -53,7 +53,7 @@ class _BaseHarvest:
 
 class dem_harvest(_BaseHarvest):
     def __init__(self):
-        super().__init__("dem.json")
+        super().__init__("australia_dem_default_config.json")
 
     @retry_decorator()
     def getwcs_dem(self, url, crs, resolution, bbox, property_name, outpath):
@@ -141,7 +141,7 @@ class dem_harvest(_BaseHarvest):
             """
             TODO: Adjust resolution param to take ana rcsecond OR metre as input rather than hard-code here.
             """
-            resolution = 30
+            resolution = self.resolution_metre
 
             fnames_out = []
             for layername in layernames:
@@ -179,7 +179,7 @@ class dem_harvest(_BaseHarvest):
 
 class dem_harvest_global(_BaseHarvest):
     def __init__(self):
-        super().__init__("stac_dem.json")
+        super().__init__("stac_global_dem_default_config.json")
 
     def get_global_stac_dem(self, property_name, layernames, bbox, outpath):
         if not isinstance(layernames, list):
@@ -225,7 +225,6 @@ class dem_harvest_global(_BaseHarvest):
 
                     final_raster = xarray_data.rio.to_raster(outfname, driver="COG")
                     fnames_out.append(final_raster)
-            print(fnames_out)
             return fnames_out
         except Exception as e:
             logger.error(

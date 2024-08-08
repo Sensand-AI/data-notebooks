@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import sys
 from datetime import datetime, timezone
 from importlib import resources
 
@@ -11,11 +10,12 @@ from geodata_fetch.utils import retry_decorator
 
 logger = logging.getLogger()
 
+
 def get_radiometricdict():
     try:
-        with resources.open_text('data','radiometric.json') as f:
+        with resources.open_text("data", "radiometric_default_config.json") as f:
             rm_json = json.load(f)
-        
+
         rmdict = {}
         rmdict["title"] = rm_json["title"]
         rmdict["description"] = rm_json["description"]
@@ -30,13 +30,15 @@ def get_radiometricdict():
 
         return rmdict
     except Exception as e:
-        logger.error("Error loading radiometric.json", extra=dict({'error': str(e)}))
+        logger.error("Error loading radiometric.json", extra=dict({"error": str(e)}))
         return None
+
 
 """
 TODO: resolution is set to 1 here. But its 3.6 (100m) in the original data. Remove or find out why its set to 1.
 Ditto EPSG.
 """
+
 
 def get_radiometric_layers(property_name, layernames, bbox, outpath):
     """
@@ -50,8 +52,8 @@ def get_radiometric_layers(property_name, layernames, bbox, outpath):
         layer identifiers
     bbox : list
         layer bounding box
-        
-    These are now being read from the dict, not passed as ahrd-coded values:    
+
+    These are now being read from the dict, not passed as ahrd-coded values:
     resolution, url, crs
 
     Return
@@ -59,14 +61,14 @@ def get_radiometric_layers(property_name, layernames, bbox, outpath):
     list of output filenames
     """
     rm_data = get_radiometricdict()
-    
+
     resolution = rm_data["resolution_arcsec"]
-    crs = rm_data["crs"]   
+    crs = rm_data["crs"]
     url = rm_data["layers_url"]
-     
-    #for url to be called the getdict function needs to be called first
-    #url = "https://gsky.nci.org.au/ows/national_geophysical_compilations?service=WCS"
-    
+
+    # for url to be called the getdict function needs to be called first
+    # url = "https://gsky.nci.org.au/ows/national_geophysical_compilations?service=WCS"
+
     if type(layernames) != list:
         layernames = [layernames]
 
@@ -74,14 +76,15 @@ def get_radiometric_layers(property_name, layernames, bbox, outpath):
     fnames_out = []
     for layername in layernames:
         outfname = os.path.join(
-            outpath, "radiometric_" + layername + "_" + property_name + '.tiff')
+            outpath, "radiometric_" + layername + "_" + property_name + ".tiff"
+        )
         ok = get_radiometric_image(
             outfname=outfname,
             layername=layername,
             bbox=bbox,
             url=url,
             resolution=resolution,
-            crs=crs
+            crs=crs,
         )
         if ok:
             fnames_out.append(outfname)
@@ -118,7 +121,7 @@ def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
     height = abs(bbox[3] - bbox[1])
     nwidth = int(width / resolution * 3600)
     nheight = int(height / resolution * 3600)
-    
+
     # Get date
     times = get_times(url, layername)
     # There is only one time available per layer
@@ -146,7 +149,7 @@ def get_radiometric_image(outfname, layername, bbox, url, resolution, crs):
         with open(outfname, "wb") as f:
             f.write(data.read())
         logger.info(f"Layer {layername} saved in {outfname}")
-    
+
     return True
 
 
