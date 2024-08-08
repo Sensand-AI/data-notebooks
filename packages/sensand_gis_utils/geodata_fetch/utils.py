@@ -252,7 +252,7 @@ def _read_file(file):
 
 
 def reproj_mask(
-    filename, input_filepath, bbox, crscode, output_filepath, resample=False
+    filename, input_filepath, bbox, out_crscode, output_filepath, resample=False
 ):
     """
     Reprojects and converts a raster file from uint16 to float32, then masks it based on the given parameters,
@@ -269,6 +269,11 @@ def reproj_mask(
     Returns:
         xarray.DataArray: The clipped and reprojected raster as a DataArray.
 
+    """
+
+    """
+    TODO: do a reproject on the incoming geometry so it's always 3857
+    TODO: Do a reproject check on the incoming raster so its always 3857
     """
     input_full_filepath = os.path.join(input_filepath, filename)
     masked_filepath = filename.replace(".tiff", "_masked.tiff")
@@ -287,6 +292,18 @@ def reproj_mask(
                 input_raster = input_raster.where(
                     input_raster != original_nodata, np.nan
                 )
+
+        if input_raster.rio.crs.to_epsg() != out_crscode:
+            logger.info(
+                f"Reprojecting raster, input crs:{input_raster.rio.crs}, output crs:{out_crscode}"
+            )
+            input_raster = input_raster.rio.reproject(out_crscode)
+
+        if bbox.crs != out_crscode:
+            logger.info(
+                f"Reprojecting geometry, input crs:{bbox.crs}, output crs:{out_crscode}"
+            )
+            bbox = bbox.to_crs(out_crscode)
 
         # Update NoData value for float32 in the metadata
         input_raster.rio.write_nodata(np.nan, inplace=True)
@@ -308,7 +325,7 @@ def reproj_mask(
         )
 
         # Reproject the clipped raster and save
-        reprojected = clipped.rio.reproject(crscode)
+        reprojected = clipped.rio.reproject(out_crscode)
         reprojected.rio.to_raster(mask_outpath, tiled=True, dtype="float32")
 
         return reprojected

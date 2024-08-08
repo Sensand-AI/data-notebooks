@@ -20,7 +20,7 @@ class slga_harvest:
 
     def load_configuration(self):
         try:
-            with resources.open_text("data", "slga_soil.json") as f:
+            with resources.open_text("data", "slga_soil_default_config.json") as f:
                 config_json = json.load(f)
             self.initialise_attributes_from_json(config_json)
         except Exception as e:
@@ -200,7 +200,7 @@ class slga_harvest:
                         dl_5 = self.getwcs_slga(
                             layer_url,
                             identifier_5,
-                            crs,
+                            self.crs,
                             bbox,
                             resolution_deg,
                             fname_out,
@@ -208,7 +208,7 @@ class slga_harvest:
                         dl_95 = self.getwcs_slga(
                             layer_url,
                             identifier_95,
-                            crs,
+                            self.crs,
                             bbox,
                             resolution_deg,
                             fname_out,
