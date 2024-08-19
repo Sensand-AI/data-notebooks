@@ -25,4 +25,7 @@ COPY packages /workspace/packages
 
 RUN pip install -r /workspace/requirements-custom.txt
 
+# Install tinybird-cli
+RUN pip install tinybird-cli
+
 CMD ["sleep", "infinity"]
