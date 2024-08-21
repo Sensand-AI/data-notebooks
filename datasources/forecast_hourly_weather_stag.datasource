@@ -1,6 +1,8 @@
 
 SCHEMA >
     `date` DateTime,
+    `location_timezone` String,
+    `location_timezone_abbreviation` String,
     `temperature_2m` Nullable(Float32),
     `apparent_temperature` Nullable(Float32),
     `relative_humidity_2m` Nullable(Float32),
@@ -28,6 +30,7 @@ SCHEMA >
 ENGINE "MergeTree"
 ENGINE_PARTITION_KEY "toYear(date)"
 ENGINE_SORTING_KEY "date, boundary_name, workspace_id, property_id"
+ENGINE_TTL "date + toIntervalDay(21)"
 
 IMPORT_SERVICE 's3_iamrole'
 IMPORT_CONNECTION_NAME 'sensand-staging-notebook-outputs-connection'
