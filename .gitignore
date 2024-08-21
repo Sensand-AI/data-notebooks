@@ -16,3 +16,5 @@ notebooks/sandbox/data
 notebook_outputs/
 .cache.sqlite
 *.zip
+
+.tinyb
