@@ -1,0 +1,24 @@
+DESCRIPTION >
+	Get all hourly data
+
+
+TOKEN "get_hourly_weather_endpoint_read_5992" READ
+
+TOKEN "Production API Admin" READ
+
+NODE all_hourly_weather
+SQL >
+
+    %
+    SELECT
+        *,
+        parseDateTimeBestEffort(date, 3) AS converted_date
+    FROM
+        (SELECT * FROM hourly_weather_4585) AS subquery
+    WHERE boundary_id = {{String(boundaryId, '018f9f6b-ab60-7b8a-be5f-14b04e989ba8', description="Boundary ID", required=True)}}
+      AND property_id = {{String(propertyId, '018f99ea-564e-72fa-a4b7-2dbd24b65c3e', description="Property ID", required=True)}}
+      AND converted_date >= toDate(parseDateTimeBestEffort({{String(startdate, '2024-01-01', description="First date to return YYYYMMDD")}}))
+      AND converted_date <= toDate(parseDateTimeBestEffort({{String(enddate, '2024-03-31', description="Last date to return YYYYMMDD")}}))
+    ORDER BY converted_date
+
+

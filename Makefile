@@ -92,9 +92,13 @@ lambda-update:
 lambda-details:
 	aws-vault exec $(AWS_STAGING_PROFILE) -- aws lambda get-function --function-name NotebookExecutorFunction --region us-east-1
 
-#tinybird-auth: Authenticate with Tinybird
+## tinybird-auth: Authenticate with Tinybird
 tinybird-auth:
 	tb auth --token $(TINYBIRD_ADMIN_TOKEN)
+
+## tinybird-pull: Pull Tinybird datasources from remote
+tinybird-pull:
+	tb pull --auto
 
 ## help: Show a list of commands
 help : Makefile

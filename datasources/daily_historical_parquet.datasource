@@ -1,0 +1,32 @@
+
+SCHEMA >
+    `apparent_temperature_max` Float32 `json:$.apparent_temperature_max`,
+    `apparent_temperature_min` Float32 `json:$.apparent_temperature_min`,
+    `boundary_id` String `json:$.boundary_id`,
+    `boundary_name` String `json:$.boundary_name`,
+    `date` String `json:$.date`,
+    `daylight_duration` Float64 `json:$.daylight_duration`,
+    `et0_fao_evapotranspiration` Float32 `json:$.et0_fao_evapotranspiration`,
+    `latitude` Float32 `json:$.latitude`,
+    `longitude` Float32 `json:$.longitude`,
+    `precipitation_hours` Float32 `json:$.precipitation_hours`,
+    `precipitation_sum` Float32 `json:$.precipitation_sum`,
+    `property_id` String `json:$.property_id`,
+    `shortwave_radiation_sum` Float32 `json:$.shortwave_radiation_sum`,
+    `sunrise` Int16 `json:$.sunrise`,
+    `sunset` Int16 `json:$.sunset`,
+    `sunshine_duration` Float64 `json:$.sunshine_duration`,
+    `temperature_2m_max` Float32 `json:$.temperature_2m_max`,
+    `temperature_2m_min` Float32 `json:$.temperature_2m_min`,
+    `weather_code` Float32 `json:$.weather_code`,
+    `wind_direction_10m_dominant` Float32 `json:$.wind_direction_10m_dominant`,
+    `workspace_id` String `json:$.workspace_id`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "sunrise, sunset, workspace_id"
+
+IMPORT_SERVICE 's3_iamrole'
+IMPORT_CONNECTION_NAME 'sensand-developer-notebook-uploads'
+IMPORT_BUCKET_URI 's3://notebook-uploads/parquet/daily_historical/*.parquet'
+IMPORT_STRATEGY 'append'
+IMPORT_SCHEDULE '@on-demand'

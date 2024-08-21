@@ -1,0 +1,37 @@
+DESCRIPTION >
+    This data source connects to the STAGING weather application s3 bucket. It pulls in data regardless of the date or propertyid.
+
+SCHEMA >
+    `date` DateTime,
+    `weather_code` Float32,
+    `sunrise` DateTime,
+    `sunset` DateTime,
+    `uv_index_max` Nullable(String),
+    `temperature_2m_max` Float32,
+    `temperature_2m_min` Float32,
+    `apparent_temperature_max` Float32,
+    `apparent_temperature_min` Float32,
+    `daylight_duration` Float32,
+    `sunshine_duration` Float32,
+    `uv_index_clear_sky_max` Nullable(String),
+    `precipitation_sum` Float32,
+    `precipitation_hours` Float32,
+    `wind_direction_10m_dominant` Float32,
+    `shortwave_radiation_sum` Float32,
+    `et0_fao_evapotranspiration` Float32,
+    `longitude` Float32,
+    `latitude` Float32,
+    `boundary_id` String,
+    `boundary_name` String,
+    `workspace_id` String,
+    `property_id` String
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(date)"
+ENGINE_SORTING_KEY "date, boundary_name, workspace_id, property_id"
+
+IMPORT_SERVICE 's3_iamrole'
+IMPORT_CONNECTION_NAME 'sensand-staging-notebook-outputs-connection'
+IMPORT_BUCKET_URI 's3://sensand-staging-notebook-outputs/weather/*/*/*historical_daily.csv'
+IMPORT_STRATEGY 'append'
+IMPORT_SCHEDULE '@auto'

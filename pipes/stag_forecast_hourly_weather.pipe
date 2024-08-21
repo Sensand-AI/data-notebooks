@@ -1,0 +1,45 @@
+TOKEN "stag_forecast_hourly_weather_endpoint_read_2966" READ
+
+TOKEN "staging_token" READ
+
+NODE select_all
+DESCRIPTION >
+    This SQL query is meant to get the max temp from historical data and aggregate to a monthly average. For learning purposes for Jenna.
+
+SQL >
+
+    %
+    SELECT *
+    FROM forecast_hourly_weather_stag
+    WHERE
+        boundary_id
+        = {{
+            String(
+                boundaryId,
+                '01907ba3-4159-7e72-8912-05ad329edad1',
+                description="Boundary ID",
+                required=True,
+            )
+        }}
+        AND property_id
+        = {{
+            String(
+                propertyId,
+                '018f3178-8f32-750b-b692-f752aca9eae5',
+                description="Property ID",
+                required=True,
+            )
+        }}
+        AND date >= toDateTime(
+            parseDateTimeBestEffort(
+                {{ String(startdate, '2024-08-01 00:00:00', description="First date to return YYYYMMDD HH:MM:SS") }}
+            )
+        )
+        AND date <= toDateTime(
+            parseDateTimeBestEffort(
+                {{ String(enddate, '2024-08-02 00:00:00', description="Last date to return YYYYMMDD HH:MM:SS") }}
+            )
+        )
+    ORDER BY date limit 1 by date
+
+

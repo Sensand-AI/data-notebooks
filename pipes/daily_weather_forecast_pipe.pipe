@@ -1,0 +1,21 @@
+TOKEN "daily_weather_forecast_pipe_endpoint_read_9789" READ
+
+TOKEN "Production API Admin" READ
+
+NODE daily_weather_forecast_pipe_node_0
+SQL >
+
+    %
+    SELECT
+        *,
+        parseDateTimeBestEffort(date, 4) AS converted_date
+    FROM
+        (SELECT * FROM forecast_auto_s3_sync) AS subquery
+    WHERE boundary_id = {{String(boundaryId, '018f9f6b-ab60-7b8a-be5f-14b04e989ba8', description="Boundary ID", required=True)}}
+      AND property_id = {{String(propertyId, '018f99ea-564e-72fa-a4b7-2dbd24b65c3e', description="Property ID", required=True)}}
+      AND converted_date >= toDate(parseDateTimeBestEffort({{String(startdate, '2024-06-04', description="First date to return YYYYMMDD")}}))
+      AND converted_date <= toDate(parseDateTimeBestEffort({{String(enddate, '2024-06-10', description="Last date to return YYYYMMDD")}}))
+    ORDER BY converted_date limit 1 by converted_date
+
+
+

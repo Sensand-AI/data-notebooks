@@ -1,0 +1,16 @@
+
+SCHEMA >
+    `workspace_id` String,
+    `property_id` String,
+    `device_id` String,
+    `ts` String,
+    `reading` String
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "device_id, ts, reading"
+
+IMPORT_SERVICE 's3_iamrole'
+IMPORT_CONNECTION_NAME 'sensand-developer-notebook-uploads'
+IMPORT_BUCKET_URI 's3://notebook-uploads/iot/ingested_datapoints.csv'
+IMPORT_STRATEGY 'append'
+IMPORT_SCHEDULE '@on-demand'

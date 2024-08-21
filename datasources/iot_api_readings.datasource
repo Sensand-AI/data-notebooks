@@ -1,0 +1,18 @@
+
+SCHEMA >
+    `time` String,
+    `ch_0_temperature__c_` String,
+    `ch_1_humidity___` String,
+    `ch_2_light_lx_` String,
+    `motion_digital` String,
+    `battery_voltage_v_` String,
+    `occupancy_digital` String
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "motion_digital, battery_voltage_v_, occupancy_digital"
+
+IMPORT_SERVICE 's3_iamrole'
+IMPORT_CONNECTION_NAME 'sensand-developer-notebook-uploads'
+IMPORT_BUCKET_URI 's3://notebook-uploads/iot/api_datapoints.csv'
+IMPORT_STRATEGY 'append'
+IMPORT_SCHEDULE '@on-demand'

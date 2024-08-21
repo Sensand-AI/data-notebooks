@@ -1,0 +1,45 @@
+TOKEN "get_iot_readings_endpoint_read_8086" READ
+
+NODE get_iot_hourly_readings
+SQL >
+
+    %
+    select
+        toStartOfHour(parseDateTimeBestEffort(ts)) AS hour_beginning,
+        avg(JSONExtractFloat(trim(BOTH '\b\b' FROM reading), 'readingList', 2, 'value')) as avg_temperature_value,
+            avg(JSONExtractFloat(trim(BOTH '\b\b' FROM reading), 'readingList', 3, 'value')) as avg_humidity_value
+    from iot_ingested_data
+    where
+        device_id = {{ String(device_id, '8CF9574000002CC8', description="ID of the device to fetch") }}
+        and hour_beginning >= toDateTime(
+            parseDateTimeBestEffort(
+                {{ String(startdate, '2024-04-01', description="First date to return YYYYMMDD") }}
+            )
+        )
+        and hour_beginning <= toDateTime(
+            parseDateTimeBestEffort(
+                {{ String(enddate, '2024-06-01', description="Last date to return YYYYMMDD") }}
+            )
+        )
+    group by toStartOfHour(parseDateTimeBestEffort(ts))
+    order by toStartOfHour(parseDateTimeBestEffort(ts))
+
+
+
+NODE get_iot_latest_reading
+SQL >
+
+    %
+    select
+        toDateTime(parseDateTimeBestEffort(ts)) AS ts,
+        JSONExtractFloat(
+            trim(BOTH '\b\b' FROM reading), 'readingList', 2, 'value'
+        ) as temperature_value,
+        JSONExtractFloat(trim(BOTH '\b\b' FROM reading), 'readingList', 3, 'value') as humidity_value
+    from iot_ingested_data
+    where
+        device_id = {{ String(device_id, '8CF9574000002CC8', description="ID of the device to fetch") }}
+    order by ts
+    limit 1
+
+

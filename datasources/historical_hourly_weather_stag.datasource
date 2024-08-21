@@ -1,0 +1,28 @@
+
+SCHEMA >
+    `date` DateTime,
+    `temperature_2m` Nullable(Float32),
+    `relative_humidity_2m` Nullable(Float32),
+    `dew_point_2m` Nullable(Float32),
+    `precipitation` Nullable(Float32),
+    `weather_code` Nullable(Float32),
+    `cloud_cover` Nullable(Float32),
+    `et0_fao_evapotranspiration` Nullable(Float32),
+    `wind_speed_10m` Nullable(Float32),
+    `wind_speed_40m` Nullable(String),
+    `longitude` Float32,
+    `latitude` Float32,
+    `boundary_id` String,
+    `boundary_name` String,
+    `workspace_id` String,
+    `property_id` String
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(date)"
+ENGINE_SORTING_KEY "date, boundary_name, workspace_id, property_id"
+
+IMPORT_SERVICE 's3_iamrole'
+IMPORT_CONNECTION_NAME 'sensand-staging-notebook-outputs-connection'
+IMPORT_BUCKET_URI 's3://sensand-staging-notebook-outputs/weather/*/*/*historical_hourly.csv'
+IMPORT_STRATEGY 'append'
+IMPORT_SCHEDULE '@auto'

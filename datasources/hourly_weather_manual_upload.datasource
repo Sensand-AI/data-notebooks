@@ -1,0 +1,20 @@
+
+SCHEMA >
+    `boundary_id` String `json:$.boundary_id`,
+    `boundary_name` String `json:$.boundary_name`,
+    `cloud_cover` Float32 `json:$.cloud_cover`,
+    `date` String `json:$.date`,
+    `dew_point_2m` Float32 `json:$.dew_point_2m`,
+    `et0_fao_evapotranspiration` Float32 `json:$.et0_fao_evapotranspiration`,
+    `latitude` Float32 `json:$.latitude`,
+    `longitude` Float32 `json:$.longitude`,
+    `precipitation` Float32 `json:$.precipitation`,
+    `property_id` String `json:$.property_id`,
+    `relative_humidity_2m` Float32 `json:$.relative_humidity_2m`,
+    `temperature_2m` Float32 `json:$.temperature_2m`,
+    `weather_code` Float32 `json:$.weather_code`,
+    `wind_speed_10m` Float32 `json:$.wind_speed_10m`,
+    `workspace_id` String `json:$.workspace_id`
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "date"

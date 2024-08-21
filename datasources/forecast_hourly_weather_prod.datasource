@@ -1,0 +1,36 @@
+
+SCHEMA >
+    `date` DateTime,
+    `temperature_2m` Float32,
+    `apparent_temperature` Float32,
+    `relative_humidity_2m` Float32,
+    `dew_point_2m` Float32,
+    `precipitation` Float32,
+    `weather_code` Float32,
+    `cloud_cover` Float32,
+    `et0_fao_evapotranspiration` Float32,
+    `wind_speed_10m` Float32,
+    `wind_speed_40m` Nullable(String),
+    `wind_direction_10m` Float32,
+    `wind_direction_40m` Nullable(String),
+    `wind_gusts_10m` Float32,
+    `sunshine_duration` Float32,
+    `visibility` Float32,
+    `soil_temperature_0_to_10cm` Float32,
+    `soil_moisture_0_to_10cm` Float32,
+    `longitude` Float32,
+    `latitude` Float32,
+    `boundary_id` String,
+    `boundary_name` String,
+    `workspace_id` String,
+    `property_id` String
+
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYear(date)"
+ENGINE_SORTING_KEY "date, boundary_name, workspace_id, property_id"
+
+IMPORT_SERVICE 's3_iamrole'
+IMPORT_CONNECTION_NAME 'sensand-prod-notebook-outputs-connection'
+IMPORT_BUCKET_URI 's3://sensand-production-notebook-outputs/weather/*/*/*forecast_hourly.csv'
+IMPORT_STRATEGY 'append'
+IMPORT_SCHEDULE '@auto'

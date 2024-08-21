@@ -1,0 +1,27 @@
+
+SCHEMA >
+    `date` String,
+    `temperature_2m` String,
+    `relative_humidity_2m` String,
+    `dew_point_2m` String,
+    `precipitation` String,
+    `weather_code` String,
+    `cloud_cover` String,
+    `et0_fao_evapotranspiration` String,
+    `wind_speed_10m` String,
+    `wind_speed_40m` String,
+    `longitude` String,
+    `latitude` String,
+    `boundary_id` String,
+    `boundary_name` String,
+    `workspace_id` String,
+    `property_id` String
+
+ENGINE "MergeTree"
+ENGINE_SORTING_KEY "boundary_name, workspace_id, property_id"
+
+IMPORT_SERVICE 's3_iamrole'
+IMPORT_CONNECTION_NAME 'sensand-developer-notebook-uploads'
+IMPORT_BUCKET_URI 's3://notebook-uploads/hourly/**/*.csv'
+IMPORT_STRATEGY 'append'
+IMPORT_SCHEDULE '@auto'
