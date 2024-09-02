@@ -127,8 +127,6 @@ def lambda_handler(event, _):
         dict: The output of the Lambda function. Must be JSON serializable.
     """
 
-    logger.info("Payload: received", extra=dict(data={"event": event}))
-
     # If invoked with a function url there's a body key
     if "body" in event:
         event = json.loads(event["body"])
@@ -174,17 +172,14 @@ def lambda_handler(event, _):
     boundaryId = (
         parameters["boundaryId"] if "boundaryId" in parameters else "unknown"
     )
-    # Append a deterministic UUID to the parameters as a notebook_key
-    # This will be used to identify the executed notebook in the S3 bucket
-    # and later to retrieve the output
-    # It will also be used as a means of tracking executions when we eventually
-    # handle retries and error handling via a persistent store
-    notebook_key = generate_deterministic_uuid(notebook_name, parameters)
+    current_date = datetime.datetime.now()
+
+    # The notebook_key is a deterministic UUID based on the notebook_name and timestamp
+    notebook_key = f"{notebook_name}_{current_date.strftime('%Y%m%d%H%M%S')}"
     parameters["notebook_key"] = notebook_key
     save_output = event.get("save_output", True)
 
     # Generate a datetime stamp
-    current_date = datetime.datetime.now()
     datetime_stamp = current_date.strftime("%Y-%m-%d_%H-%M-%S")
     date_stamp = current_date.strftime("%Y-%m-%d")
     # Create the S3 key for the output notebook based on name and datetime stamp
@@ -226,12 +221,6 @@ def lambda_handler(event, _):
                 stdout_file=sys.stdout,
                 stderr_file=sys.stderr,
             )
-            logger.info(
-                "Payload: Executed",
-                extra=dict(
-                    data={"status": "success", "notebook_name": notebook_name}
-                ),
-            )
 
             # Read in the generated artifact from the notebook execution.
             # This is a number of files stored in the /tmp/notebook_key directory
@@ -242,16 +231,6 @@ def lambda_handler(event, _):
                 output_files = os.listdir(output_dir)
                 bucket_name = AWS_S3_NOTEBOOK_OUTPUT
                 uploaded_files = []  # Keep track of successfully uploaded files
-                logger.info(
-                    "Payload: Files Generated",
-                    extra=dict(
-                        data={
-                            "status": "success",
-                            "notebook_name": notebook_name,
-                            "output_files": output_files,
-                        }
-                    ),
-                )
                 for file in output_files:
                     file_path = os.path.join(output_dir, file)
                     object_key = (
