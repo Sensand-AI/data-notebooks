@@ -138,6 +138,8 @@ def lambda_handler(event, _):
 
     # Extract notebook name and parameters from the event
     notebook_name = event.get("notebook_name")
+    parameters = event.get("parameters", {})
+    boundaryId = parameters.get("boundaryId", "unknown")
 
     if not notebook_name:
         return {
@@ -168,10 +170,6 @@ def lambda_handler(event, _):
             "body": json.dumps({"error": e.message}),
         }
 
-    parameters = event.get("parameters", {})
-    boundaryId = (
-        parameters["boundaryId"] if "boundaryId" in parameters else "unknown"
-    )
     current_date = datetime.datetime.now()
 
     # The notebook_key is a deterministic UUID based on the notebook_name and timestamp
@@ -179,22 +177,20 @@ def lambda_handler(event, _):
     parameters["notebook_key"] = notebook_key
     save_output = event.get("save_output", True)
 
-    # Generate a datetime stamp
-    datetime_stamp = current_date.strftime("%Y-%m-%d_%H-%M-%S")
-    date_stamp = current_date.strftime("%Y-%m-%d")
     # Create the S3 key for the output notebook based on name and datetime stamp
-    notebook_basename = os.path.splitext(notebook_name)[
-        0
-    ]  # Get the base name without extension
-    s3_output_key = f"executed_{notebook_basename}_{datetime_stamp}.ipynb"
+    notebook_basename = os.path.splitext(notebook_name)[0]
+    # Get the base name without extension
+    s3_output_key = f"executed_{notebook_basename}_{current_date.strftime("%Y-%m-%d_%H-%M-%S")}.ipynb"
     # Initialize the S3. Don't need to pass credentials if the Lambda has the right IAM role
     # concatenate the notebook name with the notebook key as a prefix and with datetime stamp
-    s3_prefix = f"{notebook_name}/{date_stamp}/{boundaryId}"
+    s3_prefix = (
+        f"{notebook_name}/{current_date.strftime("%Y-%m-%d")}/{boundaryId}"
+    )
     s3_utils = init_aws_utils(prefix=s3_prefix)
 
     # Define the source and output notebook paths
     # We store our notebooks in the lambda as `notebooks/notebook_name/notebook_name.ipynb`
-    notebook_file = notebook_name + ".ipynb"
+    notebook_file = f"{notebook_name}.ipynb"
     input_path = os.path.join(notebook_directory, notebook_name, notebook_file)
     output_path = f"/tmp/{s3_output_key}"
     # Create the output directory if it doesn't exist.
