@@ -9,11 +9,8 @@ from functools import wraps
 class DatadogJsonFormatter(logging.Formatter):
     def format(self, record):
         record.message = record.getMessage()
-
         if self.usesTime():
             record.asctime = self.formatTime(record, self.datefmt)
-        if not hasattr(record, "data"):
-            record.data = {}
         j = {
             "level": record.levelname,
             "timestamp": "%(asctime)s.%(msecs)dZ"
@@ -26,7 +23,7 @@ class DatadogJsonFormatter(logging.Formatter):
             "message": record.message,
             "module": record.module,
             "logger": "lambda_logger_datadog",
-            "data": record.data,
+            "data": record.__dict__.get("data", {}),
         }
         return json.dumps(j)
 
@@ -48,7 +45,7 @@ def configure_logger(custom_handler=None, level=logging.INFO):
             fmtstr = "[%(levelname)s]\t%(asctime)s.%(msecs)dZ\t%(levelno)s\t%(message)s\n"
             datefmtstr = "%Y-%m-%dT%H:%M:%S"
             formatter = DatadogJsonFormatter(fmt=fmtstr, datefmt=datefmtstr)
-            # Ensure all timestamps are in UTC
+            # ensure all timestamps are in UTC (aka GMT) timezone
             formatter.converter = time.gmtime
 
             handler = (
