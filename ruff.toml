@@ -1,1 +1,10 @@
 extend-include = ["*.ipynb"]
+
+[tool.ruff.flake8-docstrings]
+convention = "google"
+
+# Set the maximum line length
+line-length = 79
+
+# Enable autofix for specific rules
+fix = true
