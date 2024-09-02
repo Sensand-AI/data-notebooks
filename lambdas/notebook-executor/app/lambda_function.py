@@ -12,15 +12,16 @@ from typing import Any, Dict
 import papermill as pm
 from aws_utils import S3Utils
 from botocore.exceptions import BotoCoreError, ClientError
+from constants import (
+    AWS_DEFAULT_REGION,
+    AWS_LAMBDA_FUNCTION_NAME,
+    AWS_S3_NOTEBOOK_OUTPUT,
+)
 from ddtrace import tracer
 from gis_utils.logger import configure_logger
 from gis_utils.stac import read_metadata_sidecar
 from jsonschema import ValidationError, validate
 from papermill.exceptions import PapermillExecutionError
-
-aws_s3_notebook_output = os.getenv("AWS_S3_BUCKET_NOTEBOOK_OUTPUT")
-aws_default_region = os.getenv("AWS_DEFAULT_REGION")
-AWS_LAMBDA_FUNCTION_NAME = "notebook-executor"
 
 logger = logging.getLogger("NotebookExecutor")
 
@@ -28,14 +29,13 @@ logger = logging.getLogger("NotebookExecutor")
 notebook_directory = "/var/task/notebooks/production"
 
 
-@tracer.wrap()
-def init_aws_utils(prefix):
+def init_aws_utils(prefix: str) -> S3Utils:
     """
     Initialize the S3 client.
     By default, the S3Utils class will use the AWS credentials from the environment
     """
     s3_client = S3Utils(
-        region_name=aws_default_region, s3_bucket=aws_s3_notebook_output, prefix=prefix
+        region_name=AWS_DEFAULT_REGION, s3_bucket=AWS_S3_NOTEBOOK_OUTPUT, prefix=prefix
     )
     return s3_client
 
@@ -48,7 +48,7 @@ def generate_deterministic_uuid(notebook_name: str, parameters: dict):
     """
     # Use AWS Lambda function name and AWS region as part of the namespace
     namespace_uuid = uuid.uuid5(
-        uuid.NAMESPACE_DNS, f"{AWS_LAMBDA_FUNCTION_NAME}-{aws_default_region}"
+        uuid.NAMESPACE_DNS, f"{AWS_LAMBDA_FUNCTION_NAME}-{AWS_DEFAULT_REGION}"
     )
 
     # Remove parameters that are not deterministic
@@ -168,7 +168,7 @@ def lambda_handler(event, _):
         }
 
     parameters = event.get("parameters", {})
-    boundaryId = parameters['boundaryId'] if 'boundaryId' in parameters else 'unknown'
+    boundaryId = parameters["boundaryId"] if "boundaryId" in parameters else "unknown"
     # Append a deterministic UUID to the parameters as a notebook_key
     # This will be used to identify the executed notebook in the S3 bucket
     # and later to retrieve the output
@@ -230,15 +230,17 @@ def lambda_handler(event, _):
             try:
                 # List all files in the output directory
                 output_files = os.listdir(output_dir)
-                bucket_name = aws_s3_notebook_output
+                bucket_name = AWS_S3_NOTEBOOK_OUTPUT
                 uploaded_files = []  # Keep track of successfully uploaded files
                 logger.info(
                     "Payload: Files Generated",
-                    extra=dict(data={
-                        "status": "success", 
-                        "notebook_name": notebook_name, 
-                        "output_files": output_files
-                    }),
+                    extra=dict(
+                        data={
+                            "status": "success",
+                            "notebook_name": notebook_name,
+                            "output_files": output_files,
+                        }
+                    ),
                 )
                 for file in output_files:
                     file_path = os.path.join(output_dir, file)
