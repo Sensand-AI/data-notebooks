@@ -9,16 +9,24 @@ from functools import wraps
 class DatadogJsonFormatter(logging.Formatter):
     def format(self, record):
         record.message = record.getMessage()
+
         if self.usesTime():
             record.asctime = self.formatTime(record, self.datefmt)
+        if not hasattr(record, "data"):
+            record.data = {}
         j = {
             "level": record.levelname,
-            "timestamp": "%(asctime)s.%(msecs)dZ" % dict(asctime=record.asctime, msecs=record.msecs),
-            "aws_request_id": getattr(record, "aws_request_id", "00000000-0000-0000-0000-000000000000"),
+            "timestamp": "%(asctime)s.%(msecs)dZ"
+            % dict(asctime=record.asctime, msecs=record.msecs),
+            "aws_request_id": getattr(
+                record,
+                "aws_request_id",
+                "00000000-0000-0000-0000-000000000000",
+            ),
             "message": record.message,
             "module": record.module,
             "logger": "lambda_logger_datadog",
-            "data": record.__dict__.get("data", {}),
+            "data": record.data,
         }
         return json.dumps(j)
 
@@ -32,7 +40,7 @@ def configure_logger(custom_handler=None, level=logging.INFO):
                 event, context = args[:2]
             except ValueError:
                 # We might do this when testing, support it
-                event = kwargs.get('event')
+                event = kwargs.get("event")
 
             logger = logging.getLogger()
             logger.setLevel(level)
@@ -40,10 +48,12 @@ def configure_logger(custom_handler=None, level=logging.INFO):
             fmtstr = "[%(levelname)s]\t%(asctime)s.%(msecs)dZ\t%(levelno)s\t%(message)s\n"
             datefmtstr = "%Y-%m-%dT%H:%M:%S"
             formatter = DatadogJsonFormatter(fmt=fmtstr, datefmt=datefmtstr)
-            # ensure all timestamps are in UTC (aka GMT) timezone
+            # Ensure all timestamps are in UTC
             formatter.converter = time.gmtime
 
-            handler = custom_handler if custom_handler else logging.StreamHandler()
+            handler = (
+                custom_handler if custom_handler else logging.StreamHandler()
+            )
             handler.setFormatter(formatter)
 
             # Replace the AWS default root handler formatter, not the entire handler,
@@ -67,7 +77,12 @@ def configure_logger(custom_handler=None, level=logging.INFO):
                     # logged under "data" field for namespacing, and as a string to prevent
                     # evaluation of the fields by Datadog (which often breaks parsing)
                     msg,
-                    extra=dict(data={"lambda_trigger_event": str(event), "traceback": formatted_exception_traceback}),
+                    extra=dict(
+                        data={
+                            "lambda_trigger_event": str(event),
+                            "traceback": formatted_exception_traceback,
+                        }
+                    ),
                 )
                 sys.exit(1)
 
