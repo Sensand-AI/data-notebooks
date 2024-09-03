@@ -25,3 +25,5 @@ pyarrow==16.1.0 # apache arrow bindings for python
 
 psycopg2==2.9.9 # PostgreSQL database adapter for Python
 sqlalchemy==2.0.31 # SQL toolkit and Object-Relational Mapping (ORM) library for Python
+
+nbdev==2.3.29 # nbdev jupyter notebook ecosystem
