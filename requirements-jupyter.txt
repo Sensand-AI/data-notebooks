@@ -27,3 +27,5 @@ psycopg2==2.9.9 # PostgreSQL database adapter for Python
 sqlalchemy==2.0.31 # SQL toolkit and Object-Relational Mapping (ORM) library for Python
 
 nbdev==2.3.29 # nbdev jupyter notebook ecosystem
+tinybird-cli==5.6.0 # install tinybird-cli for sending/grabbing data from tinybird
+ploomber
