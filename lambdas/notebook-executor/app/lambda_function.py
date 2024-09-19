@@ -5,10 +5,15 @@ import json
 import logging
 import os
 import shutil
+import signal
 import sys
 from typing import Any, Dict
 
+import botocore
+import botocore.session
 import papermill as pm
+import psycopg2
+from aws_secretsmanager_caching import SecretCache, SecretCacheConfig
 from aws_utils import S3Utils
 from botocore.exceptions import BotoCoreError, ClientError
 from constants import AWS_DEFAULT_REGION, AWS_S3_NOTEBOOK_OUTPUT
@@ -22,6 +27,60 @@ logger = logging.getLogger("NotebookExecutor")
 
 # Only target the production notebooks directory
 notebook_directory = "/var/task/notebooks/production"
+
+
+def close_db():
+    global DB
+    if DB is not None:
+        print("gracefully disconnecting db")
+        DB.close()
+
+
+def signal_handler(_sig: int, _frame):
+    close_db()
+    sys.exit(0)
+
+
+signal.signal(signal.SIGINT, signal_handler)
+
+client = botocore.session.get_session().create_client("secretsmanager")
+cache_config = SecretCacheConfig()
+cache = SecretCache(config=cache_config, client=client)
+
+env = os.environ.get("ENV", "False")
+is_dev = env != "production"
+
+
+def init_db():
+    global DB
+
+    if is_dev:
+        dbname = os.environ.get("POSTGRES_DB", "")
+        user = os.environ.get("POSTGRES_USER", "")
+        password = os.environ.get("POSTGRES_PASSWORD", "")
+        host = os.environ.get("POSTGRES_HOST", "")
+        port = os.environ.get("POSTGRES_PORT", "")
+    else:
+        secret = cache.get_secret_string(
+            os.environ.get("DB_CREDENTIALS_SECRET_NAME", "")
+        )
+        secret_dict = json.loads(secret)
+
+        dbname = secret_dict.get("dbname")
+        user = secret_dict.get("username")
+        password = secret_dict.get("password")
+        host = os.environ.get("DB_PROXY_ENDPOINT", "")
+        port = secret_dict.get("port", 5432)
+
+    if DB is None or DB.closed:
+        DB = psycopg2.connect(
+            dbname=dbname,
+            user=user,
+            password=password,
+            host=host,
+            port=port,
+            connect_timeout=3,
+        )
 
 
 def init_aws_utils(prefix: str) -> S3Utils:
@@ -127,9 +186,13 @@ def lambda_handler(event, _):
         dict: The output of the Lambda function. Must be JSON serializable.
     """
 
+    global DB
+
     # If invoked with a function url there's a body key
     if "body" in event:
         event = json.loads(event["body"])
+
+    init_db()
 
     # If invoked with an SQS event there's a Records key
     # there shoud be only one record as the queue is setup with a batch of 1
@@ -175,6 +238,7 @@ def lambda_handler(event, _):
     # The notebook_key is a deterministic UUID based on the notebook_name and timestamp
     notebook_key = f"{notebook_name}_{current_date.strftime('%Y%m%d%H%M%S')}"
     parameters["notebook_key"] = notebook_key
+    parameters["database"] = DB
     save_output = event.get("save_output", True)
 
     # Create the S3 key for the output notebook based on name and datetime stamp
