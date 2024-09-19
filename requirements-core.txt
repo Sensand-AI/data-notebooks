@@ -33,3 +33,8 @@ wheel==0.41.2 # for package development
 
 # Time
 pytz==2024.1  # World timezone definitions, modern and historical
+
+# Database
+psycopg2-binary==2.9.9 # PostgreSQL database adapter for Python
+sqlalchemy==2.0.31 # SQL toolkit and Object-Relational Mapping (ORM) library for Python
+GeoAlchemy2==0.15.1
