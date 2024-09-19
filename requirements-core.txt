@@ -10,6 +10,7 @@ ipykernel==6.29.4
 
 # AWS SDK for Python
 boto3==1.34.107  # Amazon Web Services (AWS) SDK for Python
+botocore==1.34.125 # Low-level interface to AWS services
 
 # Web and asynchronous networking libraries
 tornado==6.4  # Web framework and asynchronous networking library
