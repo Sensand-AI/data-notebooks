@@ -36,32 +36,18 @@ env = os.environ.get("ENV", "False")
 is_dev = env != "production"
 
 def get_database_creds():
-    if is_dev:
-        dbname = os.environ.get("POSTGRES_DB", "")
-        user = os.environ.get("POSTGRES_USER", "")
-        password = os.environ.get("POSTGRES_PASSWORD", "")
-        host = os.environ.get("POSTGRES_HOST", "")
-        port = os.environ.get("POSTGRES_PORT", "")
-    else:
-        secret = cache.get_secret_string(
-            os.environ.get("DB_CREDENTIALS_SECRET_NAME", "")
-        )
-        secret_dict = json.loads(secret)
+    # In production, fetch credentials from AWS Secrets Manager
+    secret = cache.get_secret_string(
+        os.environ.get("DB_CREDENTIALS_SECRET_NAME", "")
+    )
+    secret_dict = json.loads(secret)
 
-        dbname = secret_dict.get("dbname")
-        user = secret_dict.get("username")
-        password = secret_dict.get("password")
-        host = os.environ.get("DB_PROXY_ENDPOINT", "")
-        port = secret_dict.get("port", 5432)
-
-    # return db credentials as a dictionary
-    return {
-        'dbname': dbname,
-        'user': user,
-        'password': password,
-        'host': host,
-        'port': port
-    }
+    # Set the secrets as environment variables for future use by Papermill
+    os.environ["POSTGRES_DB"] = secret_dict.get("dbname", "")
+    os.environ["POSTGRES_USER"] = secret_dict.get("username", "")
+    os.environ["POSTGRES_PASSWORD"] = secret_dict.get("password", "")
+    os.environ["POSTGRES_HOST"] = os.environ.get("DB_PROXY_ENDPOINT", "")
+    os.environ["POSTGRES_PORT"] = str(secret_dict.get("port", 5432))
 
 
 def init_aws_utils(prefix: str) -> S3Utils:
@@ -211,12 +197,14 @@ def lambda_handler(event, _):
             "body": json.dumps({"error": e.message}),
         }
 
+    if not is_dev:
+        get_database_creds()
+
     current_date = datetime.datetime.now()
 
     # The notebook_key is a deterministic UUID based on the notebook_name and timestamp
     notebook_key = f"{notebook_name}_{current_date.strftime('%Y%m%d%H%M%S')}"
     parameters["notebook_key"] = notebook_key
-    parameters["database_credentials"] = get_database_creds()
     save_output = event.get("save_output", True)
 
     # Create the S3 key for the output notebook based on name and datetime stamp
