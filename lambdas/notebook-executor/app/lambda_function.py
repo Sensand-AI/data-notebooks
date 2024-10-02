@@ -14,12 +14,13 @@ import papermill as pm
 from aws_secretsmanager_caching import SecretCache, SecretCacheConfig
 from aws_utils import S3Utils
 from botocore.exceptions import BotoCoreError, ClientError
-from constants import AWS_DEFAULT_REGION, AWS_S3_NOTEBOOK_OUTPUT
 from ddtrace import tracer
 from gis_utils.logger import configure_logger
 from gis_utils.stac import read_metadata_sidecar
 from jsonschema import ValidationError, validate
 from papermill.exceptions import PapermillExecutionError
+
+from .constants import AWS_DEFAULT_REGION, AWS_S3_NOTEBOOK_OUTPUT
 
 logger = logging.getLogger("NotebookExecutor")
 
