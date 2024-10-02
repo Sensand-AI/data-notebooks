@@ -5,14 +5,12 @@ import json
 import logging
 import os
 import shutil
-import signal
 import sys
 from typing import Any, Dict
 
 import botocore
 import botocore.session
 import papermill as pm
-import psycopg2
 from aws_secretsmanager_caching import SecretCache, SecretCacheConfig
 from aws_utils import S3Utils
 from botocore.exceptions import BotoCoreError, ClientError
@@ -34,6 +32,7 @@ cache = SecretCache(config=cache_config, client=client)
 
 env = os.environ.get("ENV", "False")
 is_dev = env != "production"
+
 
 def get_database_creds():
     # In production, fetch credentials from AWS Secrets Manager
@@ -157,7 +156,6 @@ def lambda_handler(event, _):
     if "body" in event:
         event = json.loads(event["body"])
 
-
     # If invoked with an SQS event there's a Records key
     # there shoud be only one record as the queue is setup with a batch of 1
     if "Records" in event:
@@ -210,7 +208,7 @@ def lambda_handler(event, _):
     # Create the S3 key for the output notebook based on name and datetime stamp
     notebook_basename = os.path.splitext(notebook_name)[0]
     # Get the base name without extension
-    s3_output_key = f"executed_{notebook_basename}_{current_date.strftime("%Y-%m-%d_%H-%M-%S")}.ipynb"
+    s3_output_key = f"executed_{notebook_basename}_{current_date.strftime('%Y-%m-%d_%H-%M-%S')}.ipynb"
     # Initialize the S3. Don't need to pass credentials if the Lambda has the right IAM role
     # concatenate the notebook name with the notebook key as a prefix and with datetime stamp
     s3_prefix = (
