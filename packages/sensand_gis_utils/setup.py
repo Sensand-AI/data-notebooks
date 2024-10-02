@@ -9,7 +9,7 @@ setup(
     install_requires=[
         "pystac_client==0.7.7",
         "odc-stac",
-        "rasterio==1.3.11",
+        "rasterio==1.3.10",
         "rioxarray==0.15.5",
         "rio-cogeo==5.3.0",
         "xarray==2024.5.0",
