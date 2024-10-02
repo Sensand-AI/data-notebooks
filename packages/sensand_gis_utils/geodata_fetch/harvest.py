@@ -38,7 +38,8 @@ from geodata_fetch.utils import load_settings, reproj_mask
 logger = logging.getLogger()
 # try this but remove if it doesn't work well with datadog:
 logging.basicConfig(
-    level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.ERROR,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
 
@@ -94,7 +95,7 @@ class DEM_data_source(data_source_interface):
             )
             return dem_data
         except Exception as e:
-            print(f"Error fetching DEM data: {e}")
+            print(f"Error fetching DEM data: {e}", exc_info=True)
             return []
 
 
@@ -112,7 +113,7 @@ class glob_DEM_data_source(data_source_interface):
             )
             return glob_dem_data
         except Exception as e:
-            print(f"Error fetching DEM Global data: {e}")
+            print(f"Error fetching DEM Global data: {e}", exc_info=True)
             return []
 
 
@@ -141,7 +142,7 @@ class SLGA_data_source(data_source_interface):
             )
             return files_slga
         except Exception as e:
-            print(f"Error fetching SLGA data: {e}")
+            print(f"Error fetching SLGA data: {e}", exc_info=True)
             return []
 
 
@@ -158,14 +159,16 @@ class DataHarvester:
 
     def run(self):
         if self.settings.add_buffer:
-            self.input_geom = self.input_geom.buffer(0.002, join_style=2, resolution=15)
+            self.input_geom = self.input_geom.buffer(
+                0.002, join_style=2, resolution=15
+            )
 
         for source_name, source in self.data_sources.items():
             try:
                 print(f"processing {source_name}:")
                 source.fetch_data(self.settings)
             except Exception as e:
-                print(f"error fetching {source_name}: {e}")
+                print(f"error fetching {source_name}: {e}", exc_info=True)
 
         if self.settings.data_mask:
             self.mask_data()
@@ -177,11 +180,16 @@ class DataHarvester:
                 for f in os.listdir(self.settings.outpath)
                 if f.endswith(".tiff")
                 and not f.endswith(
-                    ("_masked.tiff", "_colored.tiff", "_cog.tiff", "_cog.public.tiff")
+                    (
+                        "_masked.tiff",
+                        "_colored.tiff",
+                        "_cog.tiff",
+                        "_cog.public.tiff",
+                    )
                 )
             ]
         except Exception as e:
-            logger.error(f"Error listing tiff files: {e}")
+            logger.error(f"Error listing tiff files: {e}", exc_info=True)
 
         for tif in tif_files:
             try:
@@ -195,4 +203,4 @@ class DataHarvester:
                     resample=self.settings.resample,
                 )
             except Exception as e:
-                logger.error(f"Error masking {tif}: {e}")
+                logger.error(f"Error masking {tif}: {e}", exc_info=True)

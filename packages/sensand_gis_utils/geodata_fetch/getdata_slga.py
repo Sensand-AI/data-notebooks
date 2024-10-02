@@ -10,7 +10,8 @@ from geodata_fetch.utils import retry_decorator
 logger = logging.getLogger()
 # try this but remove if it doesn't work well with datadog:
 logging.basicConfig(
-    level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.ERROR,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
 
@@ -20,11 +21,15 @@ class slga_harvest:
 
     def load_configuration(self):
         try:
-            with resources.open_text("data", "slga_soil_default_config.json") as f:
+            with resources.open_text(
+                "data", "slga_soil_default_config.json"
+            ) as f:
                 config_json = json.load(f)
             self.initialise_attributes_from_json(config_json)
         except Exception as e:
-            logger.error(f"Error loading slga_soil.json to dem_harvest module: {e}")
+            logger.error(
+                f"Error loading slga_soil.json to dem_harvest module: {e}"
+            )
 
     def initialise_attributes_from_json(self, slga_json):
         self.title = slga_json.get("title")
@@ -62,7 +67,9 @@ class slga_harvest:
             output file name
 
         """
-        resolution = resolution if resolution is not None else self.resolution_arcsec
+        resolution = (
+            resolution if resolution is not None else self.resolution_arcsec
+        )
         try:
             # for the given endpoint e.g. Organic_Carbon, connect to the web coverage service
             wcs = WebCoverageService(
@@ -82,7 +89,9 @@ class slga_harvest:
             # Save data
             with open(outfname, "wb") as f:
                 f.write(data.read())
-                print(f"WCS data downloaded and saved as {os.path.basename(outfname)}")
+                print(
+                    f"WCS data downloaded and saved as {os.path.basename(outfname)}"
+                )
 
         except Exception as e:
             if e.response.status_code == 502:
@@ -95,7 +104,8 @@ class slga_harvest:
                 )
             else:
                 logger.error(
-                    f"Error {e.response.status_code}: {e.response.reason} when accessing {url}"
+                    f"Error {e.response.status_code}: {e.response.reason} when accessing {url}",
+                    exc_info=True,
                 )
 
     def get_slga_layers(
@@ -126,7 +136,9 @@ class slga_harvest:
         fnames_out : list of output file names
         """
         try:
-            layernames = layernames if isinstance(layernames, list) else [layernames]
+            layernames = (
+                layernames if isinstance(layernames, list) else [layernames]
+            )
             depth_min = (
                 [depth_min] * len(layernames)
                 if not isinstance(depth_min, list)
@@ -139,13 +151,18 @@ class slga_harvest:
             )
 
             if not (len(depth_min) == len(depth_max) == len(layernames)):
-                logger.error("Depth and layer name lists must be of the same length.")
+                logger.error(
+                    "Depth and layer name lists must be of the same length.",
+                    exc_info=True,
+                )
 
             os.makedirs(outpath, exist_ok=True)
 
             # If the resolution passed is None, set to native resolution of datasource
             resolution = (
-                resolution if resolution is not None else self.resolution_arcsec
+                resolution
+                if resolution is not None
+                else self.resolution_arcsec
             )
             resolution_deg = resolution / 3600.0
 
@@ -173,7 +190,12 @@ class slga_harvest:
                     )
                     # download data
                     dl = self.getwcs_slga(
-                        layer_url, identifier, self.crs, bbox, resolution_deg, fname_out
+                        layer_url,
+                        identifier,
+                        self.crs,
+                        bbox,
+                        resolution_deg,
+                        fname_out,
                     )
                     if dl:
                         fnames_out.append(fname_out)
@@ -184,9 +206,7 @@ class slga_harvest:
                         identifier_5 = identifiers_ci_5pc[i]
                         identifier_95 = identifiers_ci_95pc[i]
 
-                        layer_depth_name = (
-                            f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
-                        )
+                        layer_depth_name = f"SLGA_{layername}_{depth_lower[i]}-{depth_upper[i]}cm"
                         fname_out_5 = os.path.join(
                             outpath,
                             f"{layer_depth_name}_{property_name}_5percentile.tiff",
@@ -218,7 +238,7 @@ class slga_harvest:
 
             return fnames_out
         except Exception as e:
-            logger.error(f"Failed to get SLGA layers: {e}")
+            logger.error(f"Failed to get SLGA layers: {e}", exc_info=True)
             return None
 
 
@@ -266,7 +286,7 @@ def depth2identifier(depth_min, depth_max):
             depths_upper,
         )
     except Exception as e:
-        logger.error(f"Failed to get identifiers: {e}")
+        logger.error(f"Failed to get identifiers: {e}", exc_info=True)
         return None, None, None, None, None
 
 
@@ -309,5 +329,5 @@ def identifier2depthbounds(depths):
         assert ncount == len(depths), f"ncount = {ncount}"
         return depth_min, depth_max
     except Exception as e:
-        logger.error(f"Failed to get min and max depth: {e}")
+        logger.error(f"Failed to get min and max depth: {e}", exc_info=True)
         return None, None
