@@ -171,7 +171,7 @@ def lambda_handler(event, _):
             "statusCode": 400,
             "headers": {"Content-Type": "application/json"},
             "body": json.dumps(
-                {"error": 'Missing "notebook_name" in the event.'}
+                {"error": "Missing 'notebook_name' in the event."}
             ),
         }
 
@@ -212,7 +212,7 @@ def lambda_handler(event, _):
     # Initialize the S3. Don't need to pass credentials if the Lambda has the right IAM role
     # concatenate the notebook name with the notebook key as a prefix and with datetime stamp
     s3_prefix = (
-        f"{notebook_name}/{current_date.strftime("%Y-%m-%d")}/{boundaryId}"
+        f"{notebook_name}/{current_date.strftime('%Y-%m-%d')}/{boundaryId}"
     )
     s3_utils = init_aws_utils(prefix=s3_prefix)
 
