@@ -14,18 +14,18 @@
 		"PYTHON_VERSION": "3.10"
 	},
 	"features": {
-		// "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-		// 	"moby": "true",
-		// 	"version": "latest",
-		// 	"installDockerBuildx": true,
-		// 	"dockerDashComposeVersion": "v2"
-		// },
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"moby": "true",
+			"version": "latest",
+			"installDockerBuildx": true,
+			"dockerDashComposeVersion": "v2"
+		},
 		"ghcr.io/devcontainers/features/aws-cli:1": {
 			"version": "latest"
 		},
-		"ghcr.io/devcontainers-contrib/features/ruff:1": {},
+		"ghcr.io/devcontainers-contrib/features/ruff:1": {}
 	},	
-	"forwardPorts": [8888, 5001, 9090],
+	"forwardPorts": [8888, 5001, 9090, 5432],
 	"portsAttributes": {
 		"8888": {
 			"label": "Jupyter",
