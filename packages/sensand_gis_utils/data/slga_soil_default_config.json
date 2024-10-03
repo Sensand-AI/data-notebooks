@@ -11,7 +11,7 @@
     "depth_max": 200,
     "layers_url": {
         "Bulk_Density": "https://www.asris.csiro.au/ArcGIS/services/TERN/BDW_ACLEP_AU_NAT_C/MapServer/WCSServer",
-        "Organic_Carbon": "https://www.asris.csiro.au/ArcGIS/services/TERN/SOC_ACLEP_AU_TRN_N/MapServer/WCSServer?SERVICE=WCS&REQUEST=GetCapabilities",
+        "Organic_Carbon": "https://geoserver.tern.org.au/geoserver/slga/SOC_v2/ows?service=WMS&version=1.3.0&request=GetCapabilities",
         "Clay": "https://www.asris.csiro.au/ArcGIS/services/TERN/CLY_ACLEP_AU_NAT_C/MapServer/WCSServer",
         "Silt": "https://www.asris.csiro.au/ArcGIS/services/TERN/SLT_ACLEP_AU_NAT_C/MapServer/WCSServer",
         "Sand": "https://www.asris.csiro.au/ArcGIS/services/TERN/SND_ACLEP_AU_NAT_C/MapServer/WCSServer",
