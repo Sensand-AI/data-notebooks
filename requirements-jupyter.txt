@@ -20,6 +20,7 @@ retry-requests # Retry requests to OpenMeteo API
 ddtrace==2.8.4 # Datadog tracing library
 datadog==0.49.1 # Datadog monitoring library
 datadog_lambda==5.94.0 # Datadog monitoring library for AWS Lambda
+aws-secretsmanager-caching==1.1.3 # Caching for AWS Secrets Manager
 
 pyarrow==16.1.0 # apache arrow bindings for python
 
