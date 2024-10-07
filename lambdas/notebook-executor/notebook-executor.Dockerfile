@@ -1,4 +1,4 @@
-FROM 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base
+FROM 622020772926.dkr.ecr.us-east-1.amazonaws.com/gis-base:latest
 
 ARG \
     AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-"us-east-1"} \
