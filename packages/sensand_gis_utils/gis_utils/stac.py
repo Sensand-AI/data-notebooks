@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import sys
 
 import numpy as np  # added to use nan for masking.
 import pystac_client
@@ -11,13 +10,14 @@ from rasterio.windows import from_bounds
 
 logger = logging.getLogger()
 
+
 def initialize_stac_client(stac_url):
     """
     Initialize and return a STAC client for a given STAC API URL.
-    
+
     Parameters:
     - stac_url (str): The URL of the STAC API.
-    
+
     Returns:
     - A pystac_client.Client object
     """
@@ -31,10 +31,12 @@ def initialize_stac_client(stac_url):
         raise
 
 
-def query_stac_api(client, bbox, collections, start_date=None, end_date=None, limit=10):
+def query_stac_api(
+    client, bbox, collections, start_date=None, end_date=None, limit=10
+):
     """
     Query a STAC API for items within a bounding box and date range for specific collections.
-    
+
     Parameters:
     - client: The STAC client initialized with `initialize_stac_client`.
     - bbox (list): The bounding box for the query [min_lon, min_lat, max_lon, max_lat].
@@ -42,19 +44,19 @@ def query_stac_api(client, bbox, collections, start_date=None, end_date=None, li
     - start_date (str, optional): The start date for the query (YYYY-MM-DD). Defaults to None.
     - end_date (str, optional): The end date for the query (YYYY-MM-DD). Defaults to None.
     - limit (int): Maximum number of items to return.
-    
+
     Returns:
     - A list of STAC Items that match the query parameters.
     """
-    try: 
+    try:
         search_params = {
             "bbox": bbox,
             "collections": collections,
-            "limit": limit
+            "limit": limit,
         }
         if start_date and end_date:
             search_params["datetime"] = f"{start_date}/{end_date}"
-        
+
         search = client.search(**search_params)
         items = list(search.items())
         print(f"Found {len(items)} items")
@@ -62,6 +64,7 @@ def query_stac_api(client, bbox, collections, start_date=None, end_date=None, li
     except Exception:
         print("Failed to query STAC API")
         raise
+
 
 def inspect_stac_item(item):
     """
@@ -84,7 +87,7 @@ def inspect_stac_item(item):
     print("Item ID:", item.id)
 
     # Print the acquisition date of the data, which is stored in the item's properties
-    print("Date:", item.properties.get('datetime'))
+    print("Date:", item.properties.get("datetime"))
 
     # Begin iterating over the assets associated with this STAC item.
     # Assets represent individual data files or resources related to this item.
@@ -100,14 +103,15 @@ def inspect_stac_item(item):
         # Print a description of the asset, which can provide more context about the data it contains.
         # If no description is provided, it defaults to 'No description'.
         print(f"    Description: {asset.description or 'No description'}")
-        
+
         # Print the media type of the asset, which indicates the format of the data file (e.g., 'image/tiff' for a GeoTIFF file).
         print(f"    Media Type: {asset.media_type}")
-        
+
         # Print the roles associated with this asset. Roles are used to describe the function of the asset,
         # such as whether it's the primary data ('data'), metadata about the item ('metadata'), a thumbnail image ('thumbnail'), etc.
         # The roles are joined by a comma in case there are multiple roles.
         print(f"    Roles: {', '.join(asset.roles)}")
+
 
 def process_dem_asset(dem_asset, bbox, output_tiff_filename):
     """
@@ -132,11 +136,15 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
 
             # Extract required metadata or other information from src
             metadata = src.meta.copy()
-            metadata.update({
-                'height': window.height,
-                'width': window.width,
-                'transform': rasterio.windows.transform(window, src.transform)
-            })
+            metadata.update(
+                {
+                    "height": window.height,
+                    "width": window.width,
+                    "transform": rasterio.windows.transform(
+                        window, src.transform
+                    ),
+                }
+            )
 
             # Ensure the directory exists
             output_directory = os.path.dirname(output_tiff_filename)
@@ -144,7 +152,7 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
             os.makedirs(output_directory, exist_ok=True)
 
             print(f"Writing to file: {output_tiff_filename}")
-            with rasterio.open(output_tiff_filename, 'w', **metadata) as dst:
+            with rasterio.open(output_tiff_filename, "w", **metadata) as dst:
                 dst.write(data)
                 print(f"Written data to {output_tiff_filename}")
 
@@ -159,8 +167,11 @@ def process_dem_asset(dem_asset, bbox, output_tiff_filename):
     except Exception as e:
         print(f"Failed to process DEM asset: {e}")
         raise
-    
-def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, masked=True):
+
+
+def process_dem_asset_and_mask(
+    dem_asset, geometry, bbox, output_tiff_filename, masked=True
+):
     """
     Process a DEM asset by reading a specific region defined by a bounding box and writing it to a new file.
 
@@ -181,28 +192,32 @@ def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, 
 
         with rasterio.open(dem_asset.href) as src:
             # Nodata value here is being set to 0. This works for DEM but is not OK for indices.
-            data, out_transform = rasterio.mask.mask(src, geometry, crop=True, nodata=np.nan)
-            
-            #window = from_bounds(*bbox, transform=src.transform)
-            #data = src.read(window=window)
+            data, out_transform = rasterio.mask.mask(
+                src, geometry, crop=True, nodata=np.nan
+            )
+
+            # window = from_bounds(*bbox, transform=src.transform)
+            # data = src.read(window=window)
 
             # Extract required metadata or other information from src
             metadata = src.meta.copy()
-            
+
             # Jenna modified metadata update to work with mask:
-            metadata.update({
-                'height': data.shape[1],
-                'width': data.shape[2],
-                'transform': out_transform
-            })
-            
+            metadata.update(
+                {
+                    "height": data.shape[1],
+                    "width": data.shape[2],
+                    "transform": out_transform,
+                }
+            )
+
             # Ensure the directory exists
             output_directory = os.path.dirname(output_tiff_filename)
             # Create the directory if it does not exist
             os.makedirs(output_directory, exist_ok=True)
 
             print(f"Writing to file: {output_tiff_filename}")
-            with rasterio.open(output_tiff_filename, 'w', **metadata) as dst:
+            with rasterio.open(output_tiff_filename, "w", **metadata) as dst:
                 dst.write(data)
                 print(f"Written masked data to {output_tiff_filename}")
 
@@ -213,6 +228,7 @@ def process_dem_asset_and_mask(dem_asset, geometry, bbox, output_tiff_filename, 
     except Exception as e:
         print(f"Failed to process DEM asset: {e}")
         raise
+
 
 def save_metadata_sidecar(file_path, metadata):
     """
@@ -232,16 +248,17 @@ def save_metadata_sidecar(file_path, metadata):
 
     # Save the metadata to the sidecar file
     try:
-        with open(sidecar_filename, 'w', encoding='utf-8') as sidecar_file:
+        with open(sidecar_filename, "w", encoding="utf-8") as sidecar_file:
             json.dump(metadata, sidecar_file)
         print(f"Metadata saved to {sidecar_filename}")
     except Exception as e:
         print(f"Failed to save metadata sidecar file: {e}")
 
+
 def read_metadata_sidecar(file_path):
     """
     Reads metadata from a sidecar file associated with the primary file.
-    
+
     If the file is already a sidecar file (ending with .meta.json), it returns an empty dict.
 
     Parameters:
@@ -251,14 +268,19 @@ def read_metadata_sidecar(file_path):
     - dict: The metadata read from the sidecar file. Returns an empty dict if sidecar file is not found or if the input is already a sidecar file.
     """
     if file_path.endswith(".meta.json"):
-        logger.info("Attempting to read a sidecar file for a sidecar file. Skipping.")
+        logger.info(
+            "Attempting to read a sidecar file for a sidecar file. Skipping."
+        )
         return {}
 
     sidecar_filename = f"{file_path}.meta.json"
     try:
-        with open(sidecar_filename, 'r', encoding='utf-8') as sidecar_file:
+        with open(sidecar_filename, "r", encoding="utf-8") as sidecar_file:
             metadata = json.load(sidecar_file)
         return metadata
     except FileNotFoundError:
-        logger.warning("Sidecar file not found", extra=dict(data={"sidecar_filename": sidecar_filename}))
+        logger.warning(
+            "Sidecar file not found",
+            extra=dict(data={"sidecar_filename": sidecar_filename}),
+        )
         return {}

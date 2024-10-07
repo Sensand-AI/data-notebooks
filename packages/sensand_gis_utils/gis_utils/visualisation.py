@@ -1,7 +1,5 @@
 import json
 import logging
-import os
-import sys
 
 import numpy as np
 import rasterio
@@ -18,32 +16,41 @@ logger = logging.getLogger()
 
 def get_coords_from_geodataframe(gdf):
     """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
-    return [json.loads(gdf.to_json())['features'][0]['geometry']]
+    return [json.loads(gdf.to_json())["features"][0]["geometry"]]
 
 
 def colour_geotiff_and_save_cog(input_geotiff, colour_map):
-    
-    output_colored_tiff_filename = input_geotiff.replace('.tiff', '_colored.tiff')
-    output_cog_filename = input_geotiff.replace('.tiff', '_cog.public.tiff')
-    
+    output_colored_tiff_filename = input_geotiff.replace(
+        ".tiff", "_colored.tiff"
+    )
+    output_cog_filename = input_geotiff.replace(".tiff", "_cog.public.tiff")
+
     with rasterio.open(input_geotiff) as src:
         meta = src.meta.copy()
-        dst_crs = rasterio.crs.CRS.from_epsg(4326) #change so not hardcoded?
+        dst_crs = rasterio.crs.CRS.from_epsg(4326)  # change so not hardcoded?
         transform, width, height = calculate_default_transform(
             src.crs, dst_crs, src.width, src.height, *src.bounds
         )
 
-        meta.update({
-            'crs': dst_crs,
-            'transform': transform,
-            'width': width,
-            'height': height
-        })
+        meta.update(
+            {
+                "crs": dst_crs,
+                "transform": transform,
+                "width": width,
+                "height": height,
+            }
+        )
 
-        tif_data = src.read(1, masked=True).astype('float32') #setting masked=True here tells rasterio to use masking information if present, but we need to add the mask itself first.
+        tif_data = src.read(
+            1, masked=True
+        ).astype(
+            "float32"
+        )  # setting masked=True here tells rasterio to use masking information if present, but we need to add the mask itself first.
         tif_formatted = tif_data.filled(np.nan)
 
-        cmap = cm.get_cmap(colour_map) #can also use 'terrain' cmap to keep this the same as the preview image from above.
+        cmap = cm.get_cmap(
+            colour_map
+        )  # can also use 'terrain' cmap to keep this the same as the preview image from above.
         na = tif_formatted[~np.isnan(tif_formatted)]
 
         min_value = min(na)
@@ -51,17 +58,18 @@ def colour_geotiff_and_save_cog(input_geotiff, colour_map):
 
         norm = Normalize(vmin=min_value, vmax=max_value)
 
-        coloured_data = (cmap(norm(tif_formatted))[:, :, :3] * 255).astype(np.uint8)
+        coloured_data = (cmap(norm(tif_formatted))[:, :, :3] * 255).astype(
+            np.uint8
+        )
 
-        meta.update({"count":3})
+        meta.update({"count": 3})
 
-
-        with rasterio.open(output_colored_tiff_filename, 'w', **meta) as dst:
+        with rasterio.open(output_colored_tiff_filename, "w", **meta) as dst:
             reshape = reshape_as_raster(coloured_data)
             dst.write(reshape)
 
     try:
-        dst_profile = cog_profiles.get('deflate')
+        dst_profile = cog_profiles.get("deflate")
         with MemoryFile() as mem_dst:
             cog_translate(
                 output_colored_tiff_filename,
@@ -71,13 +79,13 @@ def colour_geotiff_and_save_cog(input_geotiff, colour_map):
                 dtype="uint8",
                 add_mask=False,
                 nodata=0,
-                dst_kwargs=dst_profile
+                dst_kwargs=dst_profile,
             )
         return output_cog_filename
-        
+
     except:
-        raise Exception('Unable to convert to cog')
-    
+        raise Exception("Unable to convert to cog")
+
 
 def get_geotiff_statistics(input_geotiff):
     """
@@ -109,11 +117,11 @@ def get_geotiff_statistics(input_geotiff):
         std_val = float(masked_data.std())
 
         stats = {
-        "min": min_val,
-        "max": max_val,
-        "mean": mean_val,
-        "median": median_val,
-        "std": std_val,
-    }
+            "min": min_val,
+            "max": max_val,
+            "mean": mean_val,
+            "median": median_val,
+            "std": std_val,
+        }
 
     return stats
