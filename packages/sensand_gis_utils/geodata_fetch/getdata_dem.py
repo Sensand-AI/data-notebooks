@@ -14,7 +14,8 @@ from geodata_fetch.utils import retry_decorator
 logger = logging.getLogger()
 # try this but remove if it doesn't work well with datadog:
 logging.basicConfig(
-    level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.ERROR,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
 configure_rio(cloud_defaults=True, aws={"aws_unsigned": True})
@@ -98,20 +99,26 @@ class dem_harvest(_BaseHarvest):
                 resy=resolution,
             )
         except Exception as e:
-            if e.response.status_code == 502:
-                logger.error(
-                    f"HTTPError 502: Bad Gateway encountered when accessing {url}",
-                    exec_info=True,
-                )
-            elif e.response.status_code == 503:
-                logger.error(
-                    f"HTTPError 503: Service Unavailable encountered when accessing {url}",
-                    exec_info=True,
-                )
+            if hasattr(e, "response") and e.response is not None:
+                # Handle cases where the exception has a response attribute
+                if e.response.status_code == 502:
+                    logger.error(
+                        f"HTTPError 502: Bad Gateway encountered when accessing {url}"
+                    )
+                elif e.response.status_code == 503:
+                    logger.error(
+                        f"HTTPError 503: Service Unavailable encountered when accessing {url}"
+                    )
+                else:
+                    logger.error(
+                        f"Error {e.response.status_code}: {e.response.reason} when accessing {url}",
+                        exc_info=True,
+                    )
             else:
+                # Handle cases where the exception has no response attribute
                 logger.error(
-                    f"Error {e.response.status_code}: {e.response.reason} when accessing {url}",
-                    exec_info=True,
+                    f"An exception occurred when accessing {url}: {str(e)}",
+                    exc_info=True,
                 )
         return data.read()  # outfname
 
@@ -165,7 +172,9 @@ class dem_harvest(_BaseHarvest):
                             rxr_reprojected = rxr.rio.reproject("EPSG:3857")
                             rxr_reprojected.rio.to_raster(outfname)
                             fnames_out.append(outfname)
-                            logger.info(f"Reprojected WCS data saved as {fname_out}")
+                            logger.info(
+                                f"Reprojected WCS data saved as {fname_out}"
+                            )
 
             return fnames_out
         except Exception as e:
@@ -223,7 +232,9 @@ class dem_harvest_global(_BaseHarvest):
                     stac_load_xarray = stac_load_xarray.load()
                     xarray_data = stac_load_xarray.data
 
-                    final_raster = xarray_data.rio.to_raster(outfname, driver="COG")
+                    final_raster = xarray_data.rio.to_raster(
+                        outfname, driver="COG"
+                    )
                     fnames_out.append(final_raster)
             return fnames_out
         except Exception as e:
