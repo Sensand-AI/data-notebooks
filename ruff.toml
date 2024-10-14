@@ -1,1 +1,5 @@
-extend-include = ["*.ipynb"]
+# Set the maximum line length
+line-length = 79
+
+# Enable autofix for specific rules
+fix = false
