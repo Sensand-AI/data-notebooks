@@ -193,7 +193,7 @@ def process_dem_asset_and_mask(
         with rasterio.open(dem_asset.href) as src:
             # Nodata value here is being set to 0. This works for DEM but is not OK for indices.
             data, out_transform = rasterio.mask.mask(
-                src, geometry, crop=True, nodata=np.nan
+                src, geometry, crop=True, nodata=np.nan, all_touched=True
             )
 
             # window = from_bounds(*bbox, transform=src.transform)
