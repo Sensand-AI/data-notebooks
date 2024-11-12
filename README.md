@@ -1,8 +1,10 @@
 # data-notebooks
 
-This repository hosts Jupyter notebooks that perform geospatial and earth observation tasks. These notebooks are used for exploring new ideas, experimental data science, and some are refined for production use. The repository also includes an AWS Lambda function under `lambdas/notebook-executor` to trigger notebooks.
+This repository hosts Jupyter notebooks that perform geospatial and earth observation tasks. These notebooks are used for exploring new ideas, experimental data science, and some are refined for production use. The repository also includes an AWS Lambda function under `lambdas/notebook-executor` to trigger notebooks in our cloud ecosystem.
 
 All notebooks are under `/notebooks`. Existing lambda code outside of that directory is work that is tangential and kept purely for archival purposes.
+
+This repository also includes the custom python packages used internall at Sensand, `aws_utils` and `sensand_gis_utils`.
 
 ## Repository Structure
 
@@ -12,6 +14,7 @@ All notebooks are under `/notebooks`. Existing lambda code outside of that direc
 - `packages/`: Contains custom python packages developed and used internally for geospatial processes.
 - `lambda/`: Contains the AWS Lambda function to trigger production notebooks.
 - `.devcontainer/`: Configuration for the development container.
+- `.buildkite/`: Configuration for buildkite.
 
 
 ## Remote Sensing Datasets
