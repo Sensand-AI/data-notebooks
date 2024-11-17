@@ -16,6 +16,7 @@ This repository also includes the custom python packages used internall at Sensa
 - `.devcontainer/`: Configuration for the development container.
 - `.buildkite/`: Configuration for buildkite.
 
+** You will find individual `README.md` files in these directories that provide instructions tailored to the contents of the directories.**
 
 ## Remote Sensing Datasets
 

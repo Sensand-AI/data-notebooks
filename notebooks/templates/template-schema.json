@@ -1,0 +1,54 @@
+// This JSON schema defines the structure for a notebook configuration file.
+// This is a template schema.json file that you can use as a starting point for creating a new schema.json file for a new notebook.
+// It specifies the following properties:
+// - notebook_name: A string representing the name of the notebook.
+// - save_output: A boolean indicating whether to save the output.
+// - output_type: A string specifying the type of output.
+// - parameters: An object containing additional parameters for the notebook, which includes:
+//   - geojson: An object representing geojson data (required).
+//   - propertyName: A string representing a property name (required).
+//   - notebook_specific_property: A string for notebook-specific configuration.
+//   - another_notebook_specific_property: A boolean for another notebook-specific configuration.
+//   - yet_another_notebook_specific_property: A number for yet another notebook-specific configuration.
+//You can specify some parameters as required by adding them to the "required" array in the "parameters" object. Geojson and propertyName are always required but you can add more.
+// The required properties for the root object are: notebook_name, parameters, and output_type.
+
+
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "notebook_name": {
+        "type": "string"
+      },
+      "save_output": {
+        "type": "boolean"
+      },
+      "output_type": {
+        "type": "string"
+      },
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "geojson": {
+            "type": "object"
+          },
+          "propertyName": {
+            "type": "string"
+          },
+          "notebook_specific_property": {
+            "type": "string"
+          },
+          "another_notebook_specific_property": {
+            "type": "boolean"
+          },
+          "yet_another_notebook_specific_property": {
+            "type": "number"
+            }
+        },
+        "required": ["geojson", "propertyName"]
+      }
+    },
+    "required": ["notebook_name", "parameters", "output_type"]
+  }
+  
