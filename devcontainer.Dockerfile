@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/vscode/devcontainers/python:3.10-bullseye
 
 RUN apt-get update && apt-get install -y \
-		gcc libgdal-dev gdal-bin \
+		gcc libgdal-dev gdal-bin libpq-dev postgresql-client\
 		&& rm -rf /var/lib/apt/lists/*
 
 ENV GDAL_CONFIG=/usr/bin/gdal-config

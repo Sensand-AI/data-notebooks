@@ -25,7 +25,7 @@
 		},
 		"ghcr.io/devcontainers-contrib/features/ruff:1": {}
 	},	
-	"forwardPorts": [8888, 5001, 9090],
+	"forwardPorts": [8888, 5001, 9090, 5432,5000],
 	"portsAttributes": {
 		"8888": {
 			"label": "Jupyter",

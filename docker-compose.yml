@@ -70,7 +70,7 @@ services:
     build: 
       context: .
       dockerfile: postgres/postgres.Dockerfile
-    image: postgis/postgis:16-3.4
+    #image: postgis/postgis:16-3.4 dockerfile above is what we're using. this shouldn't be here.
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -83,3 +83,5 @@ services:
       - ./postgres/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     ports:
       - ${POSTGRES_PORT:-5432}:5432
+    command:
+      -c 'listen_addresses=*'  # Make sure the DB listens on all network interfaces

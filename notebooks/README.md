@@ -1,5 +1,5 @@
 ## Directory structure
-This is  adraft directory structure for the sandbox (to be renamed development) notebook directory.
+This is  a draft directory structure for the sandbox (to be renamed development) notebook directory.
 
 |--data
 |   |-input-data
