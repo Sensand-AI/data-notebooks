@@ -36,5 +36,4 @@ Example:
 
 
 ## TODO
-- update template to include notebook-key directory save, instad of using the s3 utils. Can copy this from the dem.ipynb file
-- make look showing how to test in postman
+- make loom showing how to test in postman
