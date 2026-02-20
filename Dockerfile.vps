@@ -17,15 +17,26 @@ RUN apt-get update && \
 # Match the Lambda handler's expected paths
 WORKDIR /var/task
 
-# Copy requirements (we filter out Datadog/SM packages at install time)
-COPY requirements-core.txt requirements-jupyter.txt ./
-
-# Install core deps, skipping Datadog and Secrets Manager packages
-# grep -v filters excluded packages; sed strips comments and blank lines
+# Install Python deps that scipy-notebook doesn't ship.
+# scipy-notebook already has: numpy, pandas, matplotlib, scipy.
+# We skip: ddtrace, datadog*, aws-secretsmanager-caching (mocked in server.py),
+# and strict version pins that conflict with Python 3.13.
 RUN pip install --no-cache-dir \
-        $(grep -v -E '(ddtrace|datadog|datadog_lambda|aws-secretsmanager-caching)' requirements-core.txt | sed 's/#.*//;/^\s*$/d') && \
-    pip install --no-cache-dir \
-        $(grep -v -E '(ddtrace|datadog|datadog_lambda|aws-secretsmanager-caching|psycopg2==)' requirements-jupyter.txt | sed 's/#.*//;/^\s*$/d')
+    xarray \
+    jupyter nbconvert ipykernel \
+    boto3 botocore \
+    tornado requests \
+    geopandas shapely \
+    "rasterio[s3]" rioxarray rio-cogeo \
+    pystac-client pystac \
+    papermill wheel \
+    pytz \
+    psycopg2-binary sqlalchemy GeoAlchemy2 \
+    hvplot geoviews holoviews datashader \
+    jupyter-bokeh plotly \
+    openmeteo-requests requests-cache retry-requests \
+    pyarrow \
+    jsonschema
 
 # Install internal packages
 COPY packages/ ./packages/
