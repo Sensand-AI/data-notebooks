@@ -1,0 +1,47 @@
+# Notebook Executor — ARM64 VPS Container
+# Wraps the Lambda handler in a Flask HTTP server (port 9002)
+# Strips Datadog/Secrets Manager deps (mocked in server.py)
+
+FROM quay.io/jupyter/scipy-notebook:latest
+
+USER root
+
+# System dependencies for GDAL/rasterio builds
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        libgdal-dev \
+        gcc \
+        g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Match the Lambda handler's expected paths
+WORKDIR /var/task
+
+# Copy requirements (we filter out Datadog/SM packages at install time)
+COPY requirements-core.txt requirements-jupyter.txt ./
+
+# Install core deps, skipping Datadog and Secrets Manager packages
+RUN pip install --no-cache-dir \
+        $(grep -v -E '(ddtrace|datadog|datadog_lambda|aws-secretsmanager-caching)' requirements-core.txt) && \
+    pip install --no-cache-dir \
+        $(grep -v -E '(ddtrace|datadog|datadog_lambda|aws-secretsmanager-caching|psycopg2==)' requirements-jupyter.txt)
+
+# Install internal packages
+COPY packages/ ./packages/
+RUN pip install --no-cache-dir ./packages/aws_utils && \
+    pip install --no-cache-dir ./packages/sensand_gis_utils
+
+# Install HTTP server
+RUN pip install --no-cache-dir flask gunicorn
+
+# Copy Lambda handler code
+COPY lambdas/notebook-executor/app/ ./app/
+
+# Copy production notebooks — must land at /var/task/notebooks/production/
+# to match lambda_function.py:28  notebook_directory = "/var/task/notebooks/production"
+COPY notebooks/production/ ./notebooks/production/
+
+EXPOSE 9002
+
+# gunicorn: 300s timeout for long-running notebook executions, 2 workers
+CMD ["gunicorn", "--bind", "0.0.0.0:9002", "--timeout", "300", "--workers", "2", "app.server:app"]
