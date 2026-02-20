@@ -21,10 +21,11 @@ WORKDIR /var/task
 COPY requirements-core.txt requirements-jupyter.txt ./
 
 # Install core deps, skipping Datadog and Secrets Manager packages
+# grep -v filters excluded packages; sed strips comments and blank lines
 RUN pip install --no-cache-dir \
-        $(grep -v -E '(ddtrace|datadog|datadog_lambda|aws-secretsmanager-caching)' requirements-core.txt) && \
+        $(grep -v -E '(ddtrace|datadog|datadog_lambda|aws-secretsmanager-caching)' requirements-core.txt | sed 's/#.*//;/^\s*$/d') && \
     pip install --no-cache-dir \
-        $(grep -v -E '(ddtrace|datadog|datadog_lambda|aws-secretsmanager-caching|psycopg2==)' requirements-jupyter.txt)
+        $(grep -v -E '(ddtrace|datadog|datadog_lambda|aws-secretsmanager-caching|psycopg2==)' requirements-jupyter.txt | sed 's/#.*//;/^\s*$/d')
 
 # Install internal packages
 COPY packages/ ./packages/
