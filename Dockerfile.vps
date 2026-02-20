@@ -26,25 +26,24 @@ RUN pip install --no-cache-dir \
     jupyter nbconvert ipykernel \
     boto3 botocore \
     tornado requests \
-    geopandas shapely \
+    geopandas shapely pyproj \
     "rasterio[s3]" rioxarray rio-cogeo \
-    pystac-client pystac \
+    pystac-client pystac odc-stac \
     papermill wheel \
     pytz \
     psycopg2-binary sqlalchemy GeoAlchemy2 \
     hvplot geoviews holoviews datashader \
     jupyter-bokeh plotly \
     openmeteo-requests requests-cache retry-requests \
-    pyarrow \
-    jsonschema
+    pyarrow owslib \
+    jsonschema flask gunicorn
 
-# Install internal packages
+# Install internal packages.
+# --no-deps because setup.py pins versions incompatible with Python 3.13.
+# All actual deps are already installed by the pip step above.
 COPY packages/ ./packages/
-RUN pip install --no-cache-dir ./packages/aws_utils && \
-    pip install --no-cache-dir ./packages/sensand_gis_utils
-
-# Install HTTP server
-RUN pip install --no-cache-dir flask gunicorn
+RUN pip install --no-cache-dir --no-deps ./packages/aws_utils && \
+    pip install --no-cache-dir --no-deps ./packages/sensand_gis_utils
 
 # Copy Lambda handler code
 COPY lambdas/notebook-executor/app/ ./app/
